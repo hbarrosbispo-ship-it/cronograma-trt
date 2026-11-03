@@ -52,18 +52,18 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 
 /* ---------- editor ---------- */
 .fixo{position:sticky;top:0;z-index:30;box-shadow:0 1px 4px rgba(0,0,0,.12)}
-#topo{display:flex;gap:10px;align-items:center;padding:8px 16px;background:var(--g);color:#fff}
+#topo{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:8px 16px;background:var(--g);color:#fff}
 #topo a{color:#fff;text-decoration:none;font-weight:bold;white-space:nowrap}
-#topo .t{font-size:15px;font-weight:bold;max-width:40ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#topo .t{font-size:15px;font-weight:bold;flex:1 1 220px;min-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #topo .pag{margin-left:auto;display:flex;gap:10px;align-items:center;font-size:13px}
 #topo .pill{background:rgba(255,255,255,.18);border-radius:999px;padding:3px 12px;white-space:nowrap}
 #topo .pill b{font-size:15px}
 #topo button{background:rgba(255,255,255,.18);border:none;color:#fff;font-weight:bold;border-radius:8px;padding:4px 12px;cursor:pointer;white-space:nowrap}
 #topo button:hover{background:rgba(255,255,255,.3)}
-#status{color:#c9d7ec;font-size:12px}
+#status{display:none}
 
 /* faixa de ferramentas em grupos (como a do Word) */
-.rib{display:flex;align-items:stretch;gap:0;padding:4px 8px 0;background:#fff;border-bottom:1px solid var(--line);overflow-x:auto}
+.rib{display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:2px 0;padding:4px 8px 0;background:#fff;border-bottom:1px solid var(--line)}
 .rib.off{display:none}
 .grp{display:flex;flex-direction:column;padding:0 8px;border-right:1px solid var(--line);flex:none}
 .grp:last-child{border-right:none}
@@ -149,6 +149,7 @@ body.tool-on #folha{cursor:cell}
 #margem .barra:hover{box-shadow:0 0 0 2px rgba(48,84,150,.35)}
 .barra.f1{background:#FFD966}.barra.f2{background:#7ED957}.barra.f3{background:#5271FF}.barra.f4{background:#F45B8F}.barra.f5{background:#FF3131}
 @media(max-width:700px){#margem .barra{left:34px}}
+@media(max-width:1100px){.grp .gl{display:none}.grp{padding:0 5px}.rib button,.rib select{min-width:26px;padding:0 4px}.rib input[type=range]{width:80px}}
 </style>
 </head>
 <body>
