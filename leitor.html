@@ -106,7 +106,6 @@ body.tool-on #folha{cursor:cell}
 #folha table{border-collapse:collapse;width:100%;margin:.6em 0 1em}
 #folha td{border:1px solid #8a94a6;padding:5px 8px;vertical-align:top;min-width:40px}
 #folha ul,#folha ol{margin:0 0 .9em 20px}
-.st{position:fixed;right:12px;bottom:10px;background:#fff;border-radius:8px;padding:4px 10px;font-size:12px;color:var(--mute);box-shadow:0 1px 4px rgba(0,0,0,.15)}
 </style>
 </head>
 <body>
@@ -164,7 +163,6 @@ body.tool-on #folha{cursor:cell}
     <nav id="sumario"><h4>Sumário</h4><div id="sumLista"></div></nav>
     <div id="folha" contenteditable="true" spellcheck="false"></div>
   </div>
-  <div class="st" id="contador"></div>
 </div>
 
 <div class="menu" id="mTxt"></div>
@@ -339,7 +337,7 @@ document.addEventListener('selectionchange',()=>{
 // ---- salvar texto ----
 function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(salvar,500);contar();montarSumario()}
 function salvar(){try{localStorage.setItem('doc:'+slug,folha.innerHTML);$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
-function contar(){const t=folha.innerText.trim();$('#contador').textContent=(t?t.split(/\s+/).length:0)+' palavras · '+folha.querySelectorAll('mark,span[style*="background"]').length+' marcações'}
+function contar(){}
 folha.addEventListener('input',marcar);
 folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
 async function original(){const r=await fetch('leitor/docs/'+slug+'.html');if(!r.ok)throw 0;return r.text()}
