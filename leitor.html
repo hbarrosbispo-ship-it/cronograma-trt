@@ -73,8 +73,6 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 .tb .split .main{position:relative;flex-direction:column;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
 .tb .split .main i{display:block;height:4px;width:16px;border-radius:1px;margin-top:1px}
 .tb .split .main .ic{line-height:1;font-size:15px}
-#btnEdit{font-weight:bold;color:var(--gd);border:1px solid var(--line);padding:0 12px}
-#btnEdit.on{background:var(--gd);color:#fff;border-color:var(--gd)}
 .menu{position:fixed;z-index:80;background:#fff;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.25);padding:6px;display:none;min-width:190px}
 .menu.on{display:block}
 .menu button{display:flex;gap:10px;width:100%;text-align:left;height:auto;padding:7px 10px;align-items:center;border:none;background:transparent;border-radius:6px;cursor:pointer}
@@ -96,8 +94,7 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 #sumario a.atual{font-weight:bold;color:var(--g)}
 @media(max-width:1000px){#sumario.on{position:fixed;left:8px;top:150px;z-index:40;max-height:60vh;box-shadow:0 6px 20px rgba(0,0,0,.3)}}
 #folha{width:100%;max-width:820px;margin:18px 0 80px;background:#fff;color:#111;padding:44px 56px;border-radius:4px;box-shadow:0 1px 6px rgba(0,0,0,.15);
- font:11pt/1.55 Arial,Helvetica,sans-serif;text-align:justify;outline:none;min-height:60vh;caret-color:transparent}
-body.editando #folha{caret-color:auto}
+ font:11pt/1.55 Arial,Helvetica,sans-serif;text-align:justify;outline:none;min-height:60vh}
 body.tool-on #folha{cursor:cell}
 @media(max-width:700px){#folha{padding:22px 16px}}
 #folha p{margin:0 0 .9em}
@@ -149,8 +146,8 @@ body.tool-on #folha{cursor:cell}
       <button data-cmd="strikeThrough" title="Tachado"><s>T</s></button>
       <span class="split"><button class="main" id="btnTxt" title="Cor do texto"><span class="ic" style="font-weight:bold">A</span><i id="barTxt" style="background:#d90000"></i></button><button class="arr" data-menu="mTxt">▾</button></span>
       <span class="sep"></span>
-      <span class="split"><button class="main" id="btnMk" title="Marcador: clique e depois selecione os trechos (atalhos 1 a 8)"><span class="ic">🖍</span><i id="barMk" style="background:#fff176"></i></button><button class="arr" data-menu="mMk">▾</button></span>
-      <button id="tBor" title="Borracha (tecla E): tira o marca-texto">⌫</button>
+      <span class="split"><button class="main" id="btnMk" title="Marcador: clique e depois selecione os trechos (Ctrl+1 a 8)"><span class="ic">🖍</span><i id="barMk" style="background:#fff176"></i></button><button class="arr" data-menu="mMk">▾</button></span>
+      <button id="tBor" title="Borracha (Alt+E): tira o marca-texto">⌫</button>
       <span class="sep"></span>
       <button data-cmd="insertUnorderedList" title="Lista com marcadores">•≡</button>
       <button data-cmd="insertOrderedList" title="Lista numerada">1≡</button>
@@ -162,7 +159,6 @@ body.tool-on #folha{cursor:cell}
       <button data-menu="mTab" title="Tabela">▦ ▾</button>
       <button id="caixa" title="Transforma o parágrafo em quadro de destaque (ou desfaz)">▭ Quadro</button>
       <span class="esp"></span>
-      <button id="btnEdit" title="Liga a digitação. Desligado, o texto fica protegido e os números 1 a 8 escolhem o marcador">✎ Editar texto</button>
       <button data-menu="mMais" title="Mais">⋯</button>
     </div>
   </div>
@@ -172,7 +168,7 @@ body.tool-on #folha{cursor:cell}
   </div>
   <div class="st" id="contador"></div>
   <div id="aviso"></div>
-  <div id="dica">Marcar: 1–8 cores · 9 sublinhar · E borracha · Esc sai</div>
+  <div id="dica">Marcador: Ctrl+1 a 8 (ou Alt+1 a 8) · Ctrl+9 sublinhar · Alt+E borracha · Esc sai</div>
 </div>
 
 <div class="menu" id="mTxt"></div>
@@ -234,7 +230,7 @@ async function biblioteca(){
 // =================== EDITOR ===================
 const MK=[['#fff176','Amarelo'],['#b9f6ca','Verde'],['#bde0ff','Azul'],['#ffc1d9','Rosa'],['#e0c8ff','Lilás'],['#ffd0a0','Laranja'],['#FFDBB5','Pêssego (do material)'],['#D6DBE3','Cinza-azulado (do material)']];
 const TX=[['#000000','Preto'],['#d90000','Vermelho (do material)'],['#002161','Azul-marinho (do material)'],['#1b7f3b','Verde'],['#1a5fd0','Azul'],['#8e24aa','Roxo'],['#e65100','Laranja']];
-const folha=$('#folha');let slug=null,meta=null,timer=null,tool=null,modoEdicao=false,liberado=false,corMk=MK[0][0],corTx=TX[1][0];
+const folha=$('#folha');let slug=null,meta=null,timer=null,tool=null,liberado=false,corMk=MK[0][0],corTx=TX[1][0];
 
 function exec(c,v){liberado=true;try{folha.focus({preventScroll:true});document.execCommand('styleWithCSS',false,true);document.execCommand(c,false,v)}finally{liberado=false}marcar()}
 function unwrap(el){const p=el.parentNode;while(el.firstChild)p.insertBefore(el.firstChild,el);p.removeChild(el)}
@@ -251,7 +247,7 @@ $('#mTxt').innerHTML='<div class="cores">'+TX.map(([c,n])=>`<button data-c="${c}
 $('#mTxt').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{corTx=b.dataset.c;$('#barTxt').style.background=corTx;exec('foreColor',corTx);fechaMenus()});
 $('#btnTxt').onmousedown=e=>e.preventDefault();$('#btnTxt').onclick=()=>exec('foreColor',corTx);
 
-$('#mMk').innerHTML='<div class="cores">'+MK.map(([c,n],i)=>`<button data-c="${c}" title="${n} (tecla ${i+1})"><b style="background:${c}"></b>${i+1}</button>`).join('')+'</div><hr><button data-a="ul">Sublinhador <small>9</small></button><button data-a="st">Tachador</button>';
+$('#mMk').innerHTML='<div class="cores">'+MK.map(([c,n],i)=>`<button data-c="${c}" title="${n} (Ctrl+${i+1})"><b style="background:${c}"></b>${i+1}</button>`).join('')+'</div><hr><button data-a="ul">Sublinhador <small>Ctrl+9</small></button><button data-a="st">Tachador</button>';
 $('#mMk').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ligar({k:'hl',c:b.dataset.c},true);fechaMenus()});
 $('#mMk').querySelector('[data-a=ul]').onclick=()=>{ligar({k:'ul'},true);fechaMenus()};
 $('#mMk').querySelector('[data-a=st]').onclick=()=>{ligar({k:'st'},true);fechaMenus()};
@@ -270,7 +266,7 @@ function ligar(t,forcar){
   const av=$('#aviso');
   if(tool){av.style.display='block';av.textContent={hl:'Marcador ligado',ul:'Sublinhador ligado',st:'Tachador ligado',er:'Borracha ligada'}[tool.k]+' · Esc para sair';
     av.style.background=tool.k==='hl'?tool.c:'';av.style.color=tool.k==='hl'?'#111':'#fff';$('#dica').style.display='none'}
-  else{av.style.display='none';$('#dica').style.display=modoEdicao?'none':''}
+  else{av.style.display='none';$('#dica').style.display=''}
   if(tool&&selecaoNaFolha())aplicar();
 }
 function selecaoNaFolha(){const s=getSelection();return s.rangeCount&&!s.isCollapsed&&folha.contains(s.anchorNode)&&folha.contains(s.focusNode)}
@@ -287,27 +283,19 @@ function aplicar(){
 }
 ['pointerup','keyup'].forEach(ev=>folha.addEventListener(ev,e=>{if(ev==='keyup'&&!e.shiftKey)return;setTimeout(aplicar,0)}));
 
-// ---- modo marcar (texto protegido) x modo editar ----
-function modo(ed){modoEdicao=ed;document.body.classList.toggle('editando',ed);$('#btnEdit').classList.toggle('on',ed);
-  $('#btnEdit').textContent=ed?'✎ Editando':'✎ Editar texto';$('#dica').style.display=(ed||tool)?'none':''}
-$('#btnEdit').onmousedown=e=>e.preventDefault();$('#btnEdit').onclick=()=>modo(!modoEdicao);
-folha.addEventListener('beforeinput',e=>{if(!modoEdicao&&!liberado&&/^(insert|delete)/.test(e.inputType))e.preventDefault()});
-folha.addEventListener('drop',e=>{if(!modoEdicao)e.preventDefault()});
-
-// ---- atalhos: 1–8 cores, 9 sublinhar, E borracha, Esc/0 sai ----
+// ---- atalhos: Ctrl+1..8 (ou Alt+1..8) cores, Ctrl+9 sublinhar, Alt+E borracha, Esc/Ctrl+0 sai ----
 document.addEventListener('keydown',e=>{
-  if(!meta||e.ctrlKey||e.metaKey)return;
+  if(!meta||e.metaKey||e.shiftKey)return;
   const tag=(e.target.tagName||'').toLowerCase();if(['input','textarea','select'].includes(tag))return;
   if(e.key==='Escape'){if(tool)ligar(tool,false);fechaMenus();return}
-  if(modoEdicao&&!e.altKey)return;               // digitando: números e letras são texto
-  const code=e.code||'';let n=null;
-  if(/^(Digit|Numpad)[0-9]$/.test(code))n=+code.slice(-1);
-  if(n!==null){e.preventDefault();
+  if(!e.ctrlKey&&!e.altKey)return;
+  const code=e.code||'';
+  if(/^(Digit|Numpad)[0-9]$/.test(code)){const n=+code.slice(-1);e.preventDefault();
     if(n>=1&&n<=8)ligar({k:'hl',c:MK[n-1][0]},true);
     else if(n===9)ligar({k:'ul'},true);
-    else if(n===0&&tool)ligar(tool,false);
+    else if(tool)ligar(tool,false);
     return}
-  if(!modoEdicao&&(e.key==='e'||e.key==='E')){e.preventDefault();ligar({k:'er'},true)}
+  if(e.altKey&&!e.ctrlKey&&code==='KeyE'){e.preventDefault();ligar({k:'er'},true)}
 });
 
 // ---- botões simples ----
@@ -361,7 +349,7 @@ function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);tim
 function salvar(){try{localStorage.setItem('doc:'+slug,folha.innerHTML);$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
 function contar(){const t=folha.innerText.trim();$('#contador').textContent=(t?t.split(/\s+/).length:0)+' palavras · '+folha.querySelectorAll('mark,span[style*="background"]').length+' marcações'}
 folha.addEventListener('input',marcar);
-folha.addEventListener('paste',e=>{e.preventDefault();if(!modoEdicao)return;const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
+folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
 async function original(){const r=await fetch('leitor/docs/'+slug+'.html');if(!r.ok)throw 0;return r.text()}
 $('#mMais').querySelector('[data-a=restaurar]').onclick=async()=>{fechaMenus();if(!confirm('Voltar ao texto original e perder suas edições deste capítulo?'))return;
   folha.innerHTML=await original();localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';contar();montarSumario()};
