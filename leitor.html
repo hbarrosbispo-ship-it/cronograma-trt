@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Biblioteca · TRTeiros</title>
 <style>
-:root{--bg:#F5F7FA;--card:#fff;--ink:#222;--mute:#666;--line:#D9D9D9;--g:#305496;--gd:#1F4E78;--g2:#eef1f7;--ok:#2E7D32;--purple:#6C63FF}
+:root{--bg:#F5F7FA;--card:#fff;--ink:#222;--mute:#666;--line:#D9D9D9;--g:#305496;--gd:#1F4E78;--g2:#eef1f7;--ok:#2E7D32;--purple:#6C63FF;--fh:150px}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Arial,Helvetica,sans-serif;padding-bottom:40px}
 button,select,input{font:inherit;color:var(--ink)}
@@ -51,48 +51,56 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 
 /* ---------- editor ---------- */
 .fixo{position:sticky;top:0;z-index:30;box-shadow:0 1px 4px rgba(0,0,0,.12)}
-#topo{display:flex;gap:12px;align-items:center;padding:8px 16px;background:var(--g);color:#fff}
+#topo{display:flex;gap:10px;align-items:center;padding:8px 16px;background:var(--g);color:#fff}
 #topo a{color:#fff;text-decoration:none;font-weight:bold;white-space:nowrap}
-#topo .t{font-size:15px;font-weight:bold;max-width:44ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#topo .t{font-size:15px;font-weight:bold;max-width:40ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #topo .pag{margin-left:auto;display:flex;gap:10px;align-items:center;font-size:13px}
-#topo .pill{background:rgba(255,255,255,.18);border-radius:999px;padding:3px 12px}
+#topo .pill{background:rgba(255,255,255,.18);border-radius:999px;padding:3px 12px;white-space:nowrap}
 #topo .pill b{font-size:15px}
-#topo button{background:rgba(255,255,255,.18);border:none;color:#fff;font-weight:bold;border-radius:8px;padding:4px 12px;cursor:pointer}
+#topo button{background:rgba(255,255,255,.18);border:none;color:#fff;font-weight:bold;border-radius:8px;padding:4px 12px;cursor:pointer;white-space:nowrap}
 #topo button:hover{background:rgba(255,255,255,.3)}
 #status{color:#c9d7ec;font-size:12px}
 
-.tb{display:flex;align-items:center;gap:2px;padding:5px 12px;background:#fff;border-bottom:1px solid var(--line);overflow-x:auto}
-.tb button,.tb select{border:none;background:transparent;border-radius:6px;height:30px;min-width:30px;padding:0 7px;cursor:pointer;font-size:14px;white-space:nowrap}
-.tb button:hover,.tb select:hover{background:#eef1f7}
-.tb button.on{background:#dfe8f7;color:var(--gd)}
-.tb select{border:1px solid transparent;padding:0 4px}
-.tb .sep{width:1px;height:20px;background:var(--line);margin:0 6px;flex:none}
-.tb .esp{flex:1}
-.tb .split{display:inline-flex;align-items:center}
-.tb .split .arr{min-width:16px;width:16px;padding:0;font-size:10px;color:var(--mute)}
-.tb .split .main{position:relative;flex-direction:column;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
-.tb .split .main i{display:block;height:4px;width:16px;border-radius:1px;margin-top:1px}
-.tb .split .main .ic{line-height:1;font-size:15px}
-.menu{position:fixed;z-index:80;background:#fff;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.25);padding:6px;display:none;min-width:190px}
+/* faixa de ferramentas em grupos (como a do Word) */
+.rib{display:flex;align-items:stretch;gap:0;padding:4px 8px 0;background:#fff;border-bottom:1px solid var(--line);overflow-x:auto}
+.rib.off{display:none}
+.grp{display:flex;flex-direction:column;padding:0 8px;border-right:1px solid var(--line);flex:none}
+.grp:last-child{border-right:none}
+.grp .rows{display:flex;flex-direction:column;gap:2px;flex:1;justify-content:center}
+.grp .r{display:flex;align-items:center;gap:1px;min-height:28px}
+.grp .gl{text-align:center;font-size:11px;color:var(--mute);padding:1px 0 3px}
+.rib button,.rib select{border:1px solid transparent;background:transparent;border-radius:5px;height:28px;min-width:28px;padding:0 6px;cursor:pointer;font-size:14px;white-space:nowrap}
+.rib button:hover,.rib select:hover{background:#eef1f7}
+.rib button.on{background:#dfe8f7;border-color:#9db3d9;color:var(--gd)}
+.rib .split{display:inline-flex;align-items:center}
+.rib .split .arr{min-width:14px;width:14px;padding:0;font-size:9px;color:var(--mute)}
+.rib .split .main{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:0 5px;gap:0}
+.rib .split .main i{display:block;height:4px;width:16px;border-radius:1px;margin-top:1px}
+.rib .split .main .ic{line-height:1;font-size:14px}
+.rib .dots{display:flex;gap:4px;padding:0 4px;align-items:center}
+.rib .dots b{width:16px;height:16px;border-radius:50%;cursor:pointer;box-shadow:0 0 0 1px #c9ced6;display:block}
+.rib .dots b:hover{box-shadow:0 0 0 2px var(--g)}
+.rib .dots b.ativo{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--g)}
+.rib input[type=range]{width:110px;accent-color:var(--g)}
+#zoomVal{min-width:50px;font-weight:bold}
+.menu{position:fixed;z-index:80;background:#fff;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.25);padding:6px;display:none;min-width:200px}
 .menu.on{display:block}
-.menu button{display:flex;gap:10px;width:100%;text-align:left;height:auto;padding:7px 10px;align-items:center;border:none;background:transparent;border-radius:6px;cursor:pointer}
+.menu button{display:flex;gap:10px;width:100%;text-align:left;height:auto;padding:7px 10px;align-items:center;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:13.5px}
 .menu button:hover{background:#eef1f7}
-.menu .cores{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:4px}
-.menu .cores button{flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11px;color:var(--mute)}
-.menu .cores b{width:26px;height:26px;border-radius:50%;box-shadow:0 0 0 1px var(--line);display:block}
-.menu .cores button.ativo b{box-shadow:0 0 0 3px var(--g)}
+.menu button.ativo{background:#dfe8f7;font-weight:bold}
+.menu button .sw{width:16px;height:16px;border-radius:50%;box-shadow:0 0 0 1px #c9ced6;flex:none;text-align:center;font-size:12px;line-height:16px}
+.menu button small{margin-left:auto;color:var(--mute);padding-left:18px}
 .menu hr{border:none;border-top:1px solid var(--line);margin:4px 0}
-.menu small{color:var(--mute);margin-left:auto}
-#corpo{display:flex;justify-content:center;gap:16px;padding:0 10px}
-#sumario{display:none;position:sticky;top:110px;align-self:flex-start;width:260px;max-height:calc(100vh - 130px);overflow:auto;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-top:18px;padding:10px 12px;font-size:13px;flex:none}
+#corpo{display:flex;justify-content:center;gap:16px;padding:0 10px;align-items:flex-start}
+#sumario{display:none;position:sticky;top:calc(var(--fh) + 10px);width:260px;max-height:calc(100vh - var(--fh) - 30px);overflow:auto;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-top:18px;padding:10px 12px;font-size:13px;flex:none}
 #sumario.on{display:block}
 #sumario h4{margin:0 0 6px;font-size:13px;color:var(--gd)}
 #sumario a{display:block;padding:3px 0;color:var(--ink);text-decoration:none;cursor:pointer}
 #sumario a.h3{padding-left:14px;color:var(--mute)}
 #sumario a.atual{font-weight:bold;color:var(--g)}
-@media(max-width:1000px){#sumario.on{position:fixed;left:8px;top:150px;z-index:40;max-height:60vh;box-shadow:0 6px 20px rgba(0,0,0,.3)}}
+@media(max-width:1000px){#sumario.on{position:fixed;left:8px;top:calc(var(--fh) + 10px);z-index:40;max-height:60vh;box-shadow:0 6px 20px rgba(0,0,0,.3)}}
 #folha{width:100%;max-width:820px;margin:18px 0 80px;background:#fff;color:#111;padding:44px 56px;border-radius:4px;box-shadow:0 1px 6px rgba(0,0,0,.15);
- font:11pt/1.55 Arial,Helvetica,sans-serif;text-align:justify;outline:none;min-height:60vh}
+ font:11pt/1.55 Arial,Helvetica,sans-serif;text-align:justify;outline:none;min-height:60vh;flex:none}
 body.tool-on #folha{cursor:cell}
 @media(max-width:700px){#folha{padding:22px 16px}}
 #folha p{margin:0 0 .9em}
@@ -106,6 +114,18 @@ body.tool-on #folha{cursor:cell}
 #folha table{border-collapse:collapse;width:100%;margin:.6em 0 1em}
 #folha td{border:1px solid #8a94a6;padding:5px 8px;vertical-align:top;min-width:40px}
 #folha ul,#folha ol{margin:0 0 .9em 20px}
+
+.inc-badge{display:inline-block;font:700 9pt Arial,sans-serif;line-height:1.2;padding:0 5px;margin:0 3px;border-radius:9px;vertical-align:baseline;cursor:pointer;user-select:none;border:1px solid transparent;text-indent:0;text-align:center}
+.inc-badge.f0{background:#eceff3;color:#6b7280;border-color:#d5d9e0}
+.inc-badge.f1{background:#FFF3CC;color:#7a5b00;border-color:#FFD966}
+.inc-badge.f2{background:#E3F6DA;color:#2a6b12;border-color:#7ED957}
+.inc-badge.f3{background:#DDE3FF;color:#2a3fb0;border-color:#5271FF}
+.inc-badge.f4{background:#FDDCE8;color:#9c1a4a;border-color:#F45B8F}
+.inc-badge.f5{background:#FFD9D9;color:#a30f0f;border-color:#FF3131}
+.inc-badge:hover{filter:brightness(.95);box-shadow:0 0 0 2px rgba(48,84,150,.3)}
+.leg{font-size:11px;color:var(--mute);display:inline-flex;align-items:center;gap:3px;padding:0 4px}
+.leg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:5px}
+.leg i.f0{background:#c8ccd4}.leg i.f1{background:#FFD966}.leg i.f2{background:#7ED957}.leg i.f3{background:#5271FF}.leg i.f4{background:#F45B8F}.leg i.f5{background:#FF3131}
 </style>
 </head>
 <body>
@@ -125,38 +145,59 @@ body.tool-on #folha{cursor:cell}
 
 <!-- ========== EDITOR ========== -->
 <div id="ed" hidden>
-  <div class="fixo">
+  <div class="fixo" id="fixo">
     <div id="topo">
       <a href="leitor.html">← Biblioteca</a><span class="t" id="titulo"></span>
       <button id="btnSum" hidden title="Mostrar ou esconder o sumário do capítulo">☰ Sumário</button>
+      <button id="btnRib" title="Mostrar ou esconder a faixa de ferramentas">Ferramentas ▴</button>
       <span class="pag"><span id="status">pronto</span><span class="pill">Pág. <b id="pgAtual">–</b> de <span id="pgTotal">–</span></span></span>
     </div>
-    <div class="tb" id="tb">
-      <button data-cmd="undo" title="Desfazer (Ctrl+Z)">↶</button>
-      <button data-cmd="redo" title="Refazer (Ctrl+Y)">↷</button>
-      <span class="sep"></span>
-      <select id="bloco" title="Estilo do parágrafo"><option value="p">Texto normal</option><option value="h2">Título</option><option value="h3">Subtítulo</option></select>
-      <span class="sep"></span>
-      <button data-cmd="bold" title="Negrito (Ctrl+B)"><b>B</b></button>
-      <button data-cmd="italic" title="Itálico (Ctrl+I)"><i>I</i></button>
-      <button data-cmd="underline" title="Sublinhado (Ctrl+U)"><u>S</u></button>
-      <button data-cmd="strikeThrough" title="Tachado"><s>T</s></button>
-      <span class="split"><button class="main" id="btnTxt" title="Cor do texto"><span class="ic" style="font-weight:bold">A</span><i id="barTxt" style="background:#d90000"></i></button><button class="arr" data-menu="mTxt">▾</button></span>
-      <span class="sep"></span>
-      <span class="split"><button class="main" id="btnMk" title="Marcador: clique e depois selecione os trechos (Ctrl+1 a 8)"><span class="ic">🖍</span><i id="barMk" style="background:#fff176"></i></button><button class="arr" data-menu="mMk">▾</button></span>
-      <button id="tBor" title="Borracha (Alt+E): tira o marca-texto">⌫</button>
-      <span class="sep"></span>
-      <button data-cmd="insertUnorderedList" title="Lista com marcadores">•≡</button>
-      <button data-cmd="insertOrderedList" title="Lista numerada">1≡</button>
-      <button data-cmd="outdent" title="Diminuir recuo">⇤</button>
-      <button data-cmd="indent" title="Aumentar recuo">⇥</button>
-      <button data-cmd="justifyLeft" title="Alinhar à esquerda">☰</button>
-      <button data-cmd="justifyFull" title="Justificar">≣</button>
-      <span class="sep"></span>
-      <button data-menu="mTab" title="Tabela">▦ ▾</button>
-      <button id="caixa" title="Transforma o parágrafo em quadro de destaque (ou desfaz)">▭ Quadro</button>
-      <span class="esp"></span>
-      <button data-menu="mMais" title="Mais">⋯</button>
+    <div class="rib" id="rib">
+      <div class="grp"><div class="rows">
+        <div class="r"><button data-cmd="undo" title="Desfazer (Ctrl+Z)">↶</button><button data-cmd="redo" title="Refazer (Ctrl+Y)">↷</button>
+          <select id="bloco" title="Estilo do parágrafo"><option value="p">Texto normal</option><option value="h2">Título</option><option value="h3">Subtítulo</option></select>
+          <button data-cmd="removeFormat" title="Limpar formatação do trecho">Aa⌫</button></div>
+        <div class="r"><button id="tBd" title="Negrito: clique e depois selecione os trechos (Alt+3)"><b>N</b></button>
+          <button data-cmd="italic" title="Itálico (Ctrl+I)"><i>I</i></button>
+          <button id="tUl" title="Sublinhado: clique e depois selecione os trechos (Alt+4)"><u>S</u></button>
+          <button id="tSt" title="Tachado: clique e depois selecione os trechos"><s>ab</s></button>
+          <button data-cmd="subscript" title="Subscrito">x<sub>2</sub></button>
+          <button data-cmd="superscript" title="Sobrescrito">x<sup>2</sup></button>
+          <span class="split"><button class="main" id="btnTxt" title="Cor do texto"><span class="ic" style="font-weight:bold">A</span><i id="barTxt" style="background:#d90000"></i></button><button class="arr" data-menu="mTxt">▾</button></span></div>
+      </div><div class="gl">Fonte</div></div>
+
+      <div class="grp"><div class="rows">
+        <div class="r"><span class="split"><button class="main" id="btnMk" title="Marcador: clique e depois selecione os trechos (Alt+1, Alt+2...)"><span class="ic">🖍</span><i id="barMk" style="background:#fff176"></i></button><button class="arr" data-menu="mMk">▾</button></span>
+          <button id="tBor" title="Borracha (Alt+E): tira o marca-texto">⌫ Borracha</button></div>
+        <div class="r"><span class="dots" id="dots"></span></div>
+      </div><div class="gl">Marcador</div></div>
+
+      <div class="grp"><div class="rows">
+        <div class="r"><button data-cmd="insertUnorderedList" title="Lista com marcadores">•≡</button><button data-cmd="insertOrderedList" title="Lista numerada">1≡</button>
+          <button data-cmd="outdent" title="Diminuir recuo">⇤</button><button data-cmd="indent" title="Aumentar recuo">⇥</button></div>
+        <div class="r"><button data-cmd="justifyLeft" title="Alinhar à esquerda">☰</button><button data-cmd="justifyCenter" title="Centralizar">≡</button>
+          <button data-cmd="justifyRight" title="Alinhar à direita">☷</button><button data-cmd="justifyFull" title="Justificar">≣</button>
+          <button data-menu="mLin" title="Espaçamento entre linhas">↕ ▾</button></div>
+      </div><div class="gl">Parágrafo</div></div>
+
+      <div class="grp"><div class="rows">
+        <div class="r"><button data-menu="mTab" title="Tabela">▦ Tabela ▾</button></div>
+        <div class="r"><button id="caixa" title="Transforma o parágrafo em quadro de destaque (ou desfaz)">▭ Quadro</button></div>
+      </div><div class="gl">Inserir</div></div>
+
+      <div class="grp"><div class="rows">
+        <div class="r"><button id="zMenos" title="Diminuir zoom">−</button><button id="zoomVal" data-menu="mZoom" title="Zoom do texto">100%</button><button id="zMais" title="Aumentar zoom">+</button></div>
+        <div class="r"><input type="range" id="zoomRange" min="50" max="250" step="5" value="100" title="Zoom"></div>
+      </div><div class="gl">Zoom</div></div>
+
+      <div class="grp"><div class="rows">
+        <div class="r"><button id="btnInc" title="Mostra, ao lado de cada artigo citado, quantas vezes ele foi cobrado nos filtros do compilado de revisão">📊 Incidência</button></div>
+        <div class="r"><span class="leg"><i class="f1"></i>1× <i class="f2"></i>2× <i class="f3"></i>3× <i class="f4"></i>4× <i class="f5"></i>5+ <i class="f0"></i>0×</span></div>
+      </div><div class="gl" id="incInfo">incidência</div></div>
+
+      <div class="grp"><div class="rows">
+        <div class="r"><button data-menu="mMais" title="Mais opções">⋯ Mais</button></div>
+      </div><div class="gl">Capítulo</div></div>
     </div>
   </div>
   <div id="corpo">
@@ -167,13 +208,19 @@ body.tool-on #folha{cursor:cell}
 
 <div class="menu" id="mTxt"></div>
 <div class="menu" id="mMk"></div>
+<div class="menu" id="mCtx"></div>
+<div class="menu" id="mLin">
+  <button data-lh="1">Simples (1,0)</button><button data-lh="1.15">1,15</button><button data-lh="1.55">Padrão (1,55)</button><button data-lh="2">Duplo (2,0)</button><button data-lh="2.5">2,5</button>
+</div>
+<div class="menu" id="mZoom">
+  <button data-z="50">50%</button><button data-z="75">75%</button><button data-z="100">100%</button><button data-z="125">125%</button><button data-z="150">150%</button><button data-z="200">200%</button>
+</div>
 <div class="menu" id="mTab">
   <button data-a="nova">Inserir tabela…</button><hr>
   <button data-a="addlin">Adicionar linha abaixo</button><button data-a="addcol">Adicionar coluna à direita</button>
   <button data-a="dellin">Apagar linha</button><button data-a="delcol">Apagar coluna</button>
 </div>
 <div class="menu" id="mMais">
-  <button data-cmd="removeFormat">Limpar formatação</button>
   <button data-a="baixar">Baixar este capítulo (HTML)</button>
   <button data-a="restaurar">Restaurar o texto original</button>
 </div>
@@ -222,75 +269,118 @@ async function biblioteca(){
 }
 
 // =================== EDITOR ===================
-const MK=[['#fff176','Amarelo'],['#b9f6ca','Verde'],['#bde0ff','Azul'],['#ffc1d9','Rosa'],['#e0c8ff','Lilás'],['#ffd0a0','Laranja'],['#FFDBB5','Pêssego (do material)'],['#D6DBE3','Cinza-azulado (do material)']];
+// Atalhos (Alt+n ou Ctrl+n): 1 amarelo, 2 verde, 3 negrito, 4 sublinhado, 5 azul, 6 rosa, 7 pêssego, 8 lilás, 9 laranja, 0 cinza-azulado, Alt+E borracha
+const ATALHO={
+ '1':{k:'hl',c:'#fff176',n:'Amarelo'},'2':{k:'hl',c:'#b9f6ca',n:'Verde'},'3':{k:'bd',n:'Negrito'},'4':{k:'ul',n:'Sublinhado'},
+ '5':{k:'hl',c:'#bde0ff',n:'Azul'},'6':{k:'hl',c:'#ffc1d9',n:'Rosa'},'7':{k:'hl',c:'#FFDBB5',n:'Pêssego (do material)'},
+ '8':{k:'hl',c:'#e0c8ff',n:'Lilás'},'9':{k:'hl',c:'#ffd0a0',n:'Laranja'},'0':{k:'hl',c:'#D6DBE3',n:'Cinza-azulado (do material)'}
+};
 const TX=[['#000000','Preto'],['#d90000','Vermelho (do material)'],['#002161','Azul-marinho (do material)'],['#1b7f3b','Verde'],['#1a5fd0','Azul'],['#8e24aa','Roxo'],['#e65100','Laranja']];
-const folha=$('#folha');let slug=null,meta=null,timer=null,tool=null,liberado=false,corMk=MK[0][0],corTx=TX[1][0];
+const folha=$('#folha');let slug=null,meta=null,timer=null,tool=null,corMk='#fff176',corTx=TX[1][0],zoom=1;
 
-function exec(c,v){liberado=true;try{folha.focus({preventScroll:true});document.execCommand('styleWithCSS',false,true);document.execCommand(c,false,v)}finally{liberado=false}marcar()}
+function exec(c,v){try{folha.focus({preventScroll:true});document.execCommand('styleWithCSS',false,true);document.execCommand(c,false,v)}catch(e){}marcar()}
 function unwrap(el){const p=el.parentNode;while(el.firstChild)p.insertBefore(el.firstChild,el);p.removeChild(el)}
+const mesmo=(a,b)=>a&&b&&a.k===b.k&&a.c===b.c;
 
 // ---- menus ----
-function menu(id,btn){document.querySelectorAll('.menu.on').forEach(m=>{if(m.id!==id)m.classList.remove('on')});
-  const m=$('#'+id);m.classList.toggle('on');if(m.classList.contains('on')){const r=btn.getBoundingClientRect();m.style.top=(r.bottom+4)+'px';m.style.left=Math.max(8,Math.min(innerWidth-m.offsetWidth-8,r.left))+'px'}}
-document.querySelectorAll('[data-menu]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.stopPropagation();menu(b.dataset.menu,b)}});
-document.addEventListener('click',e=>{if(!e.target.closest('.menu'))document.querySelectorAll('.menu.on').forEach(m=>m.classList.remove('on'))});
-document.querySelectorAll('.menu').forEach(m=>m.onmousedown=e=>e.preventDefault());
 function fechaMenus(){document.querySelectorAll('.menu.on').forEach(m=>m.classList.remove('on'))}
+function menuEm(id,x,y){fechaMenus();const m=$('#'+id);m.classList.add('on');
+  m.style.left=Math.max(6,Math.min(innerWidth-m.offsetWidth-6,x))+'px';m.style.top=Math.max(6,Math.min(innerHeight-m.offsetHeight-6,y))+'px'}
+function menu(id,btn){const aberto=$('#'+id).classList.contains('on');fechaMenus();if(aberto)return;const r=btn.getBoundingClientRect();menuEm(id,r.left,r.bottom+4)}
+document.querySelectorAll('[data-menu]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.stopPropagation();menu(b.dataset.menu,b)}});
+document.addEventListener('click',e=>{if(!e.target.closest('.menu'))fechaMenus()});
+document.querySelectorAll('.menu').forEach(m=>m.onmousedown=e=>e.preventDefault());
 
-$('#mTxt').innerHTML='<div class="cores">'+TX.map(([c,n])=>`<button data-c="${c}" title="${n}"><b style="background:${c}"></b></button>`).join('')+'</div>';
+// cor do texto
+$('#mTxt').innerHTML=TX.map(([c,n])=>`<button data-c="${c}"><span class="sw" style="background:${c}"></span>${n}</button>`).join('');
 $('#mTxt').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{corTx=b.dataset.c;$('#barTxt').style.background=corTx;exec('foreColor',corTx);fechaMenus()});
 $('#btnTxt').onmousedown=e=>e.preventDefault();$('#btnTxt').onclick=()=>exec('foreColor',corTx);
 
-$('#mMk').innerHTML='<div class="cores">'+MK.map(([c,n],i)=>`<button data-c="${c}" title="${n} (Ctrl+${i+1})"><b style="background:${c}"></b>${i+1}</button>`).join('')+'</div><hr><button data-a="ul">Sublinhador <small>Ctrl+9</small></button><button data-a="st">Tachador</button>';
-$('#mMk').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ligar({k:'hl',c:b.dataset.c},true);fechaMenus()});
-$('#mMk').querySelector('[data-a=ul]').onclick=()=>{ligar({k:'ul'},true);fechaMenus()};
-$('#mMk').querySelector('[data-a=st]').onclick=()=>{ligar({k:'st'},true);fechaMenus()};
+// ---- marcador e ferramentas que ficam ligadas ----
+const ORDEM_ATALHO=['1','2','3','4','5','6','7','8','9','0'];
+function itemFerr(t,rotulo,tecla){
+  const sw=t.k==='hl'?`<span class="sw" style="background:${t.c}"></span>`:`<span class="sw">${{bd:'<b>N</b>',ul:'<u>S</u>',st:'<s>a</s>',er:'⌫'}[t.k]}</span>`;
+  return `<button data-t='${JSON.stringify(t)}'>${sw}${rotulo}${tecla?`<small>${tecla}</small>`:''}</button>`}
+function listaFerramentas(){
+  return ORDEM_ATALHO.map(n=>itemFerr(ATALHO[n],ATALHO[n].n,'Alt+'+n)).join('')+'<hr>'+itemFerr({k:'st'},'Tachado','')+itemFerr({k:'er'},'Borracha','Alt+E')}
+$('#mMk').innerHTML=listaFerramentas();
+$('#dots').innerHTML=ORDEM_ATALHO.filter(n=>ATALHO[n].k==='hl').map(n=>`<b data-t='${JSON.stringify(ATALHO[n])}' style="background:${ATALHO[n].c}" title="${ATALHO[n].n} (Alt+${n})"></b>`).join('');
+function ligaBotoes(raiz){raiz.querySelectorAll('[data-t]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{ligar(JSON.parse(b.dataset.t),true);fechaMenus()}})}
+ligaBotoes($('#mMk'));ligaBotoes($('#dots'));
 $('#btnMk').onmousedown=e=>e.preventDefault();$('#btnMk').onclick=()=>ligar({k:'hl',c:corMk});
-$('#tBor').onmousedown=e=>e.preventDefault();$('#tBor').onclick=()=>ligar({k:'er'});
+[['tBd','bd'],['tUl','ul'],['tSt','st'],['tBor','er']].forEach(([id,k])=>{$('#'+id).onmousedown=e=>e.preventDefault();$('#'+id).onclick=()=>ligar({k})});
 
-// ---- ferramentas que ficam ligadas (como no Okular) ----
 function ligar(t,forcar){
   if(t.k==='hl'){corMk=t.c;$('#barMk').style.background=t.c}
-  const igual=!forcar&&tool&&tool.k===t.k&&tool.c===t.c;
-  tool=igual?null:t;
+  tool=(!forcar&&tool&&mesmo(tool,t))?null:t;
   document.body.classList.toggle('tool-on',!!tool);
-  $('#btnMk').classList.toggle('on',!!tool&&tool.k==='hl');
-  $('#tBor').classList.toggle('on',!!tool&&tool.k==='er');
-  document.querySelectorAll('#mMk [data-c]').forEach(b=>b.classList.toggle('ativo',!!tool&&tool.k==='hl'&&tool.c===b.dataset.c));
+  const on=k=>!!tool&&tool.k===k;
+  $('#btnMk').classList.toggle('on',on('hl'));$('#tBd').classList.toggle('on',on('bd'));$('#tUl').classList.toggle('on',on('ul'));
+  $('#tSt').classList.toggle('on',on('st'));$('#tBor').classList.toggle('on',on('er'));
+  document.querySelectorAll('#dots b,#mMk [data-t]').forEach(b=>b.classList.toggle('ativo',!!tool&&mesmo(tool,JSON.parse(b.dataset.t))));
   if(tool&&selecaoNaFolha())aplicar();
 }
 function selecaoNaFolha(){const s=getSelection();return s.rangeCount&&!s.isCollapsed&&folha.contains(s.anchorNode)&&folha.contains(s.focusNode)}
+// Duplo clique no Chrome seleciona a palavra E o espaço depois dela: tira os espaços das pontas
+function textoAntes(n){const w=document.createTreeWalker(folha,NodeFilter.SHOW_TEXT);w.currentNode=n;return w.previousNode()}
+function textoDepois(n){const w=document.createTreeWalker(folha,NodeFilter.SHOW_TEXT);w.currentNode=n;return w.nextNode()}
+function aparaSelecao(){
+  const s=getSelection();if(!s.rangeCount||s.isCollapsed)return;
+  const r=s.getRangeAt(0);let ec=r.endContainer,eo=r.endOffset,sc=r.startContainer,so=r.startOffset;
+  const branco=c=>/[\s ]/.test(c);
+  // fim: anda para trás enquanto o caractere anterior for espaço
+  for(let g=0;g<20;g++){
+    if(ec.nodeType!==3){const t=ec.childNodes[eo-1];if(t){ec=t;while(ec.lastChild)ec=ec.lastChild;eo=ec.nodeType===3?ec.length:0}else{const a=textoAntes(ec);if(!a)break;ec=a;eo=a.length}}
+    if(eo===0){const a=textoAntes(ec);if(!a)break;ec=a;eo=a.length;continue}
+    if(branco(ec.data[eo-1])){eo--}else break;
+  }
+  // início: anda para frente enquanto o caractere seguinte for espaço
+  for(let g=0;g<20;g++){
+    if(sc.nodeType!==3){const t=sc.childNodes[so];if(t){sc=t;while(sc.firstChild)sc=sc.firstChild;so=0}else{const d=textoDepois(sc);if(!d)break;sc=d;so=0}}
+    if(sc.nodeType===3&&so>=sc.length){const d=textoDepois(sc);if(!d)break;sc=d;so=0;continue}
+    if(sc.nodeType===3&&branco(sc.data[so])){so++}else break;
+  }
+  try{const n=document.createRange();n.setStart(sc,so);n.setEnd(ec,eo);if(!n.collapsed){s.removeAllRanges();s.addRange(n)}}catch(e){}
+}
+folha.addEventListener('dblclick',()=>setTimeout(aparaSelecao,0));
 function aplicar(){
   if(!tool||!selecaoNaFolha())return;
-  liberado=true;
-  try{document.execCommand('styleWithCSS',false,true);
-    if(tool.k==='hl')document.execCommand('hiliteColor',false,tool.c);
-    else if(tool.k==='ul'){if(!document.queryCommandState('underline'))document.execCommand('underline')}
-    else if(tool.k==='st'){if(!document.queryCommandState('strikeThrough'))document.execCommand('strikeThrough')}
-    else if(tool.k==='er')limparMarca();
-  }finally{liberado=false}
+  aparaSelecao();
+  document.execCommand('styleWithCSS',false,true);
+  if(tool.k==='hl')document.execCommand('hiliteColor',false,tool.c);
+  else if(tool.k==='bd'){if(!document.queryCommandState('bold'))document.execCommand('bold')}
+  else if(tool.k==='ul'){if(!document.queryCommandState('underline'))document.execCommand('underline')}
+  else if(tool.k==='st'){if(!document.queryCommandState('strikeThrough'))document.execCommand('strikeThrough')}
+  else if(tool.k==='er')limparMarca();
   getSelection().collapseToEnd();marcar();
 }
 ['pointerup','keyup'].forEach(ev=>folha.addEventListener(ev,e=>{if(ev==='keyup'&&!e.shiftKey)return;setTimeout(aplicar,0)}));
 
-// ---- atalhos: Ctrl+1..8 (ou Alt+1..8) cores, Ctrl+9 sublinhar, Alt+E borracha, Esc/Ctrl+0 sai ----
+// ---- atalhos: Alt+n / Ctrl+n, Alt+E borracha, Esc desliga ----
 document.addEventListener('keydown',e=>{
   if(!meta||e.metaKey||e.shiftKey)return;
   const tag=(e.target.tagName||'').toLowerCase();if(['input','textarea','select'].includes(tag))return;
   if(e.key==='Escape'){if(tool)ligar(tool,false);fechaMenus();return}
   if(!e.ctrlKey&&!e.altKey)return;
   const code=e.code||'';
-  if(/^(Digit|Numpad)[0-9]$/.test(code)){const n=+code.slice(-1);e.preventDefault();
-    if(n>=1&&n<=8)ligar({k:'hl',c:MK[n-1][0]},true);
-    else if(n===9)ligar({k:'ul'},true);
-    else if(tool)ligar(tool,false);
-    return}
+  if(/^(Digit|Numpad)[0-9]$/.test(code)){e.preventDefault();ligar(ATALHO[code.slice(-1)],true);return}
   if(e.altKey&&!e.ctrlKey&&code==='KeyE'){e.preventDefault();ligar({k:'er'},true)}
 });
+
+// ---- botão direito: escolher a ferramenta (Alt+1, Alt+2...) ----
+$('#mCtx').innerHTML=listaFerramentas()+'<hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
+ligaBotoes($('#mCtx'));
+$('#mCtx').querySelector('[data-x=off]').onclick=()=>{if(tool)ligar(tool,false);fechaMenus()};
+$('#mCtx').querySelector('[data-x=copy]').onclick=()=>{document.execCommand('copy');fechaMenus()};
+$('#mCtx').querySelector('[data-x=cut]').onclick=()=>{document.execCommand('cut');fechaMenus();marcar()};
+folha.addEventListener('contextmenu',e=>{e.preventDefault();menuEm('mCtx',e.clientX,e.clientY)});
 
 // ---- botões simples ----
 document.querySelectorAll('[data-cmd]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{exec(b.dataset.cmd);fechaMenus()}});
 $('#bloco').onchange=e=>{folha.focus();exec('formatBlock',e.target.value)};
+$('#mLin').querySelectorAll('[data-lh]').forEach(b=>b.onclick=()=>{
+  const s=getSelection();if(!s.rangeCount)return;const r=s.getRangeAt(0);
+  [...folha.children].filter(c=>r.intersectsNode(c)).forEach(c=>c.style.lineHeight=b.dataset.lh);fechaMenus();marcar()});
 
 // ---- borracha ----
 function limparMarca(){
@@ -330,21 +420,34 @@ $('#mTab').querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
   const td=celula();if(!td)return alert('Coloque o cursor dentro de uma tabela.');TAB[a](td);marcar()});
 
 document.addEventListener('selectionchange',()=>{
-  document.querySelectorAll('[data-cmd]').forEach(b=>{if(/bold|italic|underline|strikeThrough/.test(b.dataset.cmd)){try{b.classList.toggle('on',document.queryCommandState(b.dataset.cmd))}catch(e){}}});
+  document.querySelectorAll('[data-cmd]').forEach(b=>{if(/italic|subscript|superscript|justify/.test(b.dataset.cmd)){try{b.classList.toggle('on',document.queryCommandState(b.dataset.cmd))}catch(e){}}});
   const b=blocoAtual();if(b){const t=b.tagName.toLowerCase();$('#bloco').value=['h2','h3'].includes(t)?t:'p'}
 });
 
+// ---- zoom do texto ----
+function setZoom(z){z=Math.max(.5,Math.min(2.5,Math.round(z*100)/100));zoom=z;folha.style.zoom=z;
+  $('#zoomVal').textContent=Math.round(z*100)+'%';$('#zoomRange').value=Math.round(z*100);LS.set('zoom',z);setTimeout(()=>{fixoAltura();aoRolar()},0)}
+$('#zMenos').onclick=()=>setZoom(zoom-.1);$('#zMais').onclick=()=>setZoom(zoom+.1);
+$('#zoomRange').oninput=e=>setZoom(e.target.value/100);
+$('#mZoom').querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{setZoom(b.dataset.z/100);fechaMenus()});
+
+// ---- faixa de ferramentas recolhível ----
+function fixoAltura(){document.documentElement.style.setProperty('--fh',$('#fixo').offsetHeight+'px')}
+function faixa(on){$('#rib').classList.toggle('off',!on);$('#btnRib').textContent='Ferramentas '+(on?'▴':'▾');LS.set('ribOn',on);fixoAltura()}
+$('#btnRib').onclick=()=>faixa($('#rib').classList.contains('off'));
+addEventListener('resize',fixoAltura);
+
 // ---- salvar texto ----
-function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(salvar,500);contar();montarSumario()}
-function salvar(){try{localStorage.setItem('doc:'+slug,folha.innerHTML);$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
-function contar(){}
+function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(salvar,500);montarSumario()}
+function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-badge').forEach(b=>b.remove());return c.innerHTML}
+function salvar(){try{localStorage.setItem('doc:'+slug,htmlLimpo());$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
 folha.addEventListener('input',marcar);
 folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
 async function original(){const r=await fetch('leitor/docs/'+slug+'.html');if(!r.ok)throw 0;return r.text()}
 $('#mMais').querySelector('[data-a=restaurar]').onclick=async()=>{fechaMenus();if(!confirm('Voltar ao texto original e perder suas edições deste capítulo?'))return;
-  folha.innerHTML=await original();localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';contar();montarSumario()};
+  folha.innerHTML=await original();localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';montarSumario();atualizarIncidencia()};
 $('#mMais').querySelector('[data-a=baixar]').onclick=()=>{fechaMenus();const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob(['<!doctype html><meta charset="utf-8"><body style="font-family:Arial;max-width:800px;margin:auto">'+folha.innerHTML],{type:'text/html'}));
+  a.href=URL.createObjectURL(new Blob(['<!doctype html><meta charset="utf-8"><body style="font-family:Arial;max-width:800px;margin:auto">'+htmlLimpo()],{type:'text/html'}));
   a.download=slug+'.html';a.click()};
 
 // ---- sumário do capítulo: só aparece se houver títulos ----
@@ -358,7 +461,7 @@ function montarSumario(){
   if(LS.get('sumOn')&&!montarSumario.ini){montarSumario.ini=1;$('#sumario').classList.add('on')}
 }
 $('#btnSum').onclick=()=>{$('#sumario').classList.toggle('on');LS.set('sumOn',$('#sumario').classList.contains('on'))};
-function altFixo(){return document.querySelector('.fixo').offsetHeight+8}
+function altFixo(){return $('#fixo').offsetHeight+8}
 function irPara(el){if(!el)return;window.scrollTo({top:el.getBoundingClientRect().top+scrollY-altFixo(),behavior:'smooth'})}
 
 // ---- página original (data-pg) e posição ----
@@ -389,6 +492,98 @@ function restaurarPosicao(params){
   if(pos&&folha.children[pos.i]){const el=folha.children[pos.i];window.scrollTo(0,el.getBoundingClientRect().top+scrollY-altFixo()+(pos.off||0))}
 }
 
+// ---- incidência: quantas vezes o artigo foi cobrado, lida do compilado de revisão ----
+let INC=null;
+const FAIXA=n=>n>=5?5:n; // 1,2,3,4,5+
+async function carregarIncidencia(){
+  if(INC)return INC;
+  try{const c=JSON.parse(sessionStorage.getItem('incMap')||'null');if(c&&Date.now()-c.t<10*60*1000){INC=c;return INC}}catch(e){}
+  const html=await (await fetch('compilado/index.html')).text();
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const m={},slugs={};
+  doc.querySelectorAll('tr[data-lei]').forEach(tr=>{
+    const a=tr.querySelector('a[href^="leis/"]');if(!a)return;
+    const href=a.getAttribute('href'),[pg,id]=href.split('#');if(!id)return;
+    const slug=pg.replace('leis/','').replace('.html','');
+    const n=parseInt((tr.querySelector('.inc')||{}).textContent,10);if(!n)return;
+    slugs[slug]=tr.dataset.lei||slug;
+    const chave=id.startsWith('a-'+slug+'-')?slug+'|'+id.slice(slug.length+3):id.replace(/^a-/,'');
+    m[chave]={n,url:'compilado/'+href};
+  });
+  INC={m,slugs,t:Date.now()};
+  try{sessionStorage.setItem('incMap',JSON.stringify(INC))}catch(e){}
+  return INC;
+}
+const LEI_NOMEADA=[
+  [/\b(?:CF\/?(?:88|1988)?|CRFB(?:\/88)?|Constituição Federal|Constituição da República|Carta Magna)\b/,'cf-1988'],
+  [/\b(?:Novo CPC|CPC(?:\/2015|\/15)?)\b/,'cpc-2015'],
+  [/\bCLT\b/,'prefixo:clt'],
+  [/\bIN\s*(?:n[º°o.]*\s*)?39(?:\/2016)?\b/,'in-39-tst-2016']
+];
+const LEI_OUTRA=/\b(?:ADCT|CC(?:\/2002)?|Código Civil|CP|CPP|CDC|CTN|ECA|LINDB|LOMAN|LRF|RI|Regimento|Decreto(?:-Lei)?|Resolução|Código|Constituição Estadual|Orientação Jurisprudencial|OJ|Portaria|Instrução Normativa|Convenção|Súmula)\b/;
+const PADRAO_LEI={DCO:'cf-1988',DPC:'cpc-2015'};
+function resolverLei(janela,inc){
+  const cand=[];
+  let m=/Lei(\s+Complementar)?\s+(?:n(?:[º°o.]|úmero)?\s*)?(\d[\d.]*)/i.exec(janela);
+  if(m){const d=m[2].replace(/\./g,'');const pre=(m[1]?'lc-':'lei-')+d+'-';const s=Object.keys(inc.slugs).find(x=>x.startsWith(pre));cand.push({i:m.index,slug:s||null})}
+  LEI_NOMEADA.forEach(([re,alvo])=>{const x=re.exec(janela);if(!x)return;
+    const slug=alvo.startsWith('prefixo:')?(Object.keys(inc.slugs).find(s=>s.startsWith(alvo.slice(8)))||null):(inc.slugs[alvo]?alvo:null);
+    cand.push({i:x.index,slug})});
+  const o=LEI_OUTRA.exec(janela);if(o)cand.push({i:o.index,slug:null});
+  if(!cand.length)return undefined;           // nenhuma lei citada
+  cand.sort((a,b)=>a.i-b.i);return cand[0].slug; // null = lei citada que não está no compilado
+}
+function blocosFolha(){return [...folha.querySelectorAll('p,h2,h3,li,td,div')].filter(el=>!el.querySelector('p,div,li,table,ul,ol,h2,h3,td'))}
+const RE_ART=/\b[Aa]rts?\.?\s*((?:\d+(?:\.\d{3})*\s*[º°o]?(?:-[A-Z])?)(?:\s*(?:,|e|a|ao|à)\s*\d+(?:\.\d{3})*\s*[º°o]?(?:-[A-Z])?)*)/g;
+const RE_SUM=/Súmula(?:\s+n[º°o.]*)?\s*(\d+)\s*(?:,?\s*d[ao]\s*)?(TST|STF|STJ)\b/gi;
+function badge(n,rotulo,url){
+  const b=document.createElement('span');b.className='inc-badge f'+(n?FAIXA(n):0);b.contentEditable='false';b.dataset.url=url||'';
+  b.textContent=n+'×';b.title=rotulo;return b}
+function inserirNaPosicao(mapa,pos,el){
+  for(const e of mapa){if(pos>=e.ini&&pos<=e.ini+e.node.length){const t=pos-e.ini;
+    if(t===0)e.node.parentNode.insertBefore(el,e.node);else if(t===e.node.length)e.node.parentNode.insertBefore(el,e.node.nextSibling);else{const resto=e.node.splitText(t);resto.parentNode.insertBefore(el,resto)}return true}}
+  return false}
+function limparIncidencia(){folha.querySelectorAll('.inc-badge').forEach(b=>b.remove());folha.normalize()}
+async function atualizarIncidencia(){
+  limparIncidencia();
+  const info=$('#incInfo');
+  if(LS.get('incOn')===false){info.textContent='desligada';return}
+  let inc;try{inc=await carregarIncidencia()}catch(e){info.textContent='compilado indisponível';return}
+  const padrao=PADRAO_LEI[meta&&meta.codigo]||null;let total=0,leis=new Set();
+  for(const bloco of blocosFolha()){
+    const tw=document.createTreeWalker(bloco,NodeFilter.SHOW_TEXT);const mapa=[];let full='',n;
+    while((n=tw.nextNode())){mapa.push({node:n,ini:full.length});full+=n.data}
+    if(!/Art|art|Súmula|SÚMULA/.test(full))continue;
+    const ins=[]; // {pos, el}
+    RE_ART.lastIndex=0;let m;
+    while((m=RE_ART.exec(full))){
+      const fim=m.index+m[0].length;
+      let jan=full.slice(fim,fim+110);const corte=jan.search(/;|\.\s+[A-ZÀ-Ú]|\n/);if(corte>=0)jan=jan.slice(0,corte);
+      let slug=resolverLei(jan,inc);if(slug===undefined)slug=padrao&&inc.slugs[padrao]?padrao:null;
+      if(!slug)continue;
+      const base=m.index+m[0].indexOf(m[1]);const re=/(\d+(?:\.\d{3})*)\s*[º°o]?(-[A-Z])?/g;let k;
+      while((k=re.exec(m[1]))){
+        const num=k[1].replace(/\./g,'')+(k[2]?'-'+k[2].slice(1).toLowerCase():'');
+        const reg=inc.m[slug+'|'+num],qtd=reg?reg.n:0,nome=inc.slugs[slug];
+        const rot=`Art. ${k[1]}${k[2]||''} · ${nome}\n`+(qtd?`Cobrado ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrado nos filtros já resolvidos');
+        ins.push({pos:base+k.index+k[0].length,el:badge(qtd,rot,reg?reg.url:'compilado/leis/'+slug+'.html')});leis.add(slug);total++;
+      }
+    }
+    RE_SUM.lastIndex=0;
+    while((m=RE_SUM.exec(full))){
+      const tr=m[2].toLowerCase(),chave=`${tr}-sumula-${m[1]}`,reg=inc.m[chave];
+      if(!inc.slugs['jurisprudencia-'+tr])continue;
+      const qtd=reg?reg.n:0;
+      ins.push({pos:m.index+m[0].length,el:badge(qtd,`Súmula ${m[1]} do ${m[2].toUpperCase()}\n`+(qtd?`Cobrada ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrada nos filtros já resolvidos'),reg?reg.url:'compilado/leis/jurisprudencia-'+tr+'.html')});total++;
+    }
+    ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
+  }
+  info.textContent=total?`${total} citações · ${leis.size} lei(s)`:'nenhuma citação encontrada';
+}
+folha.addEventListener('click',e=>{const b=e.target.closest('.inc-badge');if(b&&b.dataset.url){e.preventDefault();window.open(b.dataset.url,'_blank','noopener')}});
+$('#btnInc').onmousedown=e=>e.preventDefault();
+$('#btnInc').onclick=()=>{const on=LS.get('incOn')===false;LS.set('incOn',on);$('#btnInc').classList.toggle('on',on);atualizarIncidencia()};
+
 async function editor(){
   const params=new URLSearchParams(location.search);
   $('#ed').hidden=false;
@@ -398,8 +593,11 @@ async function editor(){
   $('#titulo').textContent=meta.titulo;$('#titulo').title=meta.titulo;$('#pgTotal').textContent=meta.paginas;
   const salvo=LS.raw('doc:'+slug);
   try{folha.innerHTML=salvo||await original()}catch(e){folha.textContent='Capítulo não encontrado.'}
-  contar();montarSumario();
-  requestAnimationFrame(()=>{restaurarPosicao(params);aoRolar()});
+  montarSumario();
+  atualizarIncidencia();
+  const z=LS.get('zoom');if(z)setZoom(z);
+  faixa(LS.get('ribOn')!==false);$('#btnInc').classList.toggle('on',LS.get('incOn')!==false);
+  requestAnimationFrame(()=>{fixoAltura();restaurarPosicao(params);aoRolar()});
 }
 
 slug=new URLSearchParams(location.search).get('doc');
