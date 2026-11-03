@@ -84,7 +84,6 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 .menu hr{border:none;border-top:1px solid var(--line);margin:4px 0}
 .menu small{color:var(--mute);margin-left:auto}
 #aviso{display:none;position:fixed;left:14px;bottom:12px;z-index:70;background:var(--purple);color:#fff;padding:6px 14px;border-radius:999px;font-size:12.5px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-#dica{position:fixed;left:14px;bottom:12px;z-index:60;background:#fff;color:var(--mute);padding:5px 12px;border-radius:999px;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 #corpo{display:flex;justify-content:center;gap:16px;padding:0 10px}
 #sumario{display:none;position:sticky;top:110px;align-self:flex-start;width:260px;max-height:calc(100vh - 130px);overflow:auto;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-top:18px;padding:10px 12px;font-size:13px;flex:none}
 #sumario.on{display:block}
@@ -168,7 +167,6 @@ body.tool-on #folha{cursor:cell}
   </div>
   <div class="st" id="contador"></div>
   <div id="aviso"></div>
-  <div id="dica">Marcador: Ctrl+1 a 8 (ou Alt+1 a 8) · Ctrl+9 sublinhar · Alt+E borracha · Esc sai</div>
 </div>
 
 <div class="menu" id="mTxt"></div>
@@ -265,8 +263,8 @@ function ligar(t,forcar){
   document.querySelectorAll('#mMk [data-c]').forEach(b=>b.classList.toggle('ativo',!!tool&&tool.k==='hl'&&tool.c===b.dataset.c));
   const av=$('#aviso');
   if(tool){av.style.display='block';av.textContent={hl:'Marcador ligado',ul:'Sublinhador ligado',st:'Tachador ligado',er:'Borracha ligada'}[tool.k]+' · Esc para sair';
-    av.style.background=tool.k==='hl'?tool.c:'';av.style.color=tool.k==='hl'?'#111':'#fff';$('#dica').style.display='none'}
-  else{av.style.display='none';$('#dica').style.display=''}
+    av.style.background=tool.k==='hl'?tool.c:'';av.style.color=tool.k==='hl'?'#111':'#fff'}
+  else av.style.display='none';
   if(tool&&selecaoNaFolha())aplicar();
 }
 function selecaoNaFolha(){const s=getSelection();return s.rangeCount&&!s.isCollapsed&&folha.contains(s.anchorNode)&&folha.contains(s.focusNode)}
