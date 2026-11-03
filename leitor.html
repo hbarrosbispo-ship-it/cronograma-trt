@@ -253,7 +253,7 @@ const $=s=>document.querySelector(s);
 const semAcento=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},raw(k){try{return localStorage.getItem(k)}catch(e){return null}}};
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-const ICONE={'Direito do Trabalho':'👷','Direito Processual do Trabalho':'⚖️','Direito Constitucional':'📜','Direito Administrativo':'🏛️','Direito Civil':'🏠','Direito Processual Civil':'🗂️','Direito Coletivo do Trabalho':'🤝','Estudo de Caso':'📝','Extras do curso':'⭐','Informática':'💻','Jurisprudência':'🔨','Português':'📖','RLM':'🧮'};
+const ICONE={'Direito do Trabalho':'⚖️','Direito Processual do Trabalho':'👷','Direito Constitucional':'📜','Direito Administrativo':'🏛️','Direito Civil':'🏠','Direito Processual Civil':'🗂️','Direito Coletivo do Trabalho':'🤝','Estudo de Caso':'📝','Extras do curso':'⭐','Informática':'💻','Jurisprudência':'🔨','Português':'📖','RLM':'🧮'};
 const ORDEM=['Direito do Trabalho','Direito Processual do Trabalho','Direito Constitucional','Direito Administrativo','Direito Civil','Direito Processual Civil','Direito Coletivo do Trabalho'];
 
 // =================== BIBLIOTECA ===================
