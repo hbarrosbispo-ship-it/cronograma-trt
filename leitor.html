@@ -141,6 +141,14 @@ body.tool-on #folha{cursor:cell}
  #folha .band,#folha .call,#folha>div:not(.band){break-inside:avoid-page}
  @page{margin:16mm 14mm}
 }
+
+#folha h2.c,#folha h3.c{text-align:center;margin:1.8em 0 .9em;line-height:1.5}
+#folha p.tit{text-align:center;font-weight:bold;margin:1.2em 0 .8em}
+#folha.leiseca p{margin-bottom:1.55em}
+#margem .barra{position:absolute;left:62px;width:5px;border-radius:2px;cursor:pointer;pointer-events:auto}
+#margem .barra:hover{box-shadow:0 0 0 2px rgba(48,84,150,.35)}
+.barra.f1{background:#FFD966}.barra.f2{background:#7ED957}.barra.f3{background:#5271FF}.barra.f4{background:#F45B8F}.barra.f5{background:#FF3131}
+@media(max-width:700px){#margem .barra{left:34px}}
 </style>
 </head>
 <body>
@@ -469,7 +477,7 @@ folha.addEventListener('input',marcar);
 folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
 async function original(){const r=await fetch('leitor/docs/'+slug+'.html');if(!r.ok)throw 0;return r.text()}
 $('#mMais').querySelector('[data-a=restaurar]').onclick=async()=>{fechaMenus();if(!confirm('Voltar ao texto original e perder suas edições deste capítulo?'))return;
-  folha.innerHTML=await original();localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';montarSumario();atualizarIncidencia()};
+  folha.innerHTML=await original();localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';montarSumario();marcarLeiSeca();atualizarIncidencia()};
 $('#mMais').querySelector('[data-a=baixar]').onclick=()=>{fechaMenus();const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob(['<!doctype html><meta charset="utf-8"><body style="font-family:Arial;max-width:800px;margin:auto">'+htmlLimpo()],{type:'text/html'}));
   a.download=slug+'.html';a.click()};
@@ -480,7 +488,7 @@ function montarSumario(){
   const hs=titulos();
   $('#btnSum').hidden=!hs.length;
   if(!hs.length){$('#sumario').classList.remove('on');$('#sumLista').innerHTML='';return}
-  $('#sumLista').innerHTML=hs.map((h,i)=>`<a class="${h.tagName.toLowerCase()}" data-i="${i}">${esc(h.textContent.trim())}</a>`).join('');
+  $('#sumLista').innerHTML=hs.map((h,i)=>`<a class="${h.tagName.toLowerCase()}" data-i="${i}">${esc(Array.from(h.childNodes).map(n=>n.nodeName==='BR'?' – ':n.textContent).join('').replace(/\s+/g,' ').trim())}</a>`).join('');
   $('#sumLista').querySelectorAll('a').forEach(a=>a.onclick=()=>irPara(titulos()[+a.dataset.i]));
   if(LS.get('sumOn')&&!montarSumario.ini){montarSumario.ini=1;$('#sumario').classList.add('on')}
 }
@@ -517,7 +525,21 @@ function restaurarPosicao(params){
 }
 
 // ---- incidência: quantas vezes o artigo foi cobrado, lida do compilado de revisão ----
-let INC=null;
+let INC=null,BARRAS=[],LEISECA=false;
+function marcarLeiSeca(){
+  const k=[...folha.children];const n=k.filter(e=>/^\s*Art\.?\s*\d/.test(e.textContent)).length;
+  LEISECA=n>=8&&n/Math.max(1,k.length)>=0.12;folha.classList.toggle('leiseca',LEISECA)}
+function leiPadrao(inc){
+  const cod=(meta&&meta.codigo)||'',tit=(meta&&meta.titulo)||'';
+  const pre=x=>Object.keys(inc.slugs).find(s=>s.startsWith(x))||null;
+  const fixo={DCO:'cf-1988',DPC:'cpc-2015'};
+  if(fixo[cod]&&inc.slugs[fixo[cod]])return fixo[cod];
+  if(cod==='DCI')return pre('cc-')||pre('codigo-civil');
+  if(['DT','DPT','DCT'].includes(cod)||/\bCLT\b/.test(tit))return pre('clt');
+  const m=/\bLei(?:\s+Complementar)?\s*(?:n[º°o.]*)?\s*(\d[\d.]*)/i.exec(tit)||/\bL(\d{4})\b/.exec(tit);
+  if(m){const d=m[1].replace(/\./g,'');return pre('lei-'+d+'-')||pre('lc-'+d+'-')}
+  return null}
+
 const FAIXA=n=>n>=5?5:n; // 1,2,3,4,5+
 async function carregarIncidencia(){
   if(INC)return INC;
@@ -574,6 +596,12 @@ function posicionarMargem(){
     const top=(r.top-pr.top)/z;const chave=Math.round(top/8);
     if(!grupos.has(chave))grupos.set(chave,{top,itens:[]});grupos.get(chave).itens.push(a);
   });
+  BARRAS.forEach(g=>{
+    if(!g.n)return;const els=g.els.filter(e=>e.isConnected);if(!els.length)return;
+    const a=els[0].getBoundingClientRect(),b=els[els.length-1].getBoundingClientRect();
+    const d=document.createElement('div');d.className='barra f'+FAIXA(g.n);d.dataset.url=g.url;
+    d.title=`Art. ${g.art} · ${g.lei}\nCobrado ${g.n}× nos filtros já resolvidos (clique para abrir no compilado)`;
+    d.style.top=((a.top-pr.top)/z)+'px';d.style.height=Math.max(6,(b.bottom-a.top)/z)+'px';mg.appendChild(d)});
   grupos.forEach(g=>{
     const multi=g.itens.length>1;
     g.itens.forEach((a,i)=>{
@@ -590,7 +618,7 @@ function inserirNaPosicao(mapa,pos,el){
   for(const e of mapa){if(pos>=e.ini&&pos<=e.ini+e.node.length){const t=pos-e.ini;
     if(t===0)e.node.parentNode.insertBefore(el,e.node);else if(t===e.node.length)e.node.parentNode.insertBefore(el,e.node.nextSibling);else{const resto=e.node.splitText(t);resto.parentNode.insertBefore(el,resto)}return true}}
   return false}
-function limparIncidencia(){folha.querySelectorAll('.inc-anc').forEach(b=>b.remove());folha.normalize();if($('#margem'))$('#margem').innerHTML=''}
+function limparIncidencia(){BARRAS=[];folha.querySelectorAll('.inc-anc').forEach(b=>b.remove());folha.normalize();if($('#margem'))$('#margem').innerHTML=''}
 async function atualizarIncidencia(){
   limparIncidencia();
   const info=$('#incInfo');
@@ -603,7 +631,9 @@ async function atualizarIncidencia(){
     if(!/Art|art|Súmula|SÚMULA/.test(full))continue;
     const ins=[]; // {pos, el}
     RE_ART.lastIndex=0;let m;
+    const ini0=full.search(/\S/);
     while((m=RE_ART.exec(full))){
+      if(LEISECA&&m.index<=ini0+1)continue;
       const fim=m.index+m[0].length;
       let jan=full.slice(fim,fim+110);const corte=jan.search(/;|\.\s+[A-ZÀ-Ú]|\n/);if(corte>=0)jan=jan.slice(0,corte);
       let slug=resolverLei(jan,inc);if(slug===undefined)slug=padrao&&inc.slugs[padrao]?padrao:null;
@@ -625,10 +655,20 @@ async function atualizarIncidencia(){
     }
     ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
   }
-  info.textContent=total?`${total} citações · ${leis.size} lei(s)`:'nenhuma citação encontrada';
+  const leiBase=LEISECA?leiPadrao(inc):null;
+  if(leiBase){let atual=null;
+    for(const el of [...folha.children]){
+      const t=el.textContent.trim(),m=/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[º°o]?(?:\s*-\s*([A-Z]))?/.exec(t);
+      const quebra=/^H[1-6]$/.test(el.tagName)||el.classList.contains('band')||el.classList.contains('tit');
+      if(m){const num=m[1].replace(/\./g,'')+(m[2]?'-'+m[2].toLowerCase():''),reg=inc.m[leiBase+'|'+num];
+        atual={els:[el],n:reg?reg.n:0,url:reg?reg.url:'',art:m[1]+(m[2]||''),lei:inc.slugs[leiBase]};BARRAS.push(atual)}
+      else if(quebra)atual=null;else if(atual)atual.els.push(el);
+    }}
+  const comBarra=BARRAS.filter(b=>b.n).length;
+  info.textContent=(total||comBarra)?`${total} citações${comBarra?` · ${comBarra} artigos marcados`:''}`:(LEISECA&&!leiBase?'lei ainda não está no compilado':'nenhuma citação encontrada');
   posicionarMargem();
 }
-$('#margem').addEventListener('click',e=>{const b=e.target.closest('.inc-badge');if(b&&b.dataset.url){e.preventDefault();window.open(b.dataset.url,'_blank','noopener')}});
+$('#margem').addEventListener('click',e=>{const b=e.target.closest('.inc-badge,.barra');if(b&&b.dataset.url){e.preventDefault();window.open(b.dataset.url,'_blank','noopener')}});
 folha.addEventListener('input',agendarMargem);addEventListener('resize',agendarMargem);if(window.ResizeObserver)new ResizeObserver(agendarMargem).observe(folha);
 $('#btnInc').onmousedown=e=>e.preventDefault();
 $('#btnInc').onclick=()=>{const on=LS.get('incOn')===false;LS.set('incOn',on);$('#btnInc').classList.toggle('on',on);atualizarIncidencia()};
@@ -705,7 +745,7 @@ async function editor(){
   $('#titulo').textContent=meta.titulo;$('#titulo').title=meta.titulo;$('#pgTotal').textContent=meta.paginas;
   const salvo=LS.raw('doc:'+slug);
   try{folha.innerHTML=salvo||await original()}catch(e){folha.textContent='Capítulo não encontrado.'}
-  montarSumario();
+  montarSumario();marcarLeiSeca();
   atualizarIncidencia();prepararBotoes();
   const z=LS.get('zoom');if(z)setZoom(z);
   faixa(LS.get('ribOn')!==false);$('#btnInc').classList.toggle('on',LS.get('incOn')!==false);
