@@ -102,7 +102,7 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 @media(max-width:1000px){#sumario.on{position:fixed;left:8px;top:calc(var(--fh) + 10px);z-index:40;max-height:60vh;box-shadow:0 6px 20px rgba(0,0,0,.3)}}
 #papel{position:relative;width:100%;max-width:840px;margin:18px 0 80px;flex:none}
 #margem{position:absolute;left:0;top:0;width:66px;height:0;z-index:3}
-#folha{width:100%;margin:0;background:#fff;color:#111;padding:44px 56px 44px 72px;border-radius:4px;box-shadow:0 1px 6px rgba(0,0,0,.15);
+#folha{width:100%;margin:0;background:#fff;color:#111;padding:44px 56px 44px 72px;border-radius:4px;border:3px solid #305496;box-shadow:0 0 0 4px rgba(48,84,150,.18);
  font:11pt/1.55 Arial,Helvetica,sans-serif;text-align:justify;outline:none;min-height:60vh;flex:none}
 body.tool-on #folha{cursor:cell}
 @media(max-width:700px){#folha{padding:22px 16px 22px 44px}#margem{width:40px}#margem .inc-badge{left:2px;font-size:7.5pt;padding:0 3px}}
@@ -136,7 +136,7 @@ body.tool-on #folha{cursor:cell}
  body{background:#fff;padding:0}
  #corpo{display:block;padding:0}
  #papel{max-width:none;margin:0;zoom:1!important}
- #folha{box-shadow:none;padding:0;border-radius:0;max-width:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ #folha{box-shadow:none;border:0;padding:0;border-radius:0;max-width:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
  #folha p,#folha h2,#folha h3{orphans:3;widows:3}
  #folha .band,#folha .call,#folha>div:not(.band){break-inside:avoid-page}
  @page{margin:16mm 14mm}
