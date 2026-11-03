@@ -3113,7 +3113,7 @@ function editalItemState(it){
   if(reserva) return { st:'reserva', mats };
   return { st: any ? 'andamento' : 'pendente', mats };
 }
-const ED_LABEL = { estudado:'Estudado', andamento:'Em andamento', pendente:'Pendente', reserva:'PDF a chegar', sem:'Sem material' };
+const ED_LABEL = { estudado:'Estudado', andamento:'Em andamento', pendente:'Pendente', reserva:'Sem PDF', sem:'Sem PDF' };
 function editalStats(m){
   const c = { estudado:0, andamento:0, pendente:0, reserva:0, sem:0 };
   const rows = m.itens.map(it=>{ const r = editalItemState(it); c[r.st]++; return r; });
@@ -3164,8 +3164,8 @@ function renderEdital(){
   resumo.querySelectorAll('.ed-sp-m li').forEach(el=>el.addEventListener('click', ()=>{ editalSel = el.dataset.ed; lsSet('editalSel', editalSel); renderEdital(); document.getElementById('editalDetalhe').scrollIntoView({behavior:'smooth', block:'start'}); }));
   resumo.querySelectorAll('.ed-card').forEach(el=>el.addEventListener('click', ()=>{ editalSel = el.dataset.ed; lsSet('editalSel', editalSel); renderEdital(); document.getElementById('editalDetalhe').scrollIntoView({behavior:'smooth', block:'start'}); }));
   const m = EDITAL.find(x=>x.id===editalSel) || EDITAL[0]; const s = st[m.id];
-  const filtros = [['todos','Todos'],['estudado','Estudados'],['faltam','Faltam'],['sem','Sem material']];
-  const rows = m.itens.map((it,i)=>({ it, i:i+1, r:s.rows[i] })).filter(x=> editalFiltro==='todos' ? true : editalFiltro==='faltam' ? (x.r.st!=='estudado') : (x.r.st===editalFiltro));
+  const filtros = [['todos','Todos'],['estudado','Estudados'],['faltam','Faltam'],['sem','Sem PDF']];
+  const rows = m.itens.map((it,i)=>({ it, i:i+1, r:s.rows[i] })).filter(x=> editalFiltro==='todos' ? true : editalFiltro==='faltam' ? (x.r.st!=='estudado') : editalFiltro==='sem' ? (x.r.st==='sem'||x.r.st==='reserva') : (x.r.st===editalFiltro));
   const body = rows.map(x=>{
     const key = 'nota_i_'+m.id+'_'+x.i; const seed = EDITAL_SEEDS[m.id+'_'+x.i]; const tem = notaGet(key, seed)!=='';
     const mats = x.r.mats.map(t=>`<span class="ed-mat ${t.ok?'ok':''}">${t.ok?'✓ ':''}${t.label}</span>`).join('');
@@ -3174,7 +3174,7 @@ function renderEdital(){
   }).join('');
   const mNota = lsGet('nota_m_'+m.id,'')!=='';
   det.innerHTML = `<div class="ed-det"><h3>${m.nome}</h3>
-    <div class="ed-s" style="font-size:12px;color:var(--gray)">${s.c.estudado} estudados · ${s.c.andamento} em andamento · ${s.c.pendente + s.c.reserva} pendentes · ${s.c.sem} sem material · ${s.total} itens no edital (${s.pct.toFixed(1)}% estudado)</div>
+    <div class="ed-s" style="font-size:12px;color:var(--gray)">${s.c.estudado} estudados · ${s.c.andamento} em andamento · ${s.c.pendente} pendentes · ${s.c.sem + s.c.reserva} sem PDF · ${s.total} itens no edital (${s.pct.toFixed(1)}% estudado)</div>
     <div class="ed-tools">${filtros.map(f=>`<button data-f="${f[0]}" class="${editalFiltro===f[0]?'on':''}">${f[1]}</button>`).join('')}
       <span style="flex:1"></span><button id="edNotaMateria" class="${mNota?'on':''}">📝 Anotações da matéria</button></div>
     <table class="ed-tab"><thead><tr><th>#</th><th>Item do edital</th><th>Situação</th><th>Material no cronograma</th><th></th></tr></thead><tbody>${body || '<tr><td colspan="5" style="color:#718096">Nenhum item neste filtro.</td></tr>'}</tbody></table></div>`;
