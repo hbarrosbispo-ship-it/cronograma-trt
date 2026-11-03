@@ -83,7 +83,6 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 .menu .cores button.ativo b{box-shadow:0 0 0 3px var(--g)}
 .menu hr{border:none;border-top:1px solid var(--line);margin:4px 0}
 .menu small{color:var(--mute);margin-left:auto}
-#aviso{display:none;position:fixed;left:14px;bottom:12px;z-index:70;background:var(--purple);color:#fff;padding:6px 14px;border-radius:999px;font-size:12.5px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 #corpo{display:flex;justify-content:center;gap:16px;padding:0 10px}
 #sumario{display:none;position:sticky;top:110px;align-self:flex-start;width:260px;max-height:calc(100vh - 130px);overflow:auto;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-top:18px;padding:10px 12px;font-size:13px;flex:none}
 #sumario.on{display:block}
@@ -102,7 +101,7 @@ body.tool-on #folha{cursor:cell}
 #folha h3{font-size:11pt;margin:1.3em 0 .5em}
 #folha .band{background:#002161;color:#fff;font-weight:700;text-align:center;padding:14px 12px;margin:0 0 1.4em}
 #folha .band *{color:#fff}
-#folha .call{background:#D6DBE3;border:2px dashed #002161;padding:6px 8px;margin:.4em 0 1em}
+#folha .call,#folha>div:not(.band){background:#D6DBE3;border:2px dashed #002161;padding:6px 8px;margin:.4em 0 1em}
 #folha mark{color:inherit}
 #folha table{border-collapse:collapse;width:100%;margin:.6em 0 1em}
 #folha td{border:1px solid #8a94a6;padding:5px 8px;vertical-align:top;min-width:40px}
@@ -166,7 +165,6 @@ body.tool-on #folha{cursor:cell}
     <div id="folha" contenteditable="true" spellcheck="false"></div>
   </div>
   <div class="st" id="contador"></div>
-  <div id="aviso"></div>
 </div>
 
 <div class="menu" id="mTxt"></div>
@@ -261,10 +259,6 @@ function ligar(t,forcar){
   $('#btnMk').classList.toggle('on',!!tool&&tool.k==='hl');
   $('#tBor').classList.toggle('on',!!tool&&tool.k==='er');
   document.querySelectorAll('#mMk [data-c]').forEach(b=>b.classList.toggle('ativo',!!tool&&tool.k==='hl'&&tool.c===b.dataset.c));
-  const av=$('#aviso');
-  if(tool){av.style.display='block';av.textContent={hl:'Marcador ligado',ul:'Sublinhador ligado',st:'Tachador ligado',er:'Borracha ligada'}[tool.k]+' · Esc para sair';
-    av.style.background=tool.k==='hl'?tool.c:'';av.style.color=tool.k==='hl'?'#111':'#fff'}
-  else av.style.display='none';
   if(tool&&selecaoNaFolha())aplicar();
 }
 function selecaoNaFolha(){const s=getSelection();return s.rangeCount&&!s.isCollapsed&&folha.contains(s.anchorNode)&&folha.contains(s.focusNode)}
@@ -320,9 +314,9 @@ function blocoAtual(){let n=getSelection().anchorNode;if(!n)return null;if(n.nod
   while(n&&n!==folha&&n.parentNode!==folha)n=n.parentNode;return n&&n!==folha?n:null}
 $('#caixa').onmousedown=e=>e.preventDefault();
 $('#caixa').onclick=()=>{const b=blocoAtual();if(!b)return;
-  if(b.classList.contains('call')){const p=document.createElement('p');p.innerHTML=b.innerHTML;b.replaceWith(p)}
-  else if(b.tagName==='P'||b.tagName==='DIV'){const d=document.createElement('div');d.className='call';d.innerHTML=b.innerHTML;b.replaceWith(d)}
-  marcar()};
+  const eQuadro=b.tagName==='DIV'&&!b.classList.contains('band');
+  if(!eQuadro&&b.tagName!=='P')return;
+  exec('formatBlock',eQuadro?'p':'div')};   // pelo histórico do navegador: Ctrl+Z desfaz e Ctrl+Y refaz
 function celula(){let n=getSelection().anchorNode;if(n&&n.nodeType===3)n=n.parentNode;return n&&n.closest?n.closest('td'):null}
 const TAB={
   nova(){const v=prompt('Linhas x colunas (ex.: 3x2)','3x2');if(!v)return;const [r,c]=v.toLowerCase().split('x').map(Number);if(!r||!c)return;

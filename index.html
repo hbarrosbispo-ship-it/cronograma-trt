@@ -183,6 +183,8 @@
   .file-link:hover{text-decoration:underline;}
   .file-link-chrome{font-size:10.5px;color:#1F618D;text-decoration:none;font-weight:bold;white-space:nowrap;margin-left:4px;}
   .file-link-chrome:hover{text-decoration:underline;}
+  .file-link-lib{font-size:10.5px;color:#fff;background:#305496;border-radius:10px;padding:1px 8px;text-decoration:none;font-weight:bold;white-space:nowrap;margin-left:4px;}
+  .file-link-lib:hover{background:#1F4E78;}
 
   select.status{padding:5px 6px;border-radius:6px;border:1px solid var(--border);background:var(--yellow);font-size:12px;font-family:inherit;}
   select.status.done{background:#D5F5E3;color:var(--green);font-weight:bold;}
@@ -1966,6 +1968,7 @@ function renderWeekSummary(groups){
   }).join('');
 }
 
+fetch('leitor/docs/mapa.json').then(r=>r.ok?r.json():null).then(m=>{ if(m){ window.LEITOR_MAPA=m; try{ renderAll(); }catch(e){} } }).catch(()=>{});
 function renderAll(){
   renderWeekSummary(groupByDate(tasks));
   renderActiveSubview();
@@ -2151,7 +2154,9 @@ function rowHtml(t, firstCol, draggableRow){
   const typeClass = t.type==='Leitura' ? 'leitura' : (t.type==='Questões' ? 'questoes' : (t.type==='Estudo de Caso' ? 'estudocaso' : 'flashcards'));
   const rowClass = (timerTaskId===t.id) ? 'timing' : '';
   const linkHtml = t.link ? ` <a href="${t.link}" target="_blank" rel="noopener" class="qc-link" title="Abrir filtro no QConcursos">QConcursos ↗</a>` : '';
-  const fileHtml = t.file ? ` <a href="${fileUri(t.file)}" class="file-link" title="Abrir o PDF direto no Okular">Abrir arquivo ↗</a> <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>` : '';
+  const bibSlug = t.file && window.LEITOR_MAPA ? window.LEITOR_MAPA[t.file.split(String.fromCharCode(92)).pop().toLowerCase()] : null;
+  const bibHtml = bibSlug ? ` <a href="leitor.html?doc=${bibSlug}" target="_blank" rel="noopener" class="file-link-lib" title="Abrir este capítulo na Biblioteca (editor com marcador, volta de onde você parou)">Biblioteca ↗</a>` : '';
+  const fileHtml = t.file ? bibHtml + ` <a href="${fileUri(t.file)}" class="file-link" title="Abrir o PDF direto no Okular">Abrir arquivo ↗</a> <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>` : '';
   const topicsHtml = isQ ? `<textarea class="topicsedit" data-id="${t.id}" rows="1" placeholder="Assuntos abordados pelo filtro">${escapeHtml(effectiveTopics(t))}</textarea>` : '';
   const descHtml = `<span class="descedit" data-id="${t.id}" title="Clique duas vezes (ou com o botão direito) para editar o nome da tarefa">${escapeHtml(effectiveDesc(t))}</span>${linkHtml}${fileHtml}${topicsHtml}`;
   const amt = effectiveAmount(t);
