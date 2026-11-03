@@ -2156,7 +2156,7 @@ function rowHtml(t, firstCol, draggableRow){
   const linkHtml = t.link ? ` <a href="${t.link}" target="_blank" rel="noopener" class="qc-link" title="Abrir filtro no QConcursos">QConcursos ↗</a>` : '';
   const bibSlug = t.file && window.LEITOR_MAPA ? window.LEITOR_MAPA[t.file.split(String.fromCharCode(92)).pop().toLowerCase()] : null;
   const bibHtml = bibSlug ? ` <a href="leitor.html?doc=${bibSlug}" target="_blank" rel="noopener" class="file-link-lib" title="Abrir este capítulo na Biblioteca (editor com marcador, volta de onde você parou)">Biblioteca ↗</a>` : '';
-  const fileHtml = t.file ? bibHtml + ` <a href="${fileUri(t.file)}" class="file-link" title="Abrir o PDF direto no Okular">Abrir arquivo ↗</a> <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>` : '';
+  const fileHtml = t.file ? bibHtml + ` <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>` : '';
   const topicsHtml = isQ ? `<textarea class="topicsedit" data-id="${t.id}" rows="1" placeholder="Assuntos abordados pelo filtro">${escapeHtml(effectiveTopics(t))}</textarea>` : '';
   const descHtml = `<span class="descedit" data-id="${t.id}" title="Clique duas vezes (ou com o botão direito) para editar o nome da tarefa">${escapeHtml(effectiveDesc(t))}</span>${linkHtml}${fileHtml}${topicsHtml}`;
   const amt = effectiveAmount(t);
