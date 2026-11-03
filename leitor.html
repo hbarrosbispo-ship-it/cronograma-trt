@@ -650,7 +650,8 @@ async function atualizarIncidencia(){
         const num=k[1].replace(/\./g,'')+(k[2]?'-'+k[2].slice(1).toLowerCase():'');
         const reg=inc.m[slug+'|'+num],qtd=reg?reg.n:0,nome=inc.slugs[slug];
         const rot=`Art. ${k[1]}${k[2]||''} · ${nome}\n`+(qtd?`Cobrado ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrado nos filtros já resolvidos');
-        ins.push({pos:base+k.index,el:badge(qtd,rot,reg?reg.url:'compilado/leis/'+slug+'.html',k[1]+(k[2]||''))});leis.add(slug);total++;
+        if(!qtd)continue;
+        ins.push({pos:base+k.index,el:badge(qtd,rot,reg.url,k[1]+(k[2]||''))});leis.add(slug);total++;
       }
     }
     RE_SUM.lastIndex=0;
@@ -658,6 +659,7 @@ async function atualizarIncidencia(){
       const tr=m[2].toLowerCase(),chave=`${tr}-sumula-${m[1]}`,reg=inc.m[chave];
       if(!inc.slugs['jurisprudencia-'+tr])continue;
       const qtd=reg?reg.n:0;
+      if(!qtd)continue;
       ins.push({pos:m.index,el:badge(qtd,`Súmula ${m[1]} do ${m[2].toUpperCase()}\n`+(qtd?`Cobrada ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrada nos filtros já resolvidos'),reg?reg.url:'compilado/leis/jurisprudencia-'+tr+'.html','Súm. '+m[1])});total++;
     }
     ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
@@ -673,7 +675,8 @@ async function atualizarIncidencia(){
     }}
   // onde o compilado não tem incidência, mostra a legenda do TRTeiros (cores que já vinham no PDF)
   const cobertos=new Set();BARRAS.filter(b=>b.n).forEach(b=>b.els.forEach(e=>cobertos.add(e)));
-  [...folha.children].forEach(el=>{const t=+(el.dataset&&el.dataset.tr||0);if(t&&!cobertos.has(el))BARRAS_TR.push({el,n:t})});
+  [...folha.children].forEach(el=>{if(cobertos.has(el))return;const t=+(el.dataset&&el.dataset.tr||0);if(t)BARRAS_TR.push({el,n:t});
+    el.querySelectorAll('.trs[data-tr]').forEach(sp=>BARRAS_TR.push({el:sp,n:+sp.dataset.tr}))});
   const comBarra=BARRAS.filter(b=>b.n).length;
   const partes=[];if(total)partes.push(`${total} citações`);if(comBarra)partes.push(`${comBarra} artigos pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);
   info.textContent=partes.length?partes.join(' · '):(LEISECA&&!leiBase?'lei ainda não está no compilado':'nenhuma citação encontrada');
