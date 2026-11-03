@@ -27,6 +27,7 @@ details.mat{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.
 details.mat>summary{background:var(--gd);color:#fff;padding:11px 16px;font-size:15px;font-weight:bold;cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center}
 details.mat>summary::before{content:"▸";color:#c9d7ec}
 details.mat[open]>summary::before{content:"▾"}
+details.mat>summary .ic{font-size:20px;line-height:1;width:26px;text-align:center}
 details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:12px}
 .grupo{background:#eef1f7;color:var(--gd);font-weight:bold;font-size:12px;padding:7px 16px;border-top:1px solid var(--line)}
 .linha{display:flex;align-items:center;border-top:1px solid #eceff4}
@@ -99,10 +100,12 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 #sumario a.h3{padding-left:14px;color:var(--mute)}
 #sumario a.atual{font-weight:bold;color:var(--g)}
 @media(max-width:1000px){#sumario.on{position:fixed;left:8px;top:calc(var(--fh) + 10px);z-index:40;max-height:60vh;box-shadow:0 6px 20px rgba(0,0,0,.3)}}
-#folha{width:100%;max-width:820px;margin:18px 0 80px;background:#fff;color:#111;padding:44px 56px;border-radius:4px;box-shadow:0 1px 6px rgba(0,0,0,.15);
+#papel{position:relative;width:100%;max-width:840px;margin:18px 0 80px;flex:none}
+#margem{position:absolute;left:0;top:0;width:66px;height:0;z-index:3}
+#folha{width:100%;margin:0;background:#fff;color:#111;padding:44px 56px 44px 72px;border-radius:4px;box-shadow:0 1px 6px rgba(0,0,0,.15);
  font:11pt/1.55 Arial,Helvetica,sans-serif;text-align:justify;outline:none;min-height:60vh;flex:none}
 body.tool-on #folha{cursor:cell}
-@media(max-width:700px){#folha{padding:22px 16px}}
+@media(max-width:700px){#folha{padding:22px 16px 22px 44px}#margem{width:40px}#margem .inc-badge{left:2px;font-size:7.5pt;padding:0 3px}}
 #folha p{margin:0 0 .9em}
 #folha p.ind{margin-left:35px}
 #folha h2{font-size:11pt;margin:1.6em 0 .6em}
@@ -115,17 +118,29 @@ body.tool-on #folha{cursor:cell}
 #folha td{border:1px solid #8a94a6;padding:5px 8px;vertical-align:top;min-width:40px}
 #folha ul,#folha ol{margin:0 0 .9em 20px}
 
-.inc-badge{display:inline-block;font:700 9pt Arial,sans-serif;line-height:1.2;padding:0 5px;margin:0 3px;border-radius:9px;vertical-align:baseline;cursor:pointer;user-select:none;border:1px solid transparent;text-indent:0;text-align:center}
+.inc-anc{display:inline-block;width:0;height:1em;overflow:hidden;vertical-align:top}
+#margem .inc-badge{position:absolute;left:6px;display:inline-block;font:700 8.5pt Arial,sans-serif;line-height:1.25;padding:0 5px;border-radius:9px;cursor:pointer;user-select:none;border:1px solid transparent;white-space:nowrap}
 .inc-badge.f0{background:#eceff3;color:#6b7280;border-color:#d5d9e0}
 .inc-badge.f1{background:#FFF3CC;color:#7a5b00;border-color:#FFD966}
 .inc-badge.f2{background:#E3F6DA;color:#2a6b12;border-color:#7ED957}
 .inc-badge.f3{background:#DDE3FF;color:#2a3fb0;border-color:#5271FF}
 .inc-badge.f4{background:#FDDCE8;color:#9c1a4a;border-color:#F45B8F}
 .inc-badge.f5{background:#FFD9D9;color:#a30f0f;border-color:#FF3131}
-.inc-badge:hover{filter:brightness(.95);box-shadow:0 0 0 2px rgba(48,84,150,.3)}
+#margem .inc-badge:hover{filter:brightness(.95);box-shadow:0 0 0 2px rgba(48,84,150,.3)}
 .leg{font-size:11px;color:var(--mute);display:inline-flex;align-items:center;gap:3px;padding:0 4px}
 .leg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:5px}
 .leg i.f0{background:#c8ccd4}.leg i.f1{background:#FFD966}.leg i.f2{background:#7ED957}.leg i.f3{background:#5271FF}.leg i.f4{background:#F45B8F}.leg i.f5{background:#FF3131}
+
+@media print{
+ .sitenav,.fixo,#sumario,#margem,.menu,#lista{display:none!important}
+ body{background:#fff;padding:0}
+ #corpo{display:block;padding:0}
+ #papel{max-width:none;margin:0;zoom:1!important}
+ #folha{box-shadow:none;padding:0;border-radius:0;max-width:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ #folha p,#folha h2,#folha h3{orphans:3;widows:3}
+ #folha .band,#folha .call,#folha>div:not(.band){break-inside:avoid-page}
+ @page{margin:16mm 14mm}
+}
 </style>
 </head>
 <body>
@@ -150,12 +165,16 @@ body.tool-on #folha{cursor:cell}
       <a href="leitor.html">← Biblioteca</a><span class="t" id="titulo"></span>
       <button id="btnSum" hidden title="Mostrar ou esconder o sumário do capítulo">☰ Sumário</button>
       <button id="btnRib" title="Mostrar ou esconder a faixa de ferramentas">Ferramentas ▴</button>
+      <button id="btnPdf" hidden title="Abrir o PDF original no Google Chrome (só neste computador)">📄 PDF no Chrome</button>
+      <button id="btnQ" hidden>📝 Questões</button>
       <span class="pag"><span id="status">pronto</span><span class="pill">Pág. <b id="pgAtual">–</b> de <span id="pgTotal">–</span></span></span>
     </div>
     <div class="rib" id="rib">
       <div class="grp"><div class="rows">
         <div class="r"><button data-cmd="undo" title="Desfazer (Ctrl+Z)">↶</button><button data-cmd="redo" title="Refazer (Ctrl+Y)">↷</button>
           <select id="bloco" title="Estilo do parágrafo"><option value="p">Texto normal</option><option value="h2">Título</option><option value="h3">Subtítulo</option></select>
+          <button id="fMais" title="Aumentar o tamanho do texto selecionado">A<sup>▲</sup></button><button id="fMenos" title="Diminuir o tamanho do texto selecionado">A<sub>▼</sub></button>
+          <button data-menu="mCase" title="Maiúsculas e minúsculas">Aa ▾</button>
           <button data-cmd="removeFormat" title="Limpar formatação do trecho">Aa⌫</button></div>
         <div class="r"><button id="tBd" title="Negrito: clique e depois selecione os trechos (Alt+3)"><b>N</b></button>
           <button data-cmd="italic" title="Itálico (Ctrl+I)"><i>I</i></button>
@@ -202,13 +221,16 @@ body.tool-on #folha{cursor:cell}
   </div>
   <div id="corpo">
     <nav id="sumario"><h4>Sumário</h4><div id="sumLista"></div></nav>
-    <div id="folha" contenteditable="true" spellcheck="false"></div>
+    <div id="papel"><div id="margem"></div><div id="folha" contenteditable="true" spellcheck="false"></div></div>
   </div>
 </div>
 
 <div class="menu" id="mTxt"></div>
 <div class="menu" id="mMk"></div>
 <div class="menu" id="mCtx"></div>
+<div class="menu" id="mCase">
+  <button data-case="up">MAIÚSCULAS</button><button data-case="low">minúsculas</button><button data-case="cap">Primeira Letra De Cada Palavra</button>
+</div>
 <div class="menu" id="mLin">
   <button data-lh="1">Simples (1,0)</button><button data-lh="1.15">1,15</button><button data-lh="1.55">Padrão (1,55)</button><button data-lh="2">Duplo (2,0)</button><button data-lh="2.5">2,5</button>
 </div>
@@ -221,6 +243,7 @@ body.tool-on #folha{cursor:cell}
   <button data-a="dellin">Apagar linha</button><button data-a="delcol">Apagar coluna</button>
 </div>
 <div class="menu" id="mMais">
+  <button data-a="pdf">Baixar como PDF</button>
   <button data-a="baixar">Baixar este capítulo (HTML)</button>
   <button data-a="restaurar">Restaurar o texto original</button>
 </div>
@@ -230,6 +253,7 @@ const $=s=>document.querySelector(s);
 const semAcento=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},raw(k){try{return localStorage.getItem(k)}catch(e){return null}}};
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const ICONE={'Direito do Trabalho':'👷','Direito Processual do Trabalho':'⚖️','Direito Constitucional':'📜','Direito Administrativo':'🏛️','Direito Civil':'🏠','Direito Processual Civil':'🗂️','Direito Coletivo do Trabalho':'🤝','Estudo de Caso':'📝','Extras do curso':'⭐','Informática':'💻','Jurisprudência':'🔨','Português':'📖','RLM':'🧮'};
 const ORDEM=['Direito do Trabalho','Direito Processual do Trabalho','Direito Constitucional','Direito Administrativo','Direito Civil','Direito Processual Civil','Direito Coletivo do Trabalho'];
 
 // =================== BIBLIOTECA ===================
@@ -247,7 +271,7 @@ async function biblioteca(){
       const lista=mats[m].filter(d=>!t||alvo(d).includes(t));if(!lista.length)return;
       if(aba==='cap'){
         const grupos={};lista.forEach(d=>(grupos[d.grupo]=grupos[d.grupo]||[]).push(d));
-        h+=`<details class="mat" ${t?'open':''}><summary>${esc(m)}<span class="n">${lista.length} capítulo(s)</span></summary>`;
+        h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s)</span></summary>`;
         Object.keys(grupos).sort().forEach(g=>{
           if(g)h+=`<div class="grupo">${esc(g)}</div>`;
           grupos[g].forEach(d=>{const andando=!!LS.get('pos:'+d.slug);
@@ -257,7 +281,7 @@ async function biblioteca(){
       }else{
         const com=lista.filter(d=>d.sumario.length);if(!com.length)return;
         const nt=com.reduce((a,d)=>a+d.sumario.length,0);
-        h+=`<details class="mat" ${t?'open':''}><summary>${esc(m)}<span class="n">${nt} tópicos · ${com.length} capítulos</span></summary><div class="allbody">`+
+        h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${nt} tópicos · ${com.length} capítulos</span></summary><div class="allbody">`+
           com.map(d=>`<div class="capt"><a href="?doc=${d.slug}">${esc(d.titulo)}</a> <small>${d.paginas} pág.</small></div><ul class="sum">${d.sumario.map((x,i)=>`<li class="${x.n}"><a href="?doc=${d.slug}&h=${i}">${esc(x.t)}</a> <small>pág. ${x.pg}</small></li>`).join('')}</ul>`).join('')+`</div></details>`;
       }
     });
@@ -425,8 +449,8 @@ document.addEventListener('selectionchange',()=>{
 });
 
 // ---- zoom do texto ----
-function setZoom(z){z=Math.max(.5,Math.min(2.5,Math.round(z*100)/100));zoom=z;folha.style.zoom=z;
-  $('#zoomVal').textContent=Math.round(z*100)+'%';$('#zoomRange').value=Math.round(z*100);LS.set('zoom',z);setTimeout(()=>{fixoAltura();aoRolar()},0)}
+function setZoom(z){z=Math.max(.5,Math.min(2.5,Math.round(z*100)/100));zoom=z;$('#papel').style.zoom=z;
+  $('#zoomVal').textContent=Math.round(z*100)+'%';$('#zoomRange').value=Math.round(z*100);LS.set('zoom',z);setTimeout(()=>{fixoAltura();aoRolar();posicionarMargem()},0)}
 $('#zMenos').onclick=()=>setZoom(zoom-.1);$('#zMais').onclick=()=>setZoom(zoom+.1);
 $('#zoomRange').oninput=e=>setZoom(e.target.value/100);
 $('#mZoom').querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{setZoom(b.dataset.z/100);fechaMenus()});
@@ -439,7 +463,7 @@ addEventListener('resize',fixoAltura);
 
 // ---- salvar texto ----
 function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(salvar,500);montarSumario()}
-function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-badge').forEach(b=>b.remove());return c.innerHTML}
+function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,.inc-badge').forEach(b=>b.remove());return c.innerHTML}
 function salvar(){try{localStorage.setItem('doc:'+slug,htmlLimpo());$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
 folha.addEventListener('input',marcar);
 folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
@@ -536,14 +560,37 @@ function resolverLei(janela,inc){
 function blocosFolha(){return [...folha.querySelectorAll('p,h2,h3,li,td,div')].filter(el=>!el.querySelector('p,div,li,table,ul,ol,h2,h3,td'))}
 const RE_ART=/\b[Aa]rts?\.?\s*((?:\d+(?:\.\d{3})*\s*[º°o]?(?:-[A-Z])?)(?:\s*(?:,|e|a|ao|à)\s*\d+(?:\.\d{3})*\s*[º°o]?(?:-[A-Z])?)*)/g;
 const RE_SUM=/Súmula(?:\s+n[º°o.]*)?\s*(\d+)\s*(?:,?\s*d[ao]\s*)?(TST|STF|STJ)\b/gi;
-function badge(n,rotulo,url){
-  const b=document.createElement('span');b.className='inc-badge f'+(n?FAIXA(n):0);b.contentEditable='false';b.dataset.url=url||'';
-  b.textContent=n+'×';b.title=rotulo;return b}
+// ---- selos na margem esquerda: ancoras invisíveis no texto + selos desenhados na margem ----
+function badge(n,rotulo,url,num){
+  const a=document.createElement('span');a.className='inc-anc';a.contentEditable='false';
+  a.dataset.n=n;a.dataset.t=rotulo;a.dataset.u=url||'';a.dataset.num=num||'';return a}
+function posicionarMargem(){
+  const mg=$('#margem');if(!mg)return;mg.innerHTML='';
+  if(LS.get('incOn')===false)return;
+  const pr=$('#papel').getBoundingClientRect(),z=zoom||1;
+  const grupos=new Map();
+  folha.querySelectorAll('.inc-anc').forEach(a=>{
+    const r=a.getBoundingClientRect();if(!r.height&&!r.top&&!r.left)return;
+    const top=(r.top-pr.top)/z;const chave=Math.round(top/8);
+    if(!grupos.has(chave))grupos.set(chave,{top,itens:[]});grupos.get(chave).itens.push(a);
+  });
+  grupos.forEach(g=>{
+    const multi=g.itens.length>1;
+    g.itens.forEach((a,i)=>{
+      const n=+a.dataset.n,b=document.createElement('span');
+      b.className='inc-badge f'+(n?FAIXA(n):0);b.title=a.dataset.t;b.dataset.url=a.dataset.u;
+      b.textContent=multi?`${a.dataset.num}: ${n}×`:`${n}×`;
+      b.style.top=(g.top+3+(multi?i*13:0))+'px';
+      mg.appendChild(b);
+    });
+  });
+}
+let _pm=null;function agendarMargem(){clearTimeout(_pm);_pm=setTimeout(posicionarMargem,120)}
 function inserirNaPosicao(mapa,pos,el){
   for(const e of mapa){if(pos>=e.ini&&pos<=e.ini+e.node.length){const t=pos-e.ini;
     if(t===0)e.node.parentNode.insertBefore(el,e.node);else if(t===e.node.length)e.node.parentNode.insertBefore(el,e.node.nextSibling);else{const resto=e.node.splitText(t);resto.parentNode.insertBefore(el,resto)}return true}}
   return false}
-function limparIncidencia(){folha.querySelectorAll('.inc-badge').forEach(b=>b.remove());folha.normalize()}
+function limparIncidencia(){folha.querySelectorAll('.inc-anc').forEach(b=>b.remove());folha.normalize();if($('#margem'))$('#margem').innerHTML=''}
 async function atualizarIncidencia(){
   limparIncidencia();
   const info=$('#incInfo');
@@ -566,7 +613,7 @@ async function atualizarIncidencia(){
         const num=k[1].replace(/\./g,'')+(k[2]?'-'+k[2].slice(1).toLowerCase():'');
         const reg=inc.m[slug+'|'+num],qtd=reg?reg.n:0,nome=inc.slugs[slug];
         const rot=`Art. ${k[1]}${k[2]||''} · ${nome}\n`+(qtd?`Cobrado ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrado nos filtros já resolvidos');
-        ins.push({pos:base+k.index+k[0].length,el:badge(qtd,rot,reg?reg.url:'compilado/leis/'+slug+'.html')});leis.add(slug);total++;
+        ins.push({pos:base+k.index,el:badge(qtd,rot,reg?reg.url:'compilado/leis/'+slug+'.html',k[1]+(k[2]||''))});leis.add(slug);total++;
       }
     }
     RE_SUM.lastIndex=0;
@@ -574,15 +621,80 @@ async function atualizarIncidencia(){
       const tr=m[2].toLowerCase(),chave=`${tr}-sumula-${m[1]}`,reg=inc.m[chave];
       if(!inc.slugs['jurisprudencia-'+tr])continue;
       const qtd=reg?reg.n:0;
-      ins.push({pos:m.index+m[0].length,el:badge(qtd,`Súmula ${m[1]} do ${m[2].toUpperCase()}\n`+(qtd?`Cobrada ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrada nos filtros já resolvidos'),reg?reg.url:'compilado/leis/jurisprudencia-'+tr+'.html')});total++;
+      ins.push({pos:m.index,el:badge(qtd,`Súmula ${m[1]} do ${m[2].toUpperCase()}\n`+(qtd?`Cobrada ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrada nos filtros já resolvidos'),reg?reg.url:'compilado/leis/jurisprudencia-'+tr+'.html','Súm. '+m[1])});total++;
     }
     ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
   }
   info.textContent=total?`${total} citações · ${leis.size} lei(s)`:'nenhuma citação encontrada';
+  posicionarMargem();
 }
-folha.addEventListener('click',e=>{const b=e.target.closest('.inc-badge');if(b&&b.dataset.url){e.preventDefault();window.open(b.dataset.url,'_blank','noopener')}});
+$('#margem').addEventListener('click',e=>{const b=e.target.closest('.inc-badge');if(b&&b.dataset.url){e.preventDefault();window.open(b.dataset.url,'_blank','noopener')}});
+folha.addEventListener('input',agendarMargem);addEventListener('resize',agendarMargem);if(window.ResizeObserver)new ResizeObserver(agendarMargem).observe(folha);
 $('#btnInc').onmousedown=e=>e.preventDefault();
 $('#btnInc').onclick=()=>{const on=LS.get('incOn')===false;LS.set('incOn',on);$('#btnInc').classList.toggle('on',on);atualizarIncidencia()};
+
+// ---- tamanho do texto e maiúsculas/minúsculas (como no Word) ----
+const ESCADA=[7,8,9,10,11,12,14,16,18,20,24,28,32,36,48];
+function tamanhoAtual(){
+  const s=getSelection();let el=s.rangeCount?s.getRangeAt(0).startContainer:null;if(el&&el.nodeType===3)el=el.parentElement;
+  while(el&&el!==folha){const m=/font-size:\s*([\d.]+)pt/.exec((el.getAttribute&&el.getAttribute('style'))||'');if(m)return +m[1];el=el.parentElement}
+  return 11}
+function substituirSelecao(fn,estilo){
+  if(!selecaoNaFolha())return false;
+  const r=getSelection().getRangeAt(0),cont=document.createElement('div');cont.appendChild(r.cloneContents());fn(cont);
+  const mk='m'+Date.now();
+  exec('insertHTML',`<span data-mk="${mk}"${estilo?` style="${estilo}"`:''}>${cont.innerHTML}</span>`);
+  const el=folha.querySelector(`[data-mk="${mk}"]`);
+  if(el){el.removeAttribute('data-mk');const rg=document.createRange();rg.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(rg)}
+  return true}
+function mudarTamanho(passo){
+  const atual=tamanhoAtual();
+  let i=ESCADA.findIndex(v=>v>=atual);if(i<0)i=ESCADA.length-1;
+  let j;
+  if(ESCADA[i]===atual)j=i+passo;else j=passo>0?i:i-1;   // entre dois degraus: sobe para o de cima ou desce para o de baixo
+  j=Math.max(0,Math.min(ESCADA.length-1,j));
+  substituirSelecao(c=>c.querySelectorAll('[style*="font-size"]').forEach(e=>e.style.removeProperty('font-size')),`font-size:${ESCADA[j]}pt`)}
+$('#fMais').onmousedown=e=>e.preventDefault();$('#fMenos').onmousedown=e=>e.preventDefault();
+$('#fMais').onclick=()=>mudarTamanho(1);$('#fMenos').onclick=()=>mudarTamanho(-1);
+function trocarCaixa(modo){
+  let anteriorLetra=false;
+  substituirSelecao(c=>{const tw=document.createTreeWalker(c,NodeFilter.SHOW_TEXT);let n;
+    while((n=tw.nextNode())){
+      if(modo==='up')n.data=n.data.toLocaleUpperCase('pt-BR');
+      else if(modo==='low')n.data=n.data.toLocaleLowerCase('pt-BR');
+      else{let out='';for(const ch of n.data.toLocaleLowerCase('pt-BR')){const letra=/[\p{L}\p{N}]/u.test(ch);out+=(letra&&!anteriorLetra)?ch.toLocaleUpperCase('pt-BR'):ch;anteriorLetra=letra}n.data=out}
+    }})}
+$('#mCase').querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{trocarCaixa(b.dataset.case);fechaMenus()});
+
+// ---- PDF original no Chrome e filtro de questões do mesmo assunto ----
+const BARRA=String.fromCharCode(92);
+function uriChrome(win){const p=win.split(BARRA);return 'cronfilechrome:///'+p[0]+'/'+p.slice(1).map(encodeURIComponent).join('/')}
+function campoTarefa(l,k){const i=l.indexOf(k+":'");if(i<0)return '';let j=i+k.length+2,out='';while(j<l.length){const c=l[j];if(c===BARRA){out+=l[j+1];j+=2;continue}if(c==="'")break;out+=c;j++}return out}
+const PARADA=new Set(['direito','trabalho','capitulo','extra','sobre','outros','geral','normas']);
+function raizes(t){return new Set((semAcento(t).split(/[^a-z0-9]+/).filter(w=>w.length>=5&&!PARADA.has(w))).map(w=>w.slice(0,5)))}
+function dataBR(s){const m=/(\d+)\/(\d+)\/(\d+)/.exec(s||'');return m?new Date(+m[3],+m[2]-1,+m[1]).getTime():0}
+async function prepararBotoes(){
+  if(meta.arquivo){$('#btnPdf').hidden=false;$('#btnPdf').onclick=()=>{const a=document.createElement('a');a.href=uriChrome(meta.arquivo);document.body.appendChild(a);a.click();a.remove()}}
+  try{
+    const [mapa,html]=await Promise.all([fetch('leitor/docs/mapa.json').then(r=>r.json()),fetch('index.html').then(r=>r.text())]);
+    const tarefas=html.split(/\r?\n/).filter(l=>l.includes("{date:'")).map(l=>({data:dataBR(campoTarefa(l,'date')),subj:campoTarefa(l,'subj'),tipo:campoTarefa(l,'type'),desc:campoTarefa(l,'desc'),topics:campoTarefa(l,'topics'),link:campoTarefa(l,'link'),file:campoTarefa(l,'file')}));
+    const leit=tarefas.filter(t=>t.tipo==='Leitura'&&t.file&&mapa[t.file.split(BARRA).pop().toLowerCase()]===slug).sort((a,b)=>a.data-b.data)[0];
+    if(!leit)return;
+    const base=raizes(leit.desc+' '+meta.titulo);let melhor=null,nota=0;
+    tarefas.filter(t=>t.tipo==='Questões'&&t.subj===leit.subj&&t.link&&t.data>=leit.data-3*864e5).forEach(t=>{
+      const r=raizes(t.topics+' '+t.desc);let comum=0;r.forEach(x=>{if(base.has(x))comum++});
+      const dist=Math.abs(t.data-leit.data);
+      if(comum>nota||(comum===nota&&comum>0&&melhor&&dist<Math.abs(melhor.data-leit.data))){nota=comum;melhor=t}});
+    if(melhor&&nota>=1){const b=$('#btnQ');b.hidden=false;b.textContent='📝 Questões · '+melhor.desc;b.title='Abrir o filtro do QConcursos deste assunto: '+(melhor.topics||melhor.desc);
+      b.onclick=()=>window.open(melhor.link,'_blank','noopener')}
+  }catch(e){}
+}
+
+// ---- baixar em PDF (imprimir e salvar como PDF) ----
+let _zAntes=1;
+addEventListener('beforeprint',()=>{_zAntes=zoom;$('#papel').style.zoom=1;if(meta)document.title=meta.titulo});
+addEventListener('afterprint',()=>{$('#papel').style.zoom=_zAntes;if(meta)document.title=meta.titulo+' · TRTeiros'});
+$('#mMais').querySelector('[data-a=pdf]').onclick=()=>{fechaMenus();setTimeout(()=>window.print(),50)};
 
 async function editor(){
   const params=new URLSearchParams(location.search);
@@ -594,7 +706,7 @@ async function editor(){
   const salvo=LS.raw('doc:'+slug);
   try{folha.innerHTML=salvo||await original()}catch(e){folha.textContent='Capítulo não encontrado.'}
   montarSumario();
-  atualizarIncidencia();
+  atualizarIncidencia();prepararBotoes();
   const z=LS.get('zoom');if(z)setZoom(z);
   faixa(LS.get('ribOn')!==false);$('#btnInc').classList.toggle('on',LS.get('incOn')!==false);
   requestAnimationFrame(()=>{fixoAltura();restaurarPosicao(params);aoRolar()});
