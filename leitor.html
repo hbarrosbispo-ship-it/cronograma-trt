@@ -3,215 +3,188 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leitor de PDF · TRTeiros</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
+<title>Biblioteca · TRTeiros</title>
 <style>
-:root{--bg:#f3f5f2;--card:#fff;--ink:#1d2a24;--mute:#64736b;--line:#dfe5e0;--g:#2f6b4f;--g2:#e6f0ea;
---c1:#ffe14d;--c2:#9fe08a;--c3:#8ec5ff;--c4:#ffa6c1}
-@media (prefers-color-scheme:dark){:root{--bg:#161b18;--card:#1f2622;--ink:#e8eee9;--mute:#9aa8a0;--line:#2f3a34;--g:#6fc29a;--g2:#26342d}}
+:root{--bg:#eef0f3;--card:#fff;--ink:#1d2a24;--mute:#64736b;--line:#d9dee3;--g:#002161;--g2:#e3e8f2;
+--page:#fff;--pink:#FFDBB5;--call:#D6DBE3}
+@media (prefers-color-scheme:dark){:root{--bg:#14171b;--card:#1d2127;--ink:#e8ecef;--mute:#9aa4ad;--line:#2d343c;--g:#8fb0ff;--g2:#26303f;--page:#1f242a;--call:#2b3442}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,Segoe UI,sans-serif}
-header{position:sticky;top:0;z-index:20;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 14px;background:var(--card);border-bottom:1px solid var(--line)}
-header h1{font-size:16px;margin:0 10px 0 0}
-button,.btn,select{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:5px 11px;border-radius:8px;cursor:pointer}
-button:hover,.btn:hover{background:var(--g2)}
-button.pri{background:var(--g);color:#fff;border-color:var(--g)}
-#fname{color:var(--mute);max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#prog{color:var(--mute);margin-left:auto}
-main{display:grid;grid-template-columns:1fr 330px;gap:14px;padding:14px;align-items:start}
-@media(max-width:900px){main{grid-template-columns:1fr}}
-#vazio{padding:50px 20px;text-align:center;color:var(--mute);background:var(--card);border:2px dashed var(--line);border-radius:14px}
-#paginas{display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0;overflow-x:auto}
-.pg{position:relative;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.18);flex:none}
-.pg canvas{display:block}
-.pg .hl{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply}
-.pg .hl i{position:absolute;border-radius:2px}
-.pg .textLayer{position:absolute;inset:0;--scale-factor:1;opacity:1;line-height:1}
-.pg .textLayer span::selection{background:rgba(47,107,79,.35)}
-.pgbar{display:flex;gap:8px;align-items:center;width:100%;max-width:100%;font-size:13px;color:var(--mute);justify-content:space-between}
-.pgwrap{display:flex;flex-direction:column;align-items:center;gap:4px}
-.hlmark{outline:2px solid var(--g)}
-aside{position:sticky;top:60px;max-height:calc(100vh - 76px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
-aside h2{font-size:14px;margin:0 0 8px}
-.item{border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-bottom:7px;font-size:13px;cursor:pointer;border-left-width:6px}
-.item small{color:var(--mute)}
-.item .nota{margin-top:4px;color:var(--ink);font-style:italic}
-textarea{width:100%;min-height:90px;font:inherit;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
-#tool{position:fixed;display:none;z-index:50;gap:6px;padding:6px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-#tool b{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid var(--card);box-shadow:0 0 0 1px var(--line)}
-#pop{position:fixed;display:none;z-index:50;width:250px;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-#pop .row{display:flex;gap:6px;margin-bottom:7px;align-items:center}
-#pop b{width:20px;height:20px;border-radius:50%;cursor:pointer;box-shadow:0 0 0 1px var(--line)}
-.filtros{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
-.filtros b{width:20px;height:20px;border-radius:50%;cursor:pointer;box-shadow:0 0 0 1px var(--line);opacity:.45}
-.filtros b.on{opacity:1;outline:2px solid var(--g)}
+button,select,input{font:inherit;color:var(--ink)}
+.tb button,.tb select{border:1px solid transparent;background:transparent;border-radius:6px;padding:5px 8px;cursor:pointer;min-width:30px}
+.tb button:hover,.tb select:hover{background:var(--g2)}
+.tb button.on{background:var(--g2);border-color:var(--g)}
+.tb .sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+.tb{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;gap:2px;align-items:center;padding:6px 10px;background:var(--card);border-bottom:1px solid var(--line)}
+.tb .sw{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);padding:0;min-width:20px;margin:0 1px}
+.tb .sw:hover{outline:2px solid var(--g)}
+.tb label.lb{font-size:12px;color:var(--mute);margin:0 3px 0 6px}
+#topo{display:flex;gap:10px;align-items:center;padding:8px 14px;background:var(--card);border-bottom:1px solid var(--line)}
+#topo a{color:var(--g);text-decoration:none}
+#topo .t{font-weight:600}
+#topo .r{margin-left:auto;color:var(--mute);font-size:13px}
+#lista{max-width:760px;margin:30px auto;padding:0 14px}
+#lista a{display:block;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;color:var(--ink);text-decoration:none}
+#lista a small{display:block;color:var(--mute)}
+#folha{max-width:820px;margin:18px auto 80px;background:#fff;color:#111;padding:44px 56px;border-radius:4px;box-shadow:0 1px 6px rgba(0,0,0,.15);
+ font:11pt/1.55 Arial,Helvetica,sans-serif;text-align:justify;outline:none;min-height:60vh}
+@media(max-width:700px){#folha{padding:22px 16px;margin:8px}}
+#folha p{margin:0 0 .9em}
+#folha p.ind{margin-left:35px}
+#folha h2{font-size:11pt;margin:1.6em 0 .6em}
+#folha h3{font-size:11pt;margin:1.3em 0 .5em}
+#folha .band{background:#002161;color:#fff;font-weight:700;text-align:center;padding:14px 12px;margin:0 0 1.4em}
+#folha .band *{color:#fff}
+#folha .call{background:#D6DBE3;border:2px dashed #002161;padding:6px 8px;margin:.4em 0 1em}
+#folha mark{color:inherit}
+#folha table{border-collapse:collapse;width:100%;margin:.6em 0 1em}
+#folha td{border:1px solid #8a94a6;padding:5px 8px;vertical-align:top;min-width:40px}
+#folha ul,#folha ol{margin:0 0 .9em 20px}
+.st{position:fixed;right:12px;bottom:10px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:12px;color:var(--mute)}
 </style>
 </head>
 <body>
-<header>
-  <h1>Leitor de PDF</h1>
-  <label class="btn pri">Abrir PDF<input id="arq" type="file" accept="application/pdf" hidden></label>
-  <span id="fname">nenhum arquivo</span>
-  <select id="zoom"><option value="0.8">80%</option><option value="1" selected>100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option></select>
-  <button id="exp" title="Baixa um arquivo com seus grifos e notas deste PDF">Exportar</button>
-  <label class="btn" title="Carrega grifos e notas exportados antes">Importar<input id="imp" type="file" accept="application/json" hidden></label>
-  <span id="prog"></span>
-</header>
-<main>
-  <div id="paginas"><div id="vazio">Escolha um PDF do seu computador. Nada é enviado: o arquivo é aberto só neste navegador.<br>Selecione um trecho para grifar. Os grifos ficam salvos por arquivo neste navegador.</div></div>
-  <aside id="lado" hidden>
-    <h2>Grifos</h2>
-    <div class="filtros" id="filtros"></div>
-    <div id="lista"></div>
-    <h2 style="margin-top:14px">Nota da página <span id="pgatual"></span></h2>
-    <textarea id="notapg" placeholder="Anotação livre sobre esta página"></textarea>
-  </aside>
-</main>
-<div id="tool"></div>
-<div id="pop"></div>
+<div id="lista" hidden>
+  <h2>Biblioteca</h2>
+  <div id="docs"></div>
+  <p style="color:var(--mute);font-size:13px">Cada capítulo foi convertido do PDF em texto editável. Tudo que você edita fica salvo neste navegador e pode ser baixado.</p>
+</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<div id="ed" hidden>
+  <div id="topo"><a href="leitor.html">← Biblioteca</a><span class="t" id="titulo"></span><span class="r" id="status">pronto</span></div>
+  <div class="tb" id="tb">
+    <button data-cmd="undo" title="Desfazer (Ctrl+Z)">↶</button>
+    <button data-cmd="redo" title="Refazer (Ctrl+Y)">↷</button>
+    <span class="sep"></span>
+    <select id="bloco" title="Estilo do parágrafo">
+      <option value="p">Texto normal</option><option value="h2">Título</option><option value="h3">Subtítulo</option>
+    </select>
+    <span class="sep"></span>
+    <button data-cmd="bold" title="Negrito (Ctrl+B)"><b>B</b></button>
+    <button data-cmd="italic" title="Itálico (Ctrl+I)"><i>I</i></button>
+    <button data-cmd="underline" title="Sublinhado (Ctrl+U)"><u>S</u></button>
+    <button data-cmd="strikeThrough" title="Tachado"><s>T</s></button>
+    <span class="sep"></span>
+    <label class="lb">Cor do texto</label><span id="cores-txt"></span>
+    <span class="sep"></span>
+    <label class="lb">Marca-texto</label><span id="cores-mk"></span>
+    <button id="borracha" title="Borracha: selecione um trecho, ou clique numa marcação, para tirar o marca-texto">⌫ Borracha</button>
+    <span class="sep"></span>
+    <button data-cmd="insertUnorderedList" title="Lista com marcadores">• Lista</button>
+    <button data-cmd="insertOrderedList" title="Lista numerada">1. Lista</button>
+    <button data-cmd="outdent" title="Diminuir recuo">⇤</button>
+    <button data-cmd="indent" title="Aumentar recuo">⇥</button>
+    <button data-cmd="justifyLeft" title="Alinhar à esquerda">≡</button>
+    <button data-cmd="justifyFull" title="Justificar">☰</button>
+    <span class="sep"></span>
+    <button id="caixa" title="Transforma o parágrafo em quadro de destaque (ou desfaz)">Quadro</button>
+    <button id="tabela" title="Inserir tabela">▦ Tabela</button>
+    <button id="addlin" title="Adicionar linha abaixo (cursor numa tabela)">+ linha</button>
+    <button id="addcol" title="Adicionar coluna à direita">+ coluna</button>
+    <button id="dellin" title="Apagar a linha do cursor">− linha</button>
+    <button id="delcol" title="Apagar a coluna do cursor">− coluna</button>
+    <span class="sep"></span>
+    <button data-cmd="removeFormat" title="Limpa negrito, cor, sublinhado etc. do trecho">Limpar formatação</button>
+    <span class="sep"></span>
+    <button id="baixar" title="Baixa o texto editado como arquivo HTML">Baixar</button>
+    <button id="restaurar" title="Volta ao texto original convertido do PDF">Restaurar original</button>
+  </div>
+  <div id="folha" contenteditable="true" spellcheck="false"></div>
+  <div class="st" id="contador"></div>
+</div>
+
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-const CORES={1:'#ffe14d',2:'#9fe08a',3:'#8ec5ff',4:'#ffa6c1'};
 const $=s=>document.querySelector(s);
-let pdf=null,chave=null,dados=null,escala=1,filtro=null,pgAtual=1;
-const els={};
+// Paleta: as cores do material original (pêssego, cinza-azulado, vermelho, azul-marinho) + as de uso comum
+const MK=[['#FFDBB5','Pêssego (original)'],['#fff176','Amarelo'],['#b9f6ca','Verde'],['#bde0ff','Azul'],['#ffc1d9','Rosa'],['#e0c8ff','Lilás'],['#D6DBE3','Cinza-azulado (original)'],['#ffd0a0','Laranja']];
+const TX=[['#000000','Preto'],['#d90000','Vermelho (original)'],['#002161','Azul-marinho (original)'],['#1b7f3b','Verde'],['#1a5fd0','Azul'],['#8e24aa','Roxo'],['#e65100','Laranja']];
+const folha=$('#folha');let slug=null,timer=null,modoBorracha=false;
 
-function carregar(k){try{return JSON.parse(localStorage.getItem('leitor:'+k))||null}catch(e){return null}}
-function salvar(){try{localStorage.setItem('leitor:'+chave,JSON.stringify(dados))}catch(e){}}
-function novo(){return{grifos:[],notas:{},lidas:{}}}
+function sw(arr,fn,box){arr.forEach(([c,n])=>{const b=document.createElement('button');b.className='sw';b.style.background=c;b.title=n;
+  b.onmousedown=e=>e.preventDefault();b.onclick=()=>fn(c);$(box).append(b)})}
+function cmd(c,v){folha.focus();document.execCommand('styleWithCSS',false,true);document.execCommand(c,false,v);marcar()}
+sw(TX,c=>cmd('foreColor',c),'#cores-txt');
+sw(MK,c=>{modoBorracha=false;$('#borracha').classList.remove('on');cmd('hiliteColor',c)},'#cores-mk');
 
-// ---------- abrir ----------
-$('#arq').onchange=async e=>{const f=e.target.files[0];if(!f)return;abrir(await f.arrayBuffer(),f.name,f.name+'|'+f.size)};
-(async()=>{const u=new URLSearchParams(location.search).get('url');if(u){try{const b=await (await fetch(u)).arrayBuffer();abrir(b,decodeURIComponent(u.split('/').pop()),u)}catch(e){}}})();
+document.querySelectorAll('[data-cmd]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>cmd(b.dataset.cmd)});
+$('#bloco').onchange=e=>{folha.focus();document.execCommand('formatBlock',false,e.target.value);marcar()};
 
-async function abrir(buf,nome,k){
-  pdf=await pdfjsLib.getDocument({data:buf}).promise;
-  chave=k;dados=carregar(k)||novo();
-  $('#fname').textContent=nome;$('#fname').title=nome;
-  $('#vazio')?.remove();$('#lado').hidden=false;
-  montar();
+// ---- borracha ----
+function limparMarca(){
+  const s=getSelection();if(!s.rangeCount||s.isCollapsed)return false;
+  document.execCommand('styleWithCSS',false,true);
+  document.execCommand('hiliteColor',false,'transparent');
+  folha.querySelectorAll('mark').forEach(m=>{if(s.containsNode(m,true)){const bg=m.style.backgroundColor;if(!bg||bg==='transparent'||bg==='rgba(0, 0, 0, 0)')unwrap(m)}});
+  folha.querySelectorAll('span[style]').forEach(sp=>{if(/background-color:\s*(transparent|rgba\(0, 0, 0, 0\))/.test(sp.getAttribute('style'))){
+    sp.style.removeProperty('background-color');if(!sp.getAttribute('style').trim())unwrap(sp)}});
+  return true;
 }
+function unwrap(el){const p=el.parentNode;while(el.firstChild)p.insertBefore(el.firstChild,el);p.removeChild(el)}
+$('#borracha').onmousedown=e=>e.preventDefault();
+$('#borracha').onclick=()=>{
+  if(limparMarca()){marcar();return}
+  modoBorracha=!modoBorracha;$('#borracha').classList.toggle('on',modoBorracha);
+};
+folha.addEventListener('click',e=>{
+  const m=e.target.closest('mark,span[style*="background"]');
+  if(modoBorracha&&m&&folha.contains(m)){unwrap(m);marcar()}
+});
+folha.addEventListener('mouseup',()=>{if(modoBorracha&&!getSelection().isCollapsed){limparMarca();getSelection().removeAllRanges();marcar()}});
 
-// ---------- páginas ----------
-const obs=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting&&!en.target._ok){en.target._ok=1;desenhar(+en.target.dataset.n)}}),{rootMargin:'600px'});
-async function montar(){
-  const box=$('#paginas');box.innerHTML='';els.pg={};
-  const p1=await pdf.getPage(1),vp=p1.getViewport({scale:escala});
-  for(let n=1;n<=pdf.numPages;n++){
-    const w=document.createElement('div');w.className='pgwrap';
-    w.innerHTML=`<div class="pgbar"><span>Página ${n} de ${pdf.numPages}</span><label><input type="checkbox" data-lida="${n}" ${dados.lidas[n]?'checked':''}> lida</label></div>`;
-    const pg=document.createElement('div');pg.className='pg';pg.dataset.n=n;
-    pg.style.width=vp.width+'px';pg.style.height=vp.height+'px';
-    w.append(pg);box.append(w);els.pg[n]=pg;obs.observe(pg);
-  }
-  box.querySelectorAll('[data-lida]').forEach(c=>c.onchange=()=>{dados.lidas[c.dataset.lida]=c.checked;salvar();prog()});
-  prog();lista();notaPg();
-}
-async function desenhar(n){
-  const page=await pdf.getPage(n),vp=page.getViewport({scale:escala}),pg=els.pg[n];
-  pg.style.width=vp.width+'px';pg.style.height=vp.height+'px';
-  const dpr=window.devicePixelRatio||1,c=document.createElement('canvas');
-  c.width=vp.width*dpr;c.height=vp.height*dpr;c.style.width=vp.width+'px';c.style.height=vp.height+'px';
-  pg.append(c);
-  await page.render({canvasContext:c.getContext('2d'),viewport:vp,transform:dpr!==1?[dpr,0,0,dpr,0,0]:null}).promise;
-  const hl=document.createElement('div');hl.className='hl';pg.append(hl);
-  const tl=document.createElement('div');tl.className='textLayer';pg.append(tl);
-  pdfjsLib.renderTextLayer({textContentSource:await page.getTextContent(),container:tl,viewport:vp,textDivs:[]});
-  tl.style.setProperty('--scale-factor',escala);
-  pintar(n);
-}
-function pintar(n){
-  const pg=els.pg[n],hl=pg&&pg.querySelector('.hl');if(!hl)return;hl.innerHTML='';
-  dados.grifos.filter(g=>g.pg===n).forEach(g=>g.r.forEach(r=>{
-    const i=document.createElement('i');
-    Object.assign(i.style,{left:r[0]*100+'%',top:r[1]*100+'%',width:r[2]*100+'%',height:r[3]*100+'%',background:CORES[g.cor]});
-    hl.append(i);}));
-}
-$('#zoom').onchange=e=>{escala=+e.target.value;if(pdf)montar()};
+// ---- quadro / tabela ----
+function blocoAtual(){let n=getSelection().anchorNode;if(!n)return null;if(n.nodeType===3)n=n.parentNode;
+  while(n&&n!==folha&&n.parentNode!==folha)n=n.parentNode;return n&&n!==folha?n:null}
+$('#caixa').onmousedown=e=>e.preventDefault();
+$('#caixa').onclick=()=>{const b=blocoAtual();if(!b)return;
+  if(b.classList.contains('call')){const p=document.createElement('p');p.innerHTML=b.innerHTML;b.replaceWith(p)}
+  else if(b.tagName==='P'||b.tagName==='DIV'){const d=document.createElement('div');d.className='call';d.innerHTML=b.innerHTML;b.replaceWith(d)}
+  marcar()};
+$('#tabela').onmousedown=e=>e.preventDefault();
+$('#tabela').onclick=()=>{
+  const v=prompt('Linhas x colunas (ex.: 3x2)','3x2');if(!v)return;const [r,c]=v.toLowerCase().split('x').map(Number);if(!r||!c)return;
+  let h='<table>'+('<tr>'+'<td><br></td>'.repeat(c)+'</tr>').repeat(r)+'</table><p><br></p>';
+  folha.focus();document.execCommand('insertHTML',false,h);marcar()};
+function celula(){let n=getSelection().anchorNode;if(n&&n.nodeType===3)n=n.parentNode;return n&&n.closest?n.closest('td'):null}
+function tabOp(fn){return()=>{const td=celula();if(!td)return alert('Coloque o cursor dentro de uma tabela.');fn(td);marcar()}}
+['addlin','addcol','dellin','delcol'].forEach(id=>$('#'+id).onmousedown=e=>e.preventDefault());
+$('#addlin').onclick=tabOp(td=>{const tr=td.parentNode,n=tr.cells.length,nova=tr.cloneNode(false);for(let i=0;i<n;i++){const c=document.createElement('td');c.innerHTML='<br>';nova.append(c)}tr.after(nova)});
+$('#addcol').onclick=tabOp(td=>{const i=td.cellIndex;td.closest('table').querySelectorAll('tr').forEach(tr=>{const c=document.createElement('td');c.innerHTML='<br>';tr.cells[i]?tr.cells[i].after(c):tr.append(c)})});
+$('#dellin').onclick=tabOp(td=>{const t=td.closest('table'),tr=td.parentNode;tr.remove();if(!t.rows.length)t.remove()});
+$('#delcol').onclick=tabOp(td=>{const t=td.closest('table'),i=td.cellIndex;t.querySelectorAll('tr').forEach(tr=>tr.cells[i]&&tr.cells[i].remove());if(!t.rows[0]||!t.rows[0].cells.length)t.remove()});
 
-// ---------- grifar ----------
-const tool=$('#tool'),pop=$('#pop');
-tool.innerHTML=Object.entries(CORES).map(([k,c])=>`<b data-c="${k}" style="background:${c}" title="Grifar"></b>`).join('');
-let pend=null;
+// ---- estado dos botões (negrito etc. acende conforme o cursor) ----
 document.addEventListener('selectionchange',()=>{
-  const s=getSelection();
-  if(!pdf||s.isCollapsed||!s.rangeCount||!s.anchorNode||!s.anchorNode.parentElement?.closest('.pg')){tool.style.display='none';pend=null;return}
-  const r=s.getRangeAt(0),rs=r.getBoundingClientRect();
-  pend={range:r,text:s.toString().trim()};
-  tool.style.display='flex';tool.style.left=Math.max(8,Math.min(innerWidth-160,rs.left))+'px';tool.style.top=Math.max(60,rs.top-44)+'px';
+  document.querySelectorAll('[data-cmd]').forEach(b=>{if(/bold|italic|underline|strikeThrough/.test(b.dataset.cmd)){try{b.classList.toggle('on',document.queryCommandState(b.dataset.cmd))}catch(e){}}});
+  const b=blocoAtual();if(b){const t=b.tagName.toLowerCase();$('#bloco').value=['h2','h3'].includes(t)?t:'p'}
 });
-tool.onmousedown=e=>e.preventDefault(); // não perde a seleção
-tool.onclick=e=>{const c=e.target.dataset.c;if(!c||!pend)return;criar(+c);};
-function criar(cor){
-  const porPg={};
-  [...pend.range.getClientRects()].forEach(q=>{
-    if(q.width<2||q.height<2)return;
-    const cx=q.left+q.width/2,cy=q.top+q.height/2;
-    for(const n in els.pg){
-      const b=els.pg[n].getBoundingClientRect();
-      if(cx>=b.left&&cx<=b.right&&cy>=b.top&&cy<=b.bottom){
-        (porPg[n]=porPg[n]||[]).push([(q.left-b.left)/b.width,(q.top-b.top)/b.height,q.width/b.width,q.height/b.height]);break}
-    }});
-  let primeiro=true;
-  for(const n in porPg){
-    dados.grifos.push({id:Date.now()+'-'+n,pg:+n,cor,r:porPg[n],t:primeiro?pend.text:'',nota:'',ts:new Date().toISOString()});
-    primeiro=false;pintar(+n);
+
+// ---- salvar / carregar ----
+function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(salvar,500);contar()}
+function salvar(){try{localStorage.setItem('doc:'+slug,folha.innerHTML);$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
+function contar(){const t=folha.innerText.trim();$('#contador').textContent=(t?t.split(/\s+/).length:0)+' palavras · '+folha.querySelectorAll('mark,span[style*="background"]').length+' marcações'}
+folha.addEventListener('input',marcar);
+folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
+async function original(){const r=await fetch('leitor/docs/'+slug+'.html');if(!r.ok)throw 0;return r.text()}
+$('#restaurar').onclick=async()=>{if(!confirm('Voltar ao texto original e perder suas edições deste capítulo?'))return;
+  folha.innerHTML=await original();localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';contar()};
+$('#baixar').onclick=()=>{const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['<!doctype html><meta charset="utf-8"><body style="font-family:Arial;max-width:800px;margin:auto">'+folha.innerHTML],{type:'text/html'}));
+  a.download=slug+'.html';a.click()};
+
+(async()=>{
+  slug=new URLSearchParams(location.search).get('doc');
+  if(!slug){
+    $('#lista').hidden=false;
+    const lista=await (await fetch('leitor/docs/index.json')).json();
+    $('#docs').innerHTML=lista.map(d=>`<a href="?doc=${d.slug}">${d.titulo}<small>${d.materia}</small></a>`).join('');
+    return;
   }
-  salvar();lista();getSelection().removeAllRanges();tool.style.display='none';
-}
-
-// clicar num grifo abre o editor
-$('#paginas').addEventListener('click',e=>{
-  if(!getSelection().isCollapsed)return;
-  const pg=e.target.closest('.pg');if(!pg)return;
-  const b=pg.getBoundingClientRect(),x=(e.clientX-b.left)/b.width,y=(e.clientY-b.top)/b.height,n=+pg.dataset.n;
-  const g=dados.grifos.find(g=>g.pg===n&&g.r.some(r=>x>=r[0]&&x<=r[0]+r[2]&&y>=r[1]&&y<=r[1]+r[3]));
-  if(g)editor(g,e.clientX,e.clientY);else pop.style.display='none';
-});
-function editor(g,x,y){
-  pop.innerHTML=`<div class="row">${Object.entries(CORES).map(([k,c])=>`<b data-c="${k}" style="background:${c}"></b>`).join('')}<span style="flex:1"></span><button data-del>Apagar</button></div>
-   <textarea placeholder="Nota deste grifo" style="min-height:70px">${(g.nota||'').replace(/</g,'&lt;')}</textarea>`;
-  pop.style.display='block';pop.style.left=Math.min(innerWidth-270,x)+'px';pop.style.top=Math.min(innerHeight-200,y+10)+'px';
-  pop.querySelectorAll('b').forEach(b=>b.onclick=()=>{g.cor=+b.dataset.c;salvar();pintar(g.pg);lista()});
-  pop.querySelector('[data-del]').onclick=()=>{dados.grifos=dados.grifos.filter(h=>h.id!==g.id);salvar();pintar(g.pg);lista();pop.style.display='none'};
-  pop.querySelector('textarea').oninput=e=>{g.nota=e.target.value;salvar();lista()};
-}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')pop.style.display='none'});
-
-// ---------- lateral ----------
-function lista(){
-  $('#filtros').innerHTML=Object.entries(CORES).map(([k,c])=>`<b data-f="${k}" class="${filtro==k?'on':''}" style="background:${c}" title="Filtrar cor"></b>`).join('');
-  $('#filtros').querySelectorAll('b').forEach(b=>b.onclick=()=>{filtro=filtro==b.dataset.f?null:b.dataset.f;lista()});
-  const gs=dados.grifos.filter(g=>!filtro||g.cor==filtro).sort((a,b)=>a.pg-b.pg||a.r[0][1]-b.r[0][1]);
-  $('#lista').innerHTML=gs.length?gs.map(g=>`<div class="item" data-id="${g.id}" style="border-left-color:${CORES[g.cor]}"><small>pág. ${g.pg}</small><div>${(g.t||'(continuação)').slice(0,160).replace(/</g,'&lt;')}</div>${g.nota?`<div class="nota">${g.nota.replace(/</g,'&lt;')}</div>`:''}</div>`).join(''):'<small>Nenhum grifo ainda.</small>';
-  $('#lista').querySelectorAll('.item').forEach(it=>it.onclick=()=>{
-    const g=dados.grifos.find(h=>h.id===it.dataset.id);
-    els.pg[g.pg].scrollIntoView({block:'start',behavior:'smooth'});
-  });
-}
-function prog(){const n=Object.values(dados.lidas).filter(Boolean).length;$('#prog').textContent=n+' de '+pdf.numPages+' páginas lidas'}
-
-// página atual = a mais visível; a nota lateral acompanha
-function notaPg(){
-  $('#pgatual').textContent='(pág. '+pgAtual+')';
-  $('#notapg').value=dados.notas[pgAtual]||'';
-}
-$('#notapg').oninput=e=>{if(!dados)return;dados.notas[pgAtual]=e.target.value;salvar()};
-addEventListener('scroll',()=>{
-  if(!pdf)return;
-  const mid=innerHeight/2;let melhor=pgAtual,d=1e9;
-  for(const n in els.pg){const b=els.pg[n].getBoundingClientRect(),dist=Math.abs((b.top+b.bottom)/2-mid);if(dist<d){d=dist;melhor=+n}}
-  if(melhor!==pgAtual){pgAtual=melhor;notaPg()}
-},{passive:true});
-
-// ---------- exportar / importar ----------
-$('#exp').onclick=()=>{if(!pdf)return;
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({chave,dados},null,1)],{type:'application/json'}));
-  a.download=($('#fname').textContent.replace(/\.pdf$/i,''))+'.grifos.json';a.click()};
-$('#imp').onchange=async e=>{const f=e.target.files[0];if(!f||!pdf)return;
-  try{const j=JSON.parse(await f.text());dados=Object.assign(novo(),j.dados);salvar();montar()}catch(x){alert('Arquivo inválido')}};
+  $('#ed').hidden=false;
+  const salvo=(()=>{try{return localStorage.getItem('doc:'+slug)}catch(e){return null}})();
+  try{folha.innerHTML=salvo||await original()}catch(e){folha.textContent='Capítulo não encontrado.'}
+  $('#titulo').textContent=slug.toUpperCase().replace(/-/g,' ');
+  contar();
+})();
 </script>
 </body>
 </html>
