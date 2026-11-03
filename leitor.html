@@ -146,6 +146,7 @@ body.tool-on #folha{cursor:cell}
 #folha p.tit{text-align:center;font-weight:bold;margin:1.2em 0 .8em}
 #folha.leiseca p{margin-bottom:1.55em}
 #margem .barra{position:absolute;left:62px;width:5px;border-radius:2px;cursor:pointer;pointer-events:auto}
+#margem .barra.tr{cursor:help}
 #margem .barra:hover{box-shadow:0 0 0 2px rgba(48,84,150,.35)}
 .barra.f1{background:#FFD966}.barra.f2{background:#7ED957}.barra.f3{background:#5271FF}.barra.f4{background:#F45B8F}.barra.f5{background:#FF3131}
 @media(max-width:700px){#margem .barra{left:34px}}
@@ -526,7 +527,7 @@ function restaurarPosicao(params){
 }
 
 // ---- incidência: quantas vezes o artigo foi cobrado, lida do compilado de revisão ----
-let INC=null,BARRAS=[],LEISECA=false;
+let INC=null,BARRAS=[],BARRAS_TR=[],LEISECA=false;
 function marcarLeiSeca(){
   const k=[...folha.children];const n=k.filter(e=>/^\s*Art\.?\s*\d/.test(e.textContent)).length;
   LEISECA=n>=8&&n/Math.max(1,k.length)>=0.12;folha.classList.toggle('leiseca',LEISECA)}
@@ -597,6 +598,11 @@ function posicionarMargem(){
     const top=(r.top-pr.top)/z;const chave=Math.round(top/8);
     if(!grupos.has(chave))grupos.set(chave,{top,itens:[]});grupos.get(chave).itens.push(a);
   });
+  BARRAS_TR.forEach(g=>{
+    if(!g.el.isConnected)return;const r=g.el.getBoundingClientRect();
+    const d=document.createElement('div');d.className='barra tr f'+g.n;
+    d.title=`Legenda do TRTeiros: ${g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes')} cobrado em prova\n(o compilado de revisão ainda não tem incidência para este trecho)`;
+    d.style.top=((r.top-pr.top)/z)+'px';d.style.height=Math.max(6,r.height/z)+'px';mg.appendChild(d)});
   BARRAS.forEach(g=>{
     if(!g.n)return;const els=g.els.filter(e=>e.isConnected);if(!els.length)return;
     const a=els[0].getBoundingClientRect(),b=els[els.length-1].getBoundingClientRect();
@@ -619,7 +625,7 @@ function inserirNaPosicao(mapa,pos,el){
   for(const e of mapa){if(pos>=e.ini&&pos<=e.ini+e.node.length){const t=pos-e.ini;
     if(t===0)e.node.parentNode.insertBefore(el,e.node);else if(t===e.node.length)e.node.parentNode.insertBefore(el,e.node.nextSibling);else{const resto=e.node.splitText(t);resto.parentNode.insertBefore(el,resto)}return true}}
   return false}
-function limparIncidencia(){BARRAS=[];folha.querySelectorAll('.inc-anc').forEach(b=>b.remove());folha.normalize();if($('#margem'))$('#margem').innerHTML=''}
+function limparIncidencia(){BARRAS=[];BARRAS_TR=[];folha.querySelectorAll('.inc-anc').forEach(b=>b.remove());folha.normalize();if($('#margem'))$('#margem').innerHTML=''}
 async function atualizarIncidencia(){
   limparIncidencia();
   const info=$('#incInfo');
@@ -665,11 +671,15 @@ async function atualizarIncidencia(){
         atual={els:[el],n:reg?reg.n:0,url:reg?reg.url:'',art:m[1]+(m[2]||''),lei:inc.slugs[leiBase]};BARRAS.push(atual)}
       else if(quebra)atual=null;else if(atual)atual.els.push(el);
     }}
+  // onde o compilado não tem incidência, mostra a legenda do TRTeiros (cores que já vinham no PDF)
+  const cobertos=new Set();BARRAS.filter(b=>b.n).forEach(b=>b.els.forEach(e=>cobertos.add(e)));
+  [...folha.children].forEach(el=>{const t=+(el.dataset&&el.dataset.tr||0);if(t&&!cobertos.has(el))BARRAS_TR.push({el,n:t})});
   const comBarra=BARRAS.filter(b=>b.n).length;
-  info.textContent=(total||comBarra)?`${total} citações${comBarra?` · ${comBarra} artigos marcados`:''}`:(LEISECA&&!leiBase?'lei ainda não está no compilado':'nenhuma citação encontrada');
+  const partes=[];if(total)partes.push(`${total} citações`);if(comBarra)partes.push(`${comBarra} artigos pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);
+  info.textContent=partes.length?partes.join(' · '):(LEISECA&&!leiBase?'lei ainda não está no compilado':'nenhuma citação encontrada');
   posicionarMargem();
 }
-$('#margem').addEventListener('click',e=>{const b=e.target.closest('.inc-badge,.barra');if(b&&b.dataset.url){e.preventDefault();window.open(b.dataset.url,'_blank','noopener')}});
+$('#margem').addEventListener('click',e=>{const b=e.target.closest('.inc-badge,.barra:not(.tr)');if(b&&b.dataset.url){e.preventDefault();window.open(b.dataset.url,'_blank','noopener')}});
 folha.addEventListener('input',agendarMargem);addEventListener('resize',agendarMargem);if(window.ResizeObserver)new ResizeObserver(agendarMargem).observe(folha);
 $('#btnInc').onmousedown=e=>e.preventDefault();
 $('#btnInc').onclick=()=>{const on=LS.get('incOn')===false;LS.set('incOn',on);$('#btnInc').classList.toggle('on',on);atualizarIncidencia()};
