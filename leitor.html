@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leitor de PDF · TRTeiros</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
+<style>
+:root{--bg:#f3f5f2;--card:#fff;--ink:#1d2a24;--mute:#64736b;--line:#dfe5e0;--g:#2f6b4f;--g2:#e6f0ea;
+--c1:#ffe14d;--c2:#9fe08a;--c3:#8ec5ff;--c4:#ffa6c1}
+@media (prefers-color-scheme:dark){:root{--bg:#161b18;--card:#1f2622;--ink:#e8eee9;--mute:#9aa8a0;--line:#2f3a34;--g:#6fc29a;--g2:#26342d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,Segoe UI,sans-serif}
+header{position:sticky;top:0;z-index:20;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 14px;background:var(--card);border-bottom:1px solid var(--line)}
+header h1{font-size:16px;margin:0 10px 0 0}
+button,.btn,select{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:5px 11px;border-radius:8px;cursor:pointer}
+button:hover,.btn:hover{background:var(--g2)}
+button.pri{background:var(--g);color:#fff;border-color:var(--g)}
+#fname{color:var(--mute);max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#prog{color:var(--mute);margin-left:auto}
+main{display:grid;grid-template-columns:1fr 330px;gap:14px;padding:14px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+#vazio{padding:50px 20px;text-align:center;color:var(--mute);background:var(--card);border:2px dashed var(--line);border-radius:14px}
+#paginas{display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0;overflow-x:auto}
+.pg{position:relative;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.18);flex:none}
+.pg canvas{display:block}
+.pg .hl{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply}
+.pg .hl i{position:absolute;border-radius:2px}
+.pg .textLayer{position:absolute;inset:0;--scale-factor:1;opacity:1;line-height:1}
+.pg .textLayer span::selection{background:rgba(47,107,79,.35)}
+.pgbar{display:flex;gap:8px;align-items:center;width:100%;max-width:100%;font-size:13px;color:var(--mute);justify-content:space-between}
+.pgwrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.hlmark{outline:2px solid var(--g)}
+aside{position:sticky;top:60px;max-height:calc(100vh - 76px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+aside h2{font-size:14px;margin:0 0 8px}
+.item{border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-bottom:7px;font-size:13px;cursor:pointer;border-left-width:6px}
+.item small{color:var(--mute)}
+.item .nota{margin-top:4px;color:var(--ink);font-style:italic}
+textarea{width:100%;min-height:90px;font:inherit;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+#tool{position:fixed;display:none;z-index:50;gap:6px;padding:6px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#tool b{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid var(--card);box-shadow:0 0 0 1px var(--line)}
+#pop{position:fixed;display:none;z-index:50;width:250px;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#pop .row{display:flex;gap:6px;margin-bottom:7px;align-items:center}
+#pop b{width:20px;height:20px;border-radius:50%;cursor:pointer;box-shadow:0 0 0 1px var(--line)}
+.filtros{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.filtros b{width:20px;height:20px;border-radius:50%;cursor:pointer;box-shadow:0 0 0 1px var(--line);opacity:.45}
+.filtros b.on{opacity:1;outline:2px solid var(--g)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Leitor de PDF</h1>
+  <label class="btn pri">Abrir PDF<input id="arq" type="file" accept="application/pdf" hidden></label>
+  <span id="fname">nenhum arquivo</span>
+  <select id="zoom"><option value="0.8">80%</option><option value="1" selected>100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option></select>
+  <button id="exp" title="Baixa um arquivo com seus grifos e notas deste PDF">Exportar</button>
+  <label class="btn" title="Carrega grifos e notas exportados antes">Importar<input id="imp" type="file" accept="application/json" hidden></label>
+  <span id="prog"></span>
+</header>
+<main>
+  <div id="paginas"><div id="vazio">Escolha um PDF do seu computador. Nada é enviado: o arquivo é aberto só neste navegador.<br>Selecione um trecho para grifar. Os grifos ficam salvos por arquivo neste navegador.</div></div>
+  <aside id="lado" hidden>
+    <h2>Grifos</h2>
+    <div class="filtros" id="filtros"></div>
+    <div id="lista"></div>
+    <h2 style="margin-top:14px">Nota da página <span id="pgatual"></span></h2>
+    <textarea id="notapg" placeholder="Anotação livre sobre esta página"></textarea>
+  </aside>
+</main>
+<div id="tool"></div>
+<div id="pop"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const CORES={1:'#ffe14d',2:'#9fe08a',3:'#8ec5ff',4:'#ffa6c1'};
+const $=s=>document.querySelector(s);
+let pdf=null,chave=null,dados=null,escala=1,filtro=null,pgAtual=1;
+const els={};
+
+function carregar(k){try{return JSON.parse(localStorage.getItem('leitor:'+k))||null}catch(e){return null}}
+function salvar(){try{localStorage.setItem('leitor:'+chave,JSON.stringify(dados))}catch(e){}}
+function novo(){return{grifos:[],notas:{},lidas:{}}}
+
+// ---------- abrir ----------
+$('#arq').onchange=async e=>{const f=e.target.files[0];if(!f)return;abrir(await f.arrayBuffer(),f.name,f.name+'|'+f.size)};
+(async()=>{const u=new URLSearchParams(location.search).get('url');if(u){try{const b=await (await fetch(u)).arrayBuffer();abrir(b,decodeURIComponent(u.split('/').pop()),u)}catch(e){}}})();
+
+async function abrir(buf,nome,k){
+  pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  chave=k;dados=carregar(k)||novo();
+  $('#fname').textContent=nome;$('#fname').title=nome;
+  $('#vazio')?.remove();$('#lado').hidden=false;
+  montar();
+}
+
+// ---------- páginas ----------
+const obs=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting&&!en.target._ok){en.target._ok=1;desenhar(+en.target.dataset.n)}}),{rootMargin:'600px'});
+async function montar(){
+  const box=$('#paginas');box.innerHTML='';els.pg={};
+  const p1=await pdf.getPage(1),vp=p1.getViewport({scale:escala});
+  for(let n=1;n<=pdf.numPages;n++){
+    const w=document.createElement('div');w.className='pgwrap';
+    w.innerHTML=`<div class="pgbar"><span>Página ${n} de ${pdf.numPages}</span><label><input type="checkbox" data-lida="${n}" ${dados.lidas[n]?'checked':''}> lida</label></div>`;
+    const pg=document.createElement('div');pg.className='pg';pg.dataset.n=n;
+    pg.style.width=vp.width+'px';pg.style.height=vp.height+'px';
+    w.append(pg);box.append(w);els.pg[n]=pg;obs.observe(pg);
+  }
+  box.querySelectorAll('[data-lida]').forEach(c=>c.onchange=()=>{dados.lidas[c.dataset.lida]=c.checked;salvar();prog()});
+  prog();lista();notaPg();
+}
+async function desenhar(n){
+  const page=await pdf.getPage(n),vp=page.getViewport({scale:escala}),pg=els.pg[n];
+  pg.style.width=vp.width+'px';pg.style.height=vp.height+'px';
+  const dpr=window.devicePixelRatio||1,c=document.createElement('canvas');
+  c.width=vp.width*dpr;c.height=vp.height*dpr;c.style.width=vp.width+'px';c.style.height=vp.height+'px';
+  pg.append(c);
+  await page.render({canvasContext:c.getContext('2d'),viewport:vp,transform:dpr!==1?[dpr,0,0,dpr,0,0]:null}).promise;
+  const hl=document.createElement('div');hl.className='hl';pg.append(hl);
+  const tl=document.createElement('div');tl.className='textLayer';pg.append(tl);
+  pdfjsLib.renderTextLayer({textContentSource:await page.getTextContent(),container:tl,viewport:vp,textDivs:[]});
+  tl.style.setProperty('--scale-factor',escala);
+  pintar(n);
+}
+function pintar(n){
+  const pg=els.pg[n],hl=pg&&pg.querySelector('.hl');if(!hl)return;hl.innerHTML='';
+  dados.grifos.filter(g=>g.pg===n).forEach(g=>g.r.forEach(r=>{
+    const i=document.createElement('i');
+    Object.assign(i.style,{left:r[0]*100+'%',top:r[1]*100+'%',width:r[2]*100+'%',height:r[3]*100+'%',background:CORES[g.cor]});
+    hl.append(i);}));
+}
+$('#zoom').onchange=e=>{escala=+e.target.value;if(pdf)montar()};
+
+// ---------- grifar ----------
+const tool=$('#tool'),pop=$('#pop');
+tool.innerHTML=Object.entries(CORES).map(([k,c])=>`<b data-c="${k}" style="background:${c}" title="Grifar"></b>`).join('');
+let pend=null;
+document.addEventListener('selectionchange',()=>{
+  const s=getSelection();
+  if(!pdf||s.isCollapsed||!s.rangeCount||!s.anchorNode||!s.anchorNode.parentElement?.closest('.pg')){tool.style.display='none';pend=null;return}
+  const r=s.getRangeAt(0),rs=r.getBoundingClientRect();
+  pend={range:r,text:s.toString().trim()};
+  tool.style.display='flex';tool.style.left=Math.max(8,Math.min(innerWidth-160,rs.left))+'px';tool.style.top=Math.max(60,rs.top-44)+'px';
+});
+tool.onmousedown=e=>e.preventDefault(); // não perde a seleção
+tool.onclick=e=>{const c=e.target.dataset.c;if(!c||!pend)return;criar(+c);};
+function criar(cor){
+  const porPg={};
+  [...pend.range.getClientRects()].forEach(q=>{
+    if(q.width<2||q.height<2)return;
+    const cx=q.left+q.width/2,cy=q.top+q.height/2;
+    for(const n in els.pg){
+      const b=els.pg[n].getBoundingClientRect();
+      if(cx>=b.left&&cx<=b.right&&cy>=b.top&&cy<=b.bottom){
+        (porPg[n]=porPg[n]||[]).push([(q.left-b.left)/b.width,(q.top-b.top)/b.height,q.width/b.width,q.height/b.height]);break}
+    }});
+  let primeiro=true;
+  for(const n in porPg){
+    dados.grifos.push({id:Date.now()+'-'+n,pg:+n,cor,r:porPg[n],t:primeiro?pend.text:'',nota:'',ts:new Date().toISOString()});
+    primeiro=false;pintar(+n);
+  }
+  salvar();lista();getSelection().removeAllRanges();tool.style.display='none';
+}
+
+// clicar num grifo abre o editor
+$('#paginas').addEventListener('click',e=>{
+  if(!getSelection().isCollapsed)return;
+  const pg=e.target.closest('.pg');if(!pg)return;
+  const b=pg.getBoundingClientRect(),x=(e.clientX-b.left)/b.width,y=(e.clientY-b.top)/b.height,n=+pg.dataset.n;
+  const g=dados.grifos.find(g=>g.pg===n&&g.r.some(r=>x>=r[0]&&x<=r[0]+r[2]&&y>=r[1]&&y<=r[1]+r[3]));
+  if(g)editor(g,e.clientX,e.clientY);else pop.style.display='none';
+});
+function editor(g,x,y){
+  pop.innerHTML=`<div class="row">${Object.entries(CORES).map(([k,c])=>`<b data-c="${k}" style="background:${c}"></b>`).join('')}<span style="flex:1"></span><button data-del>Apagar</button></div>
+   <textarea placeholder="Nota deste grifo" style="min-height:70px">${(g.nota||'').replace(/</g,'&lt;')}</textarea>`;
+  pop.style.display='block';pop.style.left=Math.min(innerWidth-270,x)+'px';pop.style.top=Math.min(innerHeight-200,y+10)+'px';
+  pop.querySelectorAll('b').forEach(b=>b.onclick=()=>{g.cor=+b.dataset.c;salvar();pintar(g.pg);lista()});
+  pop.querySelector('[data-del]').onclick=()=>{dados.grifos=dados.grifos.filter(h=>h.id!==g.id);salvar();pintar(g.pg);lista();pop.style.display='none'};
+  pop.querySelector('textarea').oninput=e=>{g.nota=e.target.value;salvar();lista()};
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')pop.style.display='none'});
+
+// ---------- lateral ----------
+function lista(){
+  $('#filtros').innerHTML=Object.entries(CORES).map(([k,c])=>`<b data-f="${k}" class="${filtro==k?'on':''}" style="background:${c}" title="Filtrar cor"></b>`).join('');
+  $('#filtros').querySelectorAll('b').forEach(b=>b.onclick=()=>{filtro=filtro==b.dataset.f?null:b.dataset.f;lista()});
+  const gs=dados.grifos.filter(g=>!filtro||g.cor==filtro).sort((a,b)=>a.pg-b.pg||a.r[0][1]-b.r[0][1]);
+  $('#lista').innerHTML=gs.length?gs.map(g=>`<div class="item" data-id="${g.id}" style="border-left-color:${CORES[g.cor]}"><small>pág. ${g.pg}</small><div>${(g.t||'(continuação)').slice(0,160).replace(/</g,'&lt;')}</div>${g.nota?`<div class="nota">${g.nota.replace(/</g,'&lt;')}</div>`:''}</div>`).join(''):'<small>Nenhum grifo ainda.</small>';
+  $('#lista').querySelectorAll('.item').forEach(it=>it.onclick=()=>{
+    const g=dados.grifos.find(h=>h.id===it.dataset.id);
+    els.pg[g.pg].scrollIntoView({block:'start',behavior:'smooth'});
+  });
+}
+function prog(){const n=Object.values(dados.lidas).filter(Boolean).length;$('#prog').textContent=n+' de '+pdf.numPages+' páginas lidas'}
+
+// página atual = a mais visível; a nota lateral acompanha
+function notaPg(){
+  $('#pgatual').textContent='(pág. '+pgAtual+')';
+  $('#notapg').value=dados.notas[pgAtual]||'';
+}
+$('#notapg').oninput=e=>{if(!dados)return;dados.notas[pgAtual]=e.target.value;salvar()};
+addEventListener('scroll',()=>{
+  if(!pdf)return;
+  const mid=innerHeight/2;let melhor=pgAtual,d=1e9;
+  for(const n in els.pg){const b=els.pg[n].getBoundingClientRect(),dist=Math.abs((b.top+b.bottom)/2-mid);if(dist<d){d=dist;melhor=+n}}
+  if(melhor!==pgAtual){pgAtual=melhor;notaPg()}
+},{passive:true});
+
+// ---------- exportar / importar ----------
+$('#exp').onclick=()=>{if(!pdf)return;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({chave,dados},null,1)],{type:'application/json'}));
+  a.download=($('#fname').textContent.replace(/\.pdf$/i,''))+'.grifos.json';a.click()};
+$('#imp').onchange=async e=>{const f=e.target.files[0];if(!f||!pdf)return;
+  try{const j=JSON.parse(await f.text());dados=Object.assign(novo(),j.dados);salvar();montar()}catch(x){alert('Arquivo inválido')}};
+</script>
+</body>
+</html>
