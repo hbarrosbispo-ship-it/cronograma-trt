@@ -218,7 +218,7 @@ body.tool-on #folha{cursor:cell}
 
       <div class="grp"><div class="rows">
         <div class="r"><span class="split"><button class="main" id="btnMk" title="Marcador: clique e depois selecione os trechos (Alt+1, Alt+2...)"><span class="ic">🖍</span><i id="barMk" style="background:#fff176"></i></button><button class="arr" data-menu="mMk">▾</button></span>
-          <button id="tBor" title="Borracha (Alt+E): tira o marca-texto">⌫ Borracha</button></div>
+          <button id="tBor" title="Borracha (Alt+E): tira marca-texto, sublinhado e cor da fonte">⌫ Borracha</button></div>
         <div class="r"><span class="dots" id="dots"></span></div>
       </div><div class="gl">Marcador</div></div>
 
@@ -544,14 +544,24 @@ function limparMarca(){
   const s=getSelection();if(!s.rangeCount||s.isCollapsed)return false;
   document.execCommand('styleWithCSS',false,true);
   document.execCommand('hiliteColor',false,'transparent');
+  // sublinhado: se o trecho misto ficou todo sublinhado, desliga de novo para garantir que saia
+  if(document.queryCommandState('underline'))document.execCommand('underline');
+  else{document.execCommand('underline');if(document.queryCommandState('underline'))document.execCommand('underline')}
+  // cor especial da fonte (ex.: vermelho): volta para a cor padrão do texto
+  document.execCommand('foreColor',false,getComputedStyle(folha).color);
   folha.querySelectorAll('mark').forEach(m=>{if(s.containsNode(m,true)){const bg=m.style.backgroundColor;if(!bg||bg==='transparent'||bg==='rgba(0, 0, 0, 0)')unwrap(m)}});
   folha.querySelectorAll('span[style]').forEach(sp=>{if(/background-color:\s*(transparent|rgba\(0, 0, 0, 0\))/.test(sp.getAttribute('style'))){
     sp.style.removeProperty('background-color');if(!sp.getAttribute('style').trim())unwrap(sp)}});
   return true;
 }
 folha.addEventListener('click',e=>{
+  if(!(tool&&tool.k==='er')||getSelection().toString())return;
   const m=e.target.closest('mark,span[style*="background"]');
-  if(tool&&tool.k==='er'&&m&&folha.contains(m)){unwrap(m);marcar()}
+  if(m&&folha.contains(m)){unwrap(m);marcar();return}
+  const u=e.target.closest('u,span[style*="underline"]');
+  if(u&&folha.contains(u)){if(u.tagName==='U')unwrap(u);else{u.style.removeProperty('text-decoration');u.style.removeProperty('text-decoration-line');if(!u.getAttribute('style').trim())unwrap(u)}marcar();return}
+  const c=e.target.closest('font[color],span[style*="color"]');
+  if(c&&folha.contains(c)){if(c.tagName==='FONT')unwrap(c);else{c.style.removeProperty('color');if(!c.getAttribute('style').trim())unwrap(c)}marcar()}
 });
 
 // ---- quadro / tabela ----
