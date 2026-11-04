@@ -151,6 +151,22 @@ body.tool-on #folha{cursor:cell}
 .barra.f1{background:#FFD966}.barra.f2{background:#7ED957}.barra.f3{background:#5271FF}.barra.f4{background:#F45B8F}.barra.f5{background:#FF3131}
 @media(max-width:700px){#margem .barra{left:34px}}
 @media(max-width:1100px){.grp .gl{display:none}.grp{padding:0 5px}.rib button,.rib select{min-width:26px;padding:0 4px}.rib input[type=range]{width:80px}}
+.upd{background:#e8f4ff;border-bottom:2px solid #1a73e8;cursor:help}
+.upd::after{content:'\21bb';font-size:.7em;vertical-align:super;margin-left:1px;color:#1a73e8;font-weight:bold}
+.upd.rem{background:#fde8e8;border-bottom-color:#c0392b;font-style:italic;color:#8a1f11}
+.upd.rem::after{color:#c0392b}
+#updbar{max-width:1100px;margin:8px auto 0;padding:0 12px}
+#updbar details{background:#fff8e1;border:1.5px solid #e0a800;border-radius:8px;padding:8px 12px;font-size:13.5px}
+#updbar summary{cursor:pointer;font-weight:bold;color:#7a4b00}
+#updbar .nv{background:#d93025;color:#fff;border-radius:10px;padding:1px 8px;font-size:11.5px;margin-left:6px}
+#updbar ul{margin:8px 0 6px 18px;padding:0}
+#updbar li{margin:5px 0;line-height:1.45}
+#updbar .st{display:inline-block;border-radius:9px;padding:0 7px;font-size:11.5px;font-weight:bold;margin-left:4px}
+#updbar .ok{background:#e3f4e1;color:#1e6b2a}
+#updbar .no{background:#fde8e8;color:#8a1f11}
+#updbar button{margin-left:10px;font-size:12px;padding:3px 10px;cursor:pointer}
+.linha .tag.atu{background:#fff3cd;color:#7a4b00}
+.linha .tag.atu.novo{background:#d93025;color:#fff}
 </style>
 </head>
 <body>
@@ -229,6 +245,7 @@ body.tool-on #folha{cursor:cell}
       </div><div class="gl">Capítulo</div></div>
     </div>
   </div>
+  <div id="updbar" hidden></div>
   <div id="corpo">
     <nav id="sumario"><h4>Sumário</h4><div id="sumLista"></div></nav>
     <div id="papel"><div id="margem"></div><div id="folha" contenteditable="true" spellcheck="false"></div></div>
@@ -266,10 +283,26 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const ICONE={'Direito do Trabalho':'⚖️','Direito Processual do Trabalho':'👷','Direito Constitucional':'📜','Direito Administrativo':'🏛️','Direito Civil':'🏠','Direito Processual Civil':'🗂️','Direito Coletivo do Trabalho':'🤝','Estudo de Caso':'📝','Extras do curso':'⭐','Informática':'💻','Jurisprudência':'🔨','Português':'📖','RLM':'🧮'};
 const ORDEM=['Direito do Trabalho','Direito Processual do Trabalho','Direito Constitucional','Direito Administrativo','Direito Civil','Direito Processual Civil','Direito Coletivo do Trabalho'];
 
+let ATU={};
+async function carregarAtu(){try{ATU=await (await fetch('leitor/docs/atualizacoes.json')).json()}catch(e){ATU={}}}
+const dtbr=d=>d.split('-').reverse().join('/');
+const ultAtu=sl=>(ATU[sl]||[]).reduce((m,x)=>x.d>m?x.d:m,'');
+const atuNovo=sl=>{const u=ultAtu(sl);return !!u&&u>(LS.get('upvis:'+sl)||'')};
+function mostrarAtu(){
+  const lst=ATU[slug],bar=$('#updbar');
+  if(!lst||!lst.length){bar.hidden=true;return}
+  const u=ultAtu(slug),novo=atuNovo(slug);
+  const itens=lst.slice().sort((a,b)=>a.d<b.d?1:-1).map(x=>`<li><b>${dtbr(x.d)}</b> · pág. ${esc(x.pg)} · ${esc(x.t)} <span class="st ${x.ap?'ok':'no'}">${x.ap?'já no seu texto (marcado com ↻)':'ainda não está no seu texto'}</span></li>`).join('');
+  const pend=lst.some(x=>!x.ap);
+  bar.innerHTML=`<details${novo?' open':''}><summary>↻ Capítulo atualizado pelo TRTeiros · ${lst.length} alteração(ões), a última em ${dtbr(u)}${novo?'<span class="nv">novo</span>':''}<button id="btnVisto">Marcar como visto</button></summary><ul>${itens}</ul>${pend?'<div style="font-size:12.5px;color:#555">Os itens vermelhos mudaram no material original, mas o PDF novo ainda não foi colocado na Biblioteca. O texto abaixo é o da versão antiga.</div>':''}</details>`;
+  bar.hidden=false;
+  $('#btnVisto').onclick=e=>{e.preventDefault();LS.set('upvis:'+slug,u);mostrarAtu();bar.querySelector('details').open=false};
+}
 // =================== BIBLIOTECA ===================
 async function biblioteca(){
   $('#lista').hidden=false;document.title='Biblioteca · TRTeiros';
   const docs=await (await fetch('leitor/docs/index.json')).json();
+  await carregarAtu();
   const mats={};docs.forEach(d=>(mats[d.materia]=mats[d.materia]||[]).push(d));
   const nomes=Object.keys(mats).sort((a,b)=>{const i=ORDEM.indexOf(a),j=ORDEM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||a.localeCompare(b)});
   let aba=LS.get('bibAba')||'cap';
@@ -285,7 +318,7 @@ async function biblioteca(){
         Object.keys(grupos).sort().forEach(g=>{
           if(g)h+=`<div class="grupo">${esc(g)}</div>`;
           grupos[g].forEach(d=>{const andando=!!LS.get('pos:'+d.slug);
-            h+=`<div class="linha"><a class="cap" href="?doc=${d.slug}"><span class="t">${esc(d.titulo)}</span>${andando?'<span class="tag">em andamento</span>':''}<span class="meta">${d.paginas} pág.</span></a>${andando?`<a class="ini" href="?doc=${d.slug}&inicio=1" title="Abrir do início">↺ início</a>`:''}</div>`});
+            h+=`<div class="linha"><a class="cap" href="?doc=${d.slug}"><span class="t">${esc(d.titulo)}</span>${andando?'<span class="tag">em andamento</span>':''}${ATU[d.slug]?`<span class="tag atu${atuNovo(d.slug)?' novo':''}" title="Atualizado pelo TRTeiros em ${dtbr(ultAtu(d.slug))}">${atuNovo(d.slug)?'atualizado · novo':'atualizado'}</span>`:''}<span class="meta">${d.paginas} pág.</span></a>${andando?`<a class="ini" href="?doc=${d.slug}&inicio=1" title="Abrir do início">↺ início</a>`:''}</div>`});
         });
         h+='</details>';
       }else{
@@ -754,12 +787,13 @@ async function editor(){
   const params=new URLSearchParams(location.search);
   $('#ed').hidden=false;
   const docs=await (await fetch('leitor/docs/index.json')).json();
+  await carregarAtu();
   meta=docs.find(d=>d.slug===slug)||{titulo:slug,paginas:1};
   document.title=meta.titulo+' · TRTeiros';
   $('#titulo').textContent=meta.titulo;$('#titulo').title=meta.titulo;$('#pgTotal').textContent=meta.paginas;
   const salvo=LS.raw('doc:'+slug);
   try{folha.innerHTML=salvo||await original()}catch(e){folha.textContent='Capítulo não encontrado.'}
-  montarSumario();marcarLeiSeca();
+  montarSumario();marcarLeiSeca();mostrarAtu();
   atualizarIncidencia();prepararBotoes();
   const z=LS.get('zoom');if(z)setZoom(z);
   faixa(LS.get('ribOn')!==false);$('#btnInc').classList.toggle('on',LS.get('incOn')!==false);
