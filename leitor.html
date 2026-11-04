@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Biblioteca · TRTeiros</title>
+<title>Biblioteca · Cronograma TRT</title>
 <style>
 :root{--bg:#F5F7FA;--card:#fff;--ink:#222;--mute:#666;--line:#D9D9D9;--g:#305496;--gd:#1F4E78;--g2:#eef1f7;--ok:#2E7D32;--purple:#6C63FF;--fh:150px}
 *{box-sizing:border-box}
@@ -303,11 +303,17 @@ function mostrarAtu(){
   const u=ultAtu(slug),novo=atuNovo(slug),d=DIFF[slug];
   const itens=lst.slice().sort((a,b)=>a.d<b.d?1:-1).map(x=>`<li><b>${dtbr(x.d)}</b> · pág. ${esc(x.pg)} · ${esc(x.t)}</li>`).join('');
   const marcados=folha.querySelectorAll('[data-u]').length;
+  // já marcado como visto e sem trechos marcados: o aviso some de vez
+  if(!novo&&!marcados){bar.hidden=true;return}
   const resumo=d?`<div style="margin:6px 0">Comparei o PDF novo com a sua versão: <b>${d.n}</b> trecho(s) novo(s) e <b>${d.c}</b> alterado(s)${d.r?`, <b>${d.r}</b> removido(s) do material`:''}. Seus grifos nos trechos que continuam iguais foram mantidos.</div>`:'';
   const leg=marcados?`<div style="margin:6px 0"><span style="border-left:5px solid #1a73e8;background:rgba(26,115,232,.09);padding:1px 8px">azul = trecho novo</span> <span style="border-left:5px solid #f29900;background:rgba(242,153,0,.12);padding:1px 8px;margin-left:8px">laranja = trecho alterado (passe o mouse para ver o texto antigo)</span> <button id="btnProx">Ir para o próximo ↓</button> <button id="btnLimpaU">Limpar as marcas</button></div>`:'';
   bar.innerHTML=`<details${novo||marcados?' open':''}><summary>↻ Capítulo atualizado pelo TRTeiros · ${lst.length} alteração(ões), a última em ${dtbr(u)}${novo?'<span class="nv">novo</span>':''}<button id="btnVisto">Marcar como visto</button></summary>${resumo}${leg}<ul>${itens}</ul></details>`;
   bar.hidden=false;
-  $('#btnVisto').onclick=e=>{e.preventDefault();LS.set('upvis:'+slug,u);mostrarAtu();bar.querySelector('details').open=false};
+  $('#btnVisto').onclick=e=>{e.preventDefault();LS.set('upvis:'+slug,u);
+    // "visto" também limpa as marcas azul/laranja dos trechos e esconde o aviso
+    folha.querySelectorAll('[data-u]').forEach(x=>{x.removeAttribute('data-u');x.removeAttribute('data-old');x.removeAttribute('title')});
+    if(typeof marcar==='function')marcar();
+    mostrarAtu()};
   const pb=$('#btnProx');if(pb)pb.onclick=()=>{const l=[...folha.querySelectorAll('[data-u]')];const y=scrollY+120;const n=l.find(e=>e.getBoundingClientRect().top+scrollY>y)||l[0];n.scrollIntoView({behavior:'smooth',block:'center'})};
   const lb=$('#btnLimpaU');if(lb)lb.onclick=()=>{folha.querySelectorAll('[data-u]').forEach(e=>{e.removeAttribute('data-u');e.removeAttribute('data-old');e.removeAttribute('title')});marcar();mostrarAtu()};
 }
@@ -336,7 +342,7 @@ function fundirAtualizacao(salvoHtml,novoHtml,rm){
 }
 // =================== BIBLIOTECA ===================
 async function biblioteca(){
-  $('#lista').hidden=false;document.title='Biblioteca · TRTeiros';
+  $('#lista').hidden=false;document.title='Biblioteca · Cronograma TRT';
   const docs=await (await fetch('leitor/docs/index.json')).json();
   await carregarAtu();
   const mats={};docs.forEach(d=>(mats[d.materia]=mats[d.materia]||[]).push(d));
@@ -839,7 +845,7 @@ async function prepararBotoes(){
 // ---- baixar em PDF (imprimir e salvar como PDF) ----
 let _zAntes=1;
 addEventListener('beforeprint',()=>{_zAntes=zoom;$('#papel').style.zoom=1;if(meta)document.title=meta.titulo});
-addEventListener('afterprint',()=>{$('#papel').style.zoom=_zAntes;if(meta)document.title=meta.titulo+' · TRTeiros'});
+addEventListener('afterprint',()=>{$('#papel').style.zoom=_zAntes;if(meta)document.title=meta.titulo+' · Cronograma TRT'});
 $('#mMais').querySelector('[data-a=pdf]').onclick=()=>{fechaMenus();setTimeout(()=>window.print(),50)};
 
 async function editor(){
@@ -848,7 +854,7 @@ async function editor(){
   const docs=await (await fetch('leitor/docs/index.json')).json();
   await carregarAtu();
   meta=docs.find(d=>d.slug===slug)||{titulo:slug,paginas:1};
-  document.title=meta.titulo+' · TRTeiros';
+  document.title=meta.titulo+' · Cronograma TRT';
   $('#titulo').textContent=meta.titulo;$('#titulo').title=meta.titulo;$('#pgTotal').textContent=meta.paginas;
   await carregarDiff();
   const salvo=LS.raw('doc:'+slug);
