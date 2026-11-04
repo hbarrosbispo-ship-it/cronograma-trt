@@ -148,7 +148,7 @@ body.tool-on #folha{cursor:cell}
 #margem .barra{position:absolute;left:62px;width:5px;border-radius:2px;cursor:pointer;pointer-events:auto}
 #margem .barra.tr{cursor:help}
 #margem .barra:hover{box-shadow:0 0 0 2px rgba(48,84,150,.35)}
-#margem .barra.tr.man{left:54px;width:6px}
+#margem .barra.tr.man{cursor:context-menu}
 .barra.f1{background:#FFD966}.barra.f2{background:#7ED957}.barra.f3{background:#5271FF}.barra.f4{background:#F45B8F}.barra.f5{background:#FF3131}
 @media(max-width:700px){#margem .barra{left:34px}}
 @media(max-width:1100px){.grp .gl{display:none}.grp{padding:0 5px}.rib button,.rib select{min-width:26px;padding:0 4px}.rib input[type=range]{width:80px}}
@@ -486,9 +486,9 @@ folha.addEventListener('contextmenu',e=>{e.preventDefault();ctxBloco=blocoDe(e.t
 // ---- linha de incidência do TRTeiros posta à mão (ao lado esquerdo do artigo) ----
 let ctxBloco=null;
 const blocoDe=n=>{while(n&&n.parentNode!==folha)n=n.parentNode;return n&&n.parentNode===folha?n:null};
-function alvosTR(base){
+function alvosTR(base,ignSel){
   const sel=getSelection();let a=base,b=base;
-  if(sel.rangeCount&&!sel.isCollapsed&&folha.contains(sel.anchorNode)){a=blocoDe(sel.anchorNode)||a;b=blocoDe(sel.focusNode)||b;
+  if(!ignSel&&sel.rangeCount&&!sel.isCollapsed&&folha.contains(sel.anchorNode)){a=blocoDe(sel.anchorNode)||a;b=blocoDe(sel.focusNode)||b;
     const kids=[...folha.children],ia=kids.indexOf(a),ib=kids.indexOf(b);return kids.slice(Math.min(ia,ib),Math.max(ia,ib)+1)}
   if(!a)return[];
   const quebra=el=>/^H[1-6]$/.test(el.tagName)||el.classList&&(el.classList.contains('band')||el.classList.contains('tit'));
@@ -497,8 +497,8 @@ function alvosTR(base){
   if(isArt(a)){let n=a.nextElementSibling;while(n&&!isArt(n)&&!quebra(n)){r.push(n);n=n.nextElementSibling}}
   return r;
 }
-function aplicarTR(n,base){
-  const els=alvosTR(base);if(!els.length)return;
+function aplicarTR(n,base,ignSel){
+  const els=alvosTR(base,ignSel);if(!els.length)return;
   els.forEach(el=>{if(n){el.dataset.tr=n;el.dataset.trm='1'}else{delete el.dataset.tr;delete el.dataset.trm}});
   marcar();atualizarIncidencia();
 }
@@ -506,6 +506,14 @@ $('#mTR').querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{const sel=getS
 $('#mCtx').insertAdjacentHTML('beforeend','<hr>'+$('#mTR').innerHTML.replace(/data-tr=/g,'data-trc='));
 $('#mCtx').querySelectorAll('[data-trc]').forEach(b=>b.onclick=()=>{aplicarTR(+b.dataset.trc,ctxBloco);ctxBloco=null;fechaMenus()});
 
+
+// clique direito na linha colorida posta à mão: mudar a cor ou remover
+$('#mCtx').insertAdjacentHTML('afterend','<div class="menu" id="mBarra">'+$('#mTR').innerHTML.replace(/data-tr=/g,'data-trb=').replace('Remover a linha','Remover esta linha')+'</div>');
+let barraAlvo=null;
+$('#mBarra').onmousedown=e=>e.preventDefault();
+$('#mBarra').querySelectorAll('[data-trb]').forEach(b=>b.onclick=()=>{if(barraAlvo&&barraAlvo.isConnected)aplicarTR(+b.dataset.trb,barraAlvo,true);barraAlvo=null;fechaMenus()});
+$('#margem').addEventListener('contextmenu',e=>{const b=e.target.closest('.barra.tr.man');if(!b||!b._el)return;
+  e.preventDefault();barraAlvo=b._el;menuEm('mBarra',e.clientX,e.clientY)});
 
 // ---- botões simples ----
 document.querySelectorAll('[data-cmd]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{exec(b.dataset.cmd);fechaMenus()}});
@@ -700,7 +708,7 @@ function posicionarMargem(){
     if(!g.el.isConnected)return;const r=g.el.getBoundingClientRect();
     const d=document.createElement('div');d.className='barra tr f'+g.n+(g.man?' man':'');
     d.title=g.man?'Linha de incidência do TRTeiros posta por você ('+(g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes'))+')':`Legenda do TRTeiros: ${g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes')} cobrado em prova\n(o compilado de revisão ainda não tem incidência para este trecho)`;
-    d.style.top=((r.top-pr.top)/z)+'px';d.style.height=Math.max(6,r.height/z)+'px';mg.appendChild(d)});
+    d._el=g.el;d.style.top=((r.top-pr.top)/z)+'px';d.style.height=Math.max(6,r.height/z)+'px';mg.appendChild(d)});
   BARRAS.forEach(g=>{
     if(!g.n)return;const els=g.els.filter(e=>e.isConnected);if(!els.length)return;
     const a=els[0].getBoundingClientRect(),b=els[els.length-1].getBoundingClientRect();
