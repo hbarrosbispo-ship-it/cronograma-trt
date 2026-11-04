@@ -387,7 +387,7 @@ const ATALHO={
 const TX=[['#000000','Preto'],['#d90000','Vermelho (do material)'],['#002161','Azul-marinho (do material)'],['#1b7f3b','Verde'],['#1a5fd0','Azul'],['#8e24aa','Roxo'],['#e65100','Laranja']];
 const folha=$('#folha');let slug=null,meta=null,timer=null,tool=null,corMk='#fff176',corTx=TX[1][0],zoom=1;
 
-function exec(c,v){try{folha.focus({preventScroll:true});document.execCommand('styleWithCSS',false,true);document.execCommand(c,false,v)}catch(e){}marcar()}
+function exec(c,v){if(c==='undo'&&TR_UNDO.length&&trRecente&&trDesfazer())return;if(c==='redo'&&TR_REDO.length&&trRefazer()){trRecente=true;return}try{folha.focus({preventScroll:true});document.execCommand('styleWithCSS',false,true);document.execCommand(c,false,v)}catch(e){}marcar()}
 function unwrap(el){const p=el.parentNode;while(el.firstChild)p.insertBefore(el.firstChild,el);p.removeChild(el)}
 const mesmo=(a,b)=>a&&b&&a.k===b.k&&a.c===b.c;
 
@@ -497,11 +497,28 @@ function alvosTR(base,ignSel){
   if(isArt(a)){let n=a.nextElementSibling;while(n&&!isArt(n)&&!quebra(n)){r.push(n);n=n.nextElementSibling}}
   return r;
 }
-function aplicarTR(n,base,ignSel){
-  const els=alvosTR(base,ignSel);if(!els.length)return;
-  els.forEach(el=>{if(n){el.dataset.tr=n;el.dataset.trm='1'}else{delete el.dataset.tr;delete el.dataset.trm}});
+const TR_UNDO=[],TR_REDO=[];
+const trEstado=el=>({el,tr:el.dataset.tr,trm:el.dataset.trm});
+function trRestaura(l){l.forEach(x=>{if(x.tr===undefined)delete x.el.dataset.tr;else x.el.dataset.tr=x.tr;if(x.trm===undefined)delete x.el.dataset.trm;else x.el.dataset.trm=x.trm})}
+function aplicarTR(n,base,ignSel,lista){
+  const els=lista||alvosTR(base,ignSel);if(!els.length)return;
+  const antes=els.map(trEstado);
+  // n=0 remove: marca como "removida" (tr=0), assim também esconde a linha natural/do PDF
+  els.forEach(el=>{el.dataset.tr=n;el.dataset.trm='1'});
+  TR_UNDO.push({antes,depois:els.map(trEstado)});TR_REDO.length=0;trRecente=true;
   marcar();atualizarIncidencia();
 }
+function trDesfazer(){const a=TR_UNDO.pop();if(!a)return false;trRestaura(a.antes);TR_REDO.push(a);marcar();atualizarIncidencia();return true}
+function trRefazer(){const a=TR_REDO.pop();if(!a)return false;trRestaura(a.depois);TR_UNDO.push(a);marcar();atualizarIncidencia();return true}
+let trRecente=false;
+folha.addEventListener('input',()=>{trRecente=false;TR_REDO.length=0});
+document.addEventListener('keydown',e=>{
+  if(!(e.ctrlKey||e.metaKey)||e.altKey)return;
+  const tag=(e.target.tagName||'').toLowerCase();if(['input','textarea','select'].includes(tag))return;
+  const k=(e.key||'').toLowerCase();
+  if(k==='z'&&!e.shiftKey){if(TR_UNDO.length&&trRecente&&trDesfazer())e.preventDefault()}
+  else if(k==='y'||(k==='z'&&e.shiftKey)){if(TR_REDO.length&&trRefazer()){e.preventDefault();trRecente=true}}
+},true);
 $('#mTR').querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{const sel=getSelection();aplicarTR(+b.dataset.tr,ctxBloco||(sel.anchorNode&&blocoDe(sel.anchorNode)));ctxBloco=null;fechaMenus()});
 $('#mCtx').insertAdjacentHTML('beforeend','<hr>'+$('#mTR').innerHTML.replace(/data-tr=/g,'data-trc='));
 $('#mCtx').querySelectorAll('[data-trc]').forEach(b=>b.onclick=()=>{aplicarTR(+b.dataset.trc,ctxBloco);ctxBloco=null;fechaMenus()});
@@ -511,9 +528,9 @@ $('#mCtx').querySelectorAll('[data-trc]').forEach(b=>b.onclick=()=>{aplicarTR(+b
 $('#mCtx').insertAdjacentHTML('afterend','<div class="menu" id="mBarra">'+$('#mTR').innerHTML.replace(/data-tr=/g,'data-trb=').replace('Remover a linha','Remover esta linha')+'</div>');
 let barraAlvo=null;
 $('#mBarra').onmousedown=e=>e.preventDefault();
-$('#mBarra').querySelectorAll('[data-trb]').forEach(b=>b.onclick=()=>{if(barraAlvo&&barraAlvo.isConnected)aplicarTR(+b.dataset.trb,barraAlvo,true);barraAlvo=null;fechaMenus()});
-$('#margem').addEventListener('contextmenu',e=>{const b=e.target.closest('.barra.tr.man');if(!b||!b._el)return;
-  e.preventDefault();barraAlvo=b._el;menuEm('mBarra',e.clientX,e.clientY)});
+$('#mBarra').querySelectorAll('[data-trb]').forEach(b=>b.onclick=()=>{if(barraAlvo)aplicarTR(+b.dataset.trb,null,true,barraAlvo.filter(x=>x.isConnected));barraAlvo=null;fechaMenus()});
+$('#margem').addEventListener('contextmenu',e=>{const b=e.target.closest('.barra');if(!b||!b._els)return;
+  e.preventDefault();barraAlvo=b._els;menuEm('mBarra',e.clientX,e.clientY)});
 
 // ---- botões simples ----
 document.querySelectorAll('[data-cmd]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{exec(b.dataset.cmd);fechaMenus()}});
@@ -708,11 +725,11 @@ function posicionarMargem(){
     if(!g.el.isConnected)return;const r=g.el.getBoundingClientRect();
     const d=document.createElement('div');d.className='barra tr f'+g.n+(g.man?' man':'');
     d.title=g.man?'Linha de incidência do TRTeiros posta por você ('+(g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes'))+')':`Legenda do TRTeiros: ${g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes')} cobrado em prova\n(o compilado de revisão ainda não tem incidência para este trecho)`;
-    d._el=g.el;d.style.top=((r.top-pr.top)/z)+'px';d.style.height=Math.max(6,r.height/z)+'px';mg.appendChild(d)});
+    d._els=(g.man||g.el.classList.contains('trs'))?(g.el.classList.contains('trs')?[g.el]:alvosTR(g.el,true)):[g.el];d.style.top=((r.top-pr.top)/z)+'px';d.style.height=Math.max(6,r.height/z)+'px';mg.appendChild(d)});
   BARRAS.forEach(g=>{
-    if(!g.n)return;const els=g.els.filter(e=>e.isConnected);if(!els.length)return;
+    if(!g.n)return;const els=g.els.filter(e=>e.isConnected);if(!els.length)return;if(els.some(e=>e.dataset&&e.dataset.trm))return;
     const a=els[0].getBoundingClientRect(),b=els[els.length-1].getBoundingClientRect();
-    const d=document.createElement('div');d.className='barra f'+FAIXA(g.n);d.dataset.url=g.url;
+    const d=document.createElement('div');d.className='barra f'+FAIXA(g.n);d.dataset.url=g.url;d._els=els;
     d.title=`Art. ${g.art} · ${g.lei}\nCobrado ${g.n}× nos filtros já resolvidos (clique para abrir no compilado)`;
     d.style.top=((a.top-pr.top)/z)+'px';d.style.height=Math.max(6,(b.bottom-a.top)/z)+'px';mg.appendChild(d)});
   grupos.forEach(g=>{
@@ -782,7 +799,7 @@ async function atualizarIncidencia(){
   // onde o compilado não tem incidência, mostra a legenda do TRTeiros (cores que já vinham no PDF)
   const cobertos=new Set();BARRAS.filter(b=>b.n).forEach(b=>b.els.forEach(e=>cobertos.add(e)));
   [...folha.children].forEach(el=>{const man=!!(el.dataset&&el.dataset.trm);if(cobertos.has(el)&&!man)return;const t=+(el.dataset&&el.dataset.tr||0);if(t)BARRAS_TR.push({el,n:t,man});
-    el.querySelectorAll('.trs[data-tr]').forEach(sp=>BARRAS_TR.push({el:sp,n:+sp.dataset.tr}))});
+    el.querySelectorAll('.trs[data-tr]').forEach(sp=>{const q=+sp.dataset.tr;if(q)BARRAS_TR.push({el:sp,n:q,man:!!sp.dataset.trm})})});
   const comBarra=BARRAS.filter(b=>b.n).length;
   const partes=[];if(total)partes.push(`${total} citações`);if(comBarra)partes.push(`${comBarra} artigos pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);
   info.textContent=partes.length?partes.join(' · '):(LEISECA&&!leiBase?'lei ainda não está no compilado':'nenhuma citação encontrada');
