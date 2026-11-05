@@ -218,7 +218,7 @@ body.tool-on #folha{cursor:cell}
 
       <div class="grp"><div class="rows">
         <div class="r"><span class="split"><button class="main" id="btnMk" title="Marcador: clique e depois selecione os trechos (Alt+1, Alt+2...)"><span class="ic">🖍</span><i id="barMk" style="background:#fff176"></i></button><button class="arr" data-menu="mMk">▾</button></span>
-          <button id="tBor" title="Borracha (Alt+E): tira marca-texto, sublinhado e cor da fonte">⌫ Borracha</button></div>
+          <button id="tBor" title="Borracha (Alt+E): tira marca-texto, negrito, sublinhado e cor da fonte">⌫ Borracha</button></div>
         <div class="r"><span class="dots" id="dots"></span></div>
       </div><div class="gl">Marcador</div></div>
 
@@ -547,6 +547,15 @@ function limparMarca(){
   // sublinhado: se o trecho misto ficou todo sublinhado, desliga de novo para garantir que saia
   if(document.queryCommandState('underline'))document.execCommand('underline');
   else{document.execCommand('underline');if(document.queryCommandState('underline'))document.execCommand('underline')}
+  // negrito: mesma lógica do sublinhado (se o trecho misto ficou todo em negrito, desliga de novo)
+  // só age se houver negrito aplicado no trecho (títulos h2/h3 são negrito de estilo e ficam como estão)
+  const rg=s.getRangeAt(0);
+  if([...folha.querySelectorAll('b,strong,span[style*="font-weight"]')].some(n=>rg.intersectsNode(n))){
+    if(document.queryCommandState('bold'))document.execCommand('bold');
+    else{document.execCommand('bold');if(document.queryCommandState('bold'))document.execCommand('bold')}
+    folha.querySelectorAll('h1 span[style*="font-weight"],h2 span[style*="font-weight"],h3 span[style*="font-weight"],h4 span[style*="font-weight"]').forEach(sp=>{
+      sp.style.removeProperty('font-weight');if(!sp.getAttribute('style').trim())unwrap(sp)});
+  }
   // cor especial da fonte (ex.: vermelho): volta para a cor padrão do texto
   document.execCommand('foreColor',false,getComputedStyle(folha).color);
   folha.querySelectorAll('mark').forEach(m=>{if(s.containsNode(m,true)){const bg=m.style.backgroundColor;if(!bg||bg==='transparent'||bg==='rgba(0, 0, 0, 0)')unwrap(m)}});
@@ -560,6 +569,8 @@ folha.addEventListener('click',e=>{
   if(m&&folha.contains(m)){unwrap(m);marcar();return}
   const u=e.target.closest('u,span[style*="underline"]');
   if(u&&folha.contains(u)){if(u.tagName==='U')unwrap(u);else{u.style.removeProperty('text-decoration');u.style.removeProperty('text-decoration-line');if(!u.getAttribute('style').trim())unwrap(u)}marcar();return}
+  const n=e.target.closest('b,strong,span[style*="font-weight"]');
+  if(n&&folha.contains(n)){if(n.tagName==='B'||n.tagName==='STRONG')unwrap(n);else{n.style.removeProperty('font-weight');if(!n.getAttribute('style').trim())unwrap(n)}marcar();return}
   const c=e.target.closest('font[color],span[style*="color"]');
   if(c&&folha.contains(c)){if(c.tagName==='FONT')unwrap(c);else{c.style.removeProperty('color');if(!c.getAttribute('style').trim())unwrap(c)}marcar()}
 });
