@@ -359,7 +359,7 @@
 .stopwatch{top:92px!important}
 body > .wrap > .tab-bar{display:none}
 </style>
-<nav class="sitenav"><span class="logo">Cronograma TRT</span><a id="sn-cronograma" data-tab="cronograma" class="on" href="index.html#cronograma">Cronograma</a><a href="leitor.html">Biblioteca</a><a id="sn-desempenho" data-tab="desempenho" href="index.html#desempenho">Desempenho e Estatísticas</a><a id="sn-edital" data-tab="edital" href="index.html#edital">Edital</a><a href="compilado/index.html">Compilado de Revisão</a></nav>
+<nav class="sitenav"><span class="logo">Cronograma TRT</span><a id="sn-cronograma" data-tab="cronograma" class="on" href="index.html#cronograma">Cronograma</a><a href="leitor.html">Biblioteca</a><a id="sn-desempenho" data-tab="desempenho" href="index.html#desempenho">Desempenho e Estatísticas</a><a id="sn-edital" data-tab="edital" href="index.html#edital">Edital</a><a href="compilado/index.html">Compilado de Revisão</a><a href="questoes/index.html">Questões offline</a></nav>
 
 
 <div id="bootOverlay" style="position:fixed;inset:0;background:#F5F7FA;z-index:999;display:flex;align-items:center;justify-content:center;font-family:Arial,Helvetica,sans-serif;color:#305496;font-size:15px;">Carregando cronograma…</div>
@@ -2154,6 +2154,7 @@ function acertosTotalStr(t){
 }
 function flashcardsQtd(t){ return lsGet('flashqtd_'+t.id, ''); }
 
+const QOFF_IDS = ['15251313','15251320','15508590','15262244','15251572','15262247','15251584','15262245','15262242','15262236','15262243','15251527','15251283','15262241','15262216','15406585','15251285','15496270','15262246','15406434','15496289','15496291','15406592','15406435','15407249','15406589','15496292','15406568','15496276'];
 function rowHtml(t, firstCol, draggableRow){
   const status = lsGet('status_'+t.id, 'Pendente');
   const isQ = t.type==='Questões';
@@ -2162,11 +2163,13 @@ function rowHtml(t, firstCol, draggableRow){
   const typeClass = t.type==='Leitura' ? 'leitura' : (t.type==='Questões' ? 'questoes' : (t.type==='Estudo de Caso' ? 'estudocaso' : 'flashcards'));
   const rowClass = (timerTaskId===t.id) ? 'timing' : '';
   const linkHtml = t.link ? ` <a href="${t.link}" target="_blank" rel="noopener" class="qc-link" title="Abrir filtro no QConcursos">QConcursos ↗</a>` : '';
+  const offM = t.link ? t.link.match(/^[^&]*notebook_ids%5B%5D=(\d+)$/) : null;
+  const offHtml = (offM && QOFF_IDS.indexOf(offM[1]) >= 0) ? ` <a href="questoes/index.html#nb${offM[1]}" target="_blank" rel="noopener" class="qc-link" title="Abrir este caderno nas Questões offline (com gabarito e 5 comentários)">Offline ↗</a>` : '';
   const bibSlug = t.file && window.LEITOR_MAPA ? window.LEITOR_MAPA[t.file.split(String.fromCharCode(92)).pop().toLowerCase()] : null;
   const bibHtml = bibSlug ? ` <a href="leitor.html?doc=${bibSlug}" target="_blank" rel="noopener" class="file-link-lib" title="Abrir este capítulo na Biblioteca (editor com marcador, volta de onde você parou)">Biblioteca ↗</a>` : '';
   const fileHtml = t.file ? bibHtml + ` <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>` : '';
   const topicsHtml = isQ ? `<textarea class="topicsedit" data-id="${t.id}" rows="1" placeholder="Assuntos abordados pelo filtro">${escapeHtml(effectiveTopics(t))}</textarea>` : '';
-  const descHtml = `<span class="descedit" data-id="${t.id}" title="Clique duas vezes (ou com o botão direito) para editar o nome da tarefa">${escapeHtml(effectiveDesc(t))}</span>${linkHtml}${fileHtml}${topicsHtml}`;
+  const descHtml = `<span class="descedit" data-id="${t.id}" title="Clique duas vezes (ou com o botão direito) para editar o nome da tarefa">${escapeHtml(effectiveDesc(t))}</span>${linkHtml}${offHtml}${fileHtml}${topicsHtml}`;
   const amt = effectiveAmount(t);
   const qtdHtml = isQ
     ? `<input type="number" min="1" class="qtdedit" data-id="${t.id}" value="${amt}" title="Ajuste conforme a quantidade real de questões no filtro"> ${t.unit}`
