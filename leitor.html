@@ -206,7 +206,7 @@ body.tool-on #folha{cursor:cell}
           <select id="bloco" title="Estilo do parágrafo"><option value="p">Texto normal</option><option value="h2">Título</option><option value="h3">Subtítulo</option></select>
           <button id="fMais" title="Aumentar o tamanho do texto selecionado">A<sup>▲</sup></button><button id="fMenos" title="Diminuir o tamanho do texto selecionado">A<sub>▼</sub></button>
           <button data-menu="mCase" title="Maiúsculas e minúsculas">Aa ▾</button>
-          <button data-cmd="removeFormat" title="Limpar formatação do trecho">Aa⌫</button></div>
+          <button id="bLimpaGrifo" title="Limpar só o grifo/marca-texto do trecho selecionado (mantém negrito e cor da letra). Ctrl+Z desfaz, Ctrl+Y refaz"><span style="background:#fff176;padding:0 3px;border-radius:2px">Aa</span>⌫</button></div>
         <div class="r"><button id="tBd" title="Negrito: clique e depois selecione os trechos (Alt+3)"><b>N</b></button>
           <button data-cmd="italic" title="Itálico (Ctrl+I)"><i>I</i></button>
           <button id="tUl" title="Sublinhado: clique e depois selecione os trechos (Alt+4)"><u>S</u></button>
@@ -532,6 +532,11 @@ $('#mBarra').querySelectorAll('[data-trb]').forEach(b=>b.onclick=()=>{if(barraAl
 $('#margem').addEventListener('contextmenu',e=>{const b=e.target.closest('.barra');if(!b||!b._els)return;
   e.preventDefault();barraAlvo=b._els;menuEm('mBarra',e.clientX,e.clientY)});
 
+// ---- limpar só o grifo (usa execCommand: entra no desfazer/refazer nativo, Ctrl+Z / Ctrl+Y) ----
+(function(){const bt=$('#bLimpaGrifo');bt.onmousedown=e=>e.preventDefault();
+  bt.onclick=()=>{if(!selecaoNaFolha()||getSelection().isCollapsed)return;
+    try{folha.focus({preventScroll:true});document.execCommand('styleWithCSS',false,true);document.execCommand('hiliteColor',false,'transparent')}catch(e){}
+    fechaMenus();marcar()}})();
 // ---- botões simples ----
 document.querySelectorAll('[data-cmd]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{exec(b.dataset.cmd);fechaMenus()}});
 $('#bloco').onchange=e=>{folha.focus();exec('formatBlock',e.target.value)};
