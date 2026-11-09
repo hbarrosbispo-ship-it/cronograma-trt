@@ -80,10 +80,10 @@ main{flex:1;min-width:0}
 <header>
   <div class="logo">Questões offline<span>Cronograma TRT · 05 a 30/11/2026</span></div>
   <a class="home" id="homeLink" href="../index.html">← Cronograma</a>
-  <div class="st"><span>Respondidas <b id="sA">0</b>/<span id="sT">0</span></span><span>Acertos <b id="sC">0</b></span><span>Erros <b id="sE">0</b></span><span id="sP"></span><span>Cadernos concluídos <b id="sD">0</b></span></div>
+  <div class="st"><span>Respondidas <b id="sA">0</b>/<span id="sT">0</span></span><span>Acertos <b id="sC">0</b></span><span>Erros <b id="sE">0</b></span><span id="sP"></span><span id="sY" style="cursor:pointer" title="Clique para sincronizar agora com o Anki/skill"></span><span>Cadernos concluídos <b id="sD">0</b></span></div>
 </header>
 <div class="wrap">
-<aside><h3>Cadernos (ordem do cronograma)</h3><div id="nbs"></div><div style="padding:12px"><button class="btn gray" style="width:100%;font-size:13px" id="reset">Zerar minhas respostas</button></div></aside>
+<aside><h3>Cadernos (ordem do cronograma)</h3><div id="nbs"></div><div style="padding:12px"><button class="btn gray" style="width:100%;font-size:13px;margin-bottom:8px" id="resync">Reenviar tudo que já respondi</button><button class="btn gray" style="width:100%;font-size:13px" id="reset">Zerar minhas respostas</button></div></aside>
 <main>
   <div class="mh" id="mh"></div>
   <div class="tools">
@@ -102,6 +102,26 @@ let S={};
 try{S=JSON.parse(localStorage.getItem(KEY)||'null')||{};
  if(!Object.keys(S).length){const old=JSON.parse(localStorage.getItem('qoffline_nov2026_v1')||'null');if(old)S=old}}catch(e){}
 S.__done=S.__done||{};
+// ---- Sincronização com o backend do cronograma (o mesmo que a extensão do qconcursos alimenta) ----
+// Funciona offline: cada resposta entra numa fila local e é enviada quando houver internet.
+const SYNC_URL='https://script.google.com/macros/s/AKfycbwrbaghAE1EsQzcvOCsTLn-B6lYzT29bXtrA_hPVM5A0qMlxBl_dfJ4P-zFi6VjdXuVqA/exec',SKEY='qoffline_sync_v1',SESSAO=new Date().toISOString();
+let SQ=[],SYNCERR='',fl=false;try{SQ=JSON.parse(localStorage.getItem(SKEY)||'[]')}catch(e){}
+const saveQ=()=>{try{localStorage.setItem(SKEY,JSON.stringify(SQ))}catch(e){}};
+function plain(h){const t=document.createElement('template');t.innerHTML=h||'';return(t.content.textContent||'').replace(/\s+/g,' ').trim()}
+function showSync(){const e=document.getElementById('sY');if(!e)return;e.textContent=SQ.length?(navigator.onLine?'⏳ ':'📴 ')+SQ.length+' a sincronizar'+(SYNCERR&&navigator.onLine?' (erro: tentando de novo)':''):'✔ sincronizado'}
+function enqueue(q,noflush){const s=S[q.key]||{};if(s.res!=='ok'&&s.res!=='er')return;
+ const nb=DATA.find(n=>n.id===q.nb),cut=s.cut||[],vivas=q.alts.length-cut.length;
+ const id=String(q.code||'').replace(/\D/g,'')||String(q.key);
+ const item={id,codigo:q.code||id,ts:new Date().toISOString(),sessao:SESSAO,resultado:s.res==='ok'?'acerto':'erro',marcada:s.sel||null,gabarito:q.g||(s.res==='ok'?s.sel:''),duvida:cut.length>0&&vivas>=2,vivas,disciplina:(q.disc||[]).join(' › '),info:q.info||'',enunciado:plain(q.enun),alternativas:q.alts.map(([l,t])=>({l,t,d:cut.includes(l)})),pagina:'/cronograma-trt/questoes/#nb'+q.nb,filtro:nb?nb.desc+(nb.subj?' · '+nb.subj:''):'Filtro não identificado'};
+ const com={id,codigo:item.codigo,comentarios:(q.c||[]).slice(0,5).map(c=>({autor:c.a,data:c.d,curtidas:c.l,texto:c.t})),ts:item.ts};
+ SQ=SQ.filter(x=>!(x.item.id===id&&x.item.sessao===SESSAO));SQ.push({item,com});saveQ();showSync();if(!noflush)flush()}
+async function flush(){if(fl||!SQ.length||!navigator.onLine){showSync();return}fl=true;
+ try{const lote=SQ.slice(0,10);
+  const r=await fetch(SYNC_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'capture',items:lote.map(x=>x.item),comentarios:lote.map(x=>x.com)})});
+  const j=await r.json();if(!j.ok)throw new Error(j.erro||'resposta inválida');
+  const sent=new Set(lote);SQ=SQ.filter(x=>!sent.has(x));saveQ();SYNCERR='';fl=false;showSync();if(SQ.length)return flush();return}
+ catch(e){SYNCERR=String(e)}
+ fl=false;showSync()}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function clean(h){const t=document.createElement('template');t.innerHTML=h;t.content.querySelectorAll('script,style,iframe,object,embed,link,form').forEach(e=>e.remove());t.content.querySelectorAll('*').forEach(e=>{[...e.attributes].forEach(a=>{if(/^on/i.test(a.name)||/^javascript:/i.test(a.value))e.removeAttribute(a.name)})});return t.innerHTML}
@@ -148,8 +168,8 @@ function render(){const f=fs.value,term=fq.value.trim().toLowerCase();
 list.addEventListener('click',e=>{const art=e.target.closest('.q');if(!art)return;const q=Q.find(x=>String(x.key)===art.dataset.k);const s=S[q.key]=S[q.key]||{};
  const a=e.target.closest('[data-a]');
  if(a){const act=a.dataset.a;
-  if(act==='resp'&&s.sel){s.res=q.g?(s.sel===q.g?'ok':'er'):'nf';save();rerender(art,q)}
-  else if(act==='man-ok'||act==='man-er'){s.res=act==='man-ok'?'ok':'er';s.manual=true;save();rerender(art,q)}
+  if(act==='resp'&&s.sel){s.res=q.g?(s.sel===q.g?'ok':'er'):'nf';save();rerender(art,q);enqueue(q)}
+  else if(act==='man-ok'||act==='man-er'){s.res=act==='man-ok'?'ok':'er';s.manual=true;save();rerender(art,q);enqueue(q)}
   else if(act==='redo'){delete S[q.key];save();rerender(art,q)}
   else if(act==='tog'){return}
   return}
@@ -162,7 +182,10 @@ window.addEventListener('hashchange',()=>{const h=hash();if(h&&DATA.some(n=>n.id
 reset.onclick=()=>{if(confirm('Apagar todas as suas respostas e conclusões neste navegador?')){S={__done:{}};save();render()}};
 ferr.onclick=()=>{const l=Q.filter(q=>st(q).res==='er').map(q=>q.code).join('\n');navigator.clipboard&&navigator.clipboard.writeText(l).then(()=>alert('Códigos copiados: '+(l?l.split('\n').length:0)),()=>prompt('Copie:',l))};
 if(location.protocol==='file:')homeLink.href='../Sistema do cronograma/cronograma-web/index.html';
-render();
+sY.onclick=()=>flush();
+resync.onclick=()=>{if(!confirm('Reenviar todas as questões já respondidas neste navegador?'))return;Q.forEach(q=>enqueue(q,true));flush()};
+window.addEventListener('online',flush);setInterval(flush,120000);
+render();showSync();flush();
 </script>
 </body>
 </html>
