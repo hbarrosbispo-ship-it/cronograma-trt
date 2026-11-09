@@ -527,6 +527,10 @@ $('#mCtx').querySelectorAll('[data-trc]').forEach(b=>b.onclick=()=>{aplicarTR(+b
 // clique direito na linha colorida posta à mão: mudar a cor ou remover
 $('#mCtx').insertAdjacentHTML('afterend','<div class="menu" id="mBarra">'+$('#mTR').innerHTML.replace(/data-tr=/g,'data-trb=').replace('Remover a linha','Remover esta linha')+'</div>');
 let barraAlvo=null;
+$('#mBarra').insertAdjacentHTML('afterend','<div class="menu" id="mSelo"><button data-x="del"><span class="sw">&#10005;</span>Excluir este selo</button></div>');
+let seloAlvo=null;$('#mSelo').onmousedown=e=>e.preventDefault();
+$('#mSelo').querySelector('button').onclick=()=>{const a=seloAlvo&&seloAlvo._anc;fechaMenus();if(!a||!a.dataset.k)return;const l=LS.get('incOcult:'+slug)||[];l.push(a.dataset.k);LS.set('incOcult:'+slug,l);a.remove();seloAlvo=null;posicionarMargem()};
+$('#margem').addEventListener('contextmenu',e=>{const b=e.target.closest('.inc-badge');if(!b)return;e.preventDefault();e.stopPropagation();seloAlvo=b;menuEm('mSelo',e.clientX,e.clientY)});
 $('#mBarra').onmousedown=e=>e.preventDefault();
 $('#mBarra').querySelectorAll('[data-trb]').forEach(b=>b.onclick=()=>{if(barraAlvo)aplicarTR(+b.dataset.trb,null,true,barraAlvo.filter(x=>x.isConnected));barraAlvo=null;fechaMenus()});
 $('#margem').addEventListener('contextmenu',e=>{const b=e.target.closest('.barra');if(!b||!b._els)return;
@@ -792,6 +796,7 @@ const RE_SUM=/Súmula(?:\s+n[º°o.]*)?\s*(\d+)\s*(?:,?\s*d[ao]\s*)?(TST|STF|STJ
 function badge(n,rotulo,url,num){
   const a=document.createElement('span');a.className='inc-anc';a.contentEditable='false';
   a.dataset.n=n;a.dataset.t=rotulo;a.dataset.u=url||'';a.dataset.num=num||'';return a}
+const chaveSelo=(bloco,num,i)=>(bloco.textContent||'').trim().slice(0,60)+'|'+num+'|'+i;
 function posicionarMargem(){
   const mg=$('#margem');if(!mg)return;mg.innerHTML='';
   if(LS.get('incOn')===false)return;
@@ -817,7 +822,7 @@ function posicionarMargem(){
     const multi=g.itens.length>1;
     g.itens.forEach((a,i)=>{
       const n=+a.dataset.n,b=document.createElement('span');
-      b.className='inc-badge f'+(n?FAIXA(n):0);b.title=a.dataset.t;b.dataset.url=a.dataset.u;
+      b.className='inc-badge f'+(n?FAIXA(n):0);b.title=a.dataset.t;b.dataset.url=a.dataset.u;b._anc=a;
       b.textContent=multi?`${a.dataset.num}: ${n}×`:`${n}×`;
       b.style.top=(g.top+3+(multi?i*13:0))+'px';
       mg.appendChild(b);
@@ -836,11 +841,13 @@ async function atualizarIncidencia(){
   if(LS.get('incOn')===false){info.textContent='desligada';return}
   let inc;try{inc=await carregarIncidencia()}catch(e){info.textContent='compilado indisponível';return}
   const padrao=PADRAO_LEI[meta&&meta.codigo]||null;let total=0,leis=new Set();
+  const OCULT=new Set(LS.get('incOcult:'+slug)||[]);
   for(const bloco of blocosFolha()){
     const tw=document.createTreeWalker(bloco,NodeFilter.SHOW_TEXT);const mapa=[];let full='',n;
     while((n=tw.nextNode())){mapa.push({node:n,ini:full.length});full+=n.data}
     if(!/Art|art|Súmula|SÚMULA/.test(full))continue;
     const ins=[]; // {pos, el}
+    const contSelo={};const novoSelo=(num,pos,el)=>{const c=contSelo[num]=(contSelo[num]||0)+1;const k=chaveSelo(bloco,num,c);if(OCULT.has(k))return;el.dataset.k=k;ins.push({pos,el});total++};
     RE_ART.lastIndex=0;let m;
     const ini0=full.search(/\S/);
     while((m=RE_ART.exec(full))){
@@ -855,7 +862,7 @@ async function atualizarIncidencia(){
         const reg=inc.m[slug+'|'+num],qtd=reg?reg.n:0,nome=inc.slugs[slug];
         const rot=`Art. ${k[1]}${k[2]||''} · ${nome}\n`+(qtd?`Cobrado ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrado nos filtros já resolvidos');
         if(!qtd)continue;
-        ins.push({pos:base+k.index,el:badge(qtd,rot,reg.url,k[1]+(k[2]||''))});leis.add(slug);total++;
+        novoSelo(k[1]+(k[2]||''),base+k.index,badge(qtd,rot,reg.url,k[1]+(k[2]||'')));leis.add(slug);
       }
     }
     RE_SUM.lastIndex=0;
@@ -864,7 +871,7 @@ async function atualizarIncidencia(){
       if(!inc.slugs['jurisprudencia-'+tr])continue;
       const qtd=reg?reg.n:0;
       if(!qtd)continue;
-      ins.push({pos:m.index,el:badge(qtd,`Súmula ${m[1]} do ${m[2].toUpperCase()}\n`+(qtd?`Cobrada ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrada nos filtros já resolvidos'),reg?reg.url:'compilado/leis/jurisprudencia-'+tr+'.html','Súm. '+m[1])});total++;
+      novoSelo('Súm. '+m[1]+' '+tr,m.index,badge(qtd,`Súmula ${m[1]} do ${m[2].toUpperCase()}\n`+(qtd?`Cobrada ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrada nos filtros já resolvidos'),reg?reg.url:'compilado/leis/jurisprudencia-'+tr+'.html','Súm. '+m[1]));
     }
     ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
   }
