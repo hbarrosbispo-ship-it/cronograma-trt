@@ -23,6 +23,7 @@ aside h3{margin:0;padding:11px 14px;font-size:13px;font-weight:700;color:var(--t
 .nb .bar{height:3px;background:#e9ecef;margin-top:4px;overflow:hidden}.nb .bar i{display:block;height:100%;background:var(--ok)}
 .chk{flex:none;width:44px;border:0;border-left:1px solid var(--bd);background:none;cursor:pointer;font-size:18px;color:#c3c9cf}
 .chk:hover{background:#f6f7f8}.nbrow.done .chk{color:var(--ok)}.nbrow.done .nb{opacity:.55}.nbrow.done .nb .t{text-decoration:line-through}
+aside.min #nbs,aside.min .asf{display:none}aside.min h3{border-bottom:0}
 main{flex:1;min-width:0}
 .mh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .mh h2{margin:0;font-size:22px;font-weight:600}.mh h2 small{display:block;font-size:13px;font-weight:400;color:var(--mut)}
@@ -67,9 +68,13 @@ main{flex:1;min-width:0}
 .tabbar{display:flex;gap:26px;padding:10px 8px;font-size:13px;flex-wrap:wrap}
 .tabbar span{color:var(--tx);cursor:default}.tabbar .tb{cursor:pointer}.tabbar .tb:hover{color:var(--or)}
 .cmts{padding:0 8px 8px}
-.cm{border-left:3px solid var(--or);padding:2px 0 2px 12px;margin:12px 0 16px}
-.cm .who{font-weight:700}.cm .meta2{color:var(--mut);font-size:12px;margin-left:8px}
-.cm pre{white-space:pre-wrap;font:inherit;margin:6px 0 0}
+.cm{background:#fafbfc;border:1px solid var(--bd);border-left:5px solid var(--or);border-radius:4px;padding:0 0 10px;margin:14px 0 22px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.cm:nth-child(even){border-left-color:var(--bl);background:#f6f9fc}
+.cm .cmh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 14px;background:var(--strip);border-bottom:1px solid var(--bd);border-radius:3px 3px 0 0}
+.cm .cmn{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#fff;background:var(--or);border-radius:10px;padding:0 8px}
+.cm:nth-child(even) .cmn{background:var(--bl)}
+.cm .who{font-weight:700}.cm .meta2{color:var(--mut);font-size:12px}
+.cm pre{white-space:pre-wrap;font:inherit;margin:10px 14px 0}
 .locknote{color:var(--mut);padding:6px 8px 12px;font-size:13px}
 .empty{text-align:center;color:var(--mut);padding:40px}
 .alldone{background:var(--okbg);color:#14663b;padding:10px 14px;border-radius:3px;margin-bottom:14px}
@@ -80,10 +85,10 @@ main{flex:1;min-width:0}
 <header>
   <div class="logo">Questões offline<span>Cronograma TRT · 05 a 30/11/2026</span></div>
   <a class="home" id="homeLink" href="../index.html">← Cronograma</a>
-  <div class="st"><span>Respondidas <b id="sA">0</b>/<span id="sT">0</span></span><span>Acertos <b id="sC">0</b></span><span>Erros <b id="sE">0</b></span><span id="sP"></span><span id="sY" style="cursor:pointer" title="Clique para sincronizar agora com o Anki/skill"></span><span>Cadernos concluídos <b id="sD">0</b></span></div>
+  <div class="st"><span hidden>Respondidas <b id="sA">0</b>/<span id="sT">0</span></span><span hidden>Acertos <b id="sC">0</b></span><span hidden>Erros <b id="sE">0</b></span><span hidden id="sP"></span><span id="sY" style="cursor:pointer;font-weight:700;color:var(--tx);border:1px solid var(--bd);border-radius:12px;padding:1px 10px" title="Clique para sincronizar agora com o Anki/skill"></span><span>Cadernos concluídos <b id="sD">0</b></span></div>
 </header>
 <div class="wrap">
-<aside><h3>Cadernos (ordem do cronograma)</h3><div id="nbs"></div><div style="padding:12px"><button class="btn gray" style="width:100%;font-size:13px;margin-bottom:8px" id="resync">Reenviar tudo que já respondi</button><button class="btn gray" style="width:100%;font-size:13px" id="reset">Zerar minhas respostas</button></div></aside>
+<aside id="asd"><h3 id="ah" style="cursor:pointer;display:flex;justify-content:space-between;user-select:none" title="Minimizar / expandir"><span>Cadernos (ordem do cronograma)</span><span id="aar">▾</span></h3><div id="nbs"></div><div class="asf" style="padding:12px"><button class="btn gray" style="width:100%;font-size:13px;margin-bottom:8px" id="resync">Reenviar tudo que já respondi</button><button class="btn gray" style="width:100%;font-size:13px" id="reset">Zerar minhas respostas</button></div></aside>
 <main>
   <div class="mh" id="mh"></div>
   <div class="tools">
@@ -154,13 +159,13 @@ function card(q){const s=st(q),done=!!s.res,gab=q.g;
   else if(s.res==='ok')res=`<div class="res ok"><b>Você acertou!</b> Gabarito: ${esc(gab)}<small>${esc(q.gnote)}</small></div>`;
   else res=`<div class="res er"><b>Você errou.</b> Marcou ${esc(s.sel)}; gabarito: <b>${esc(gab)}</b><small>${esc(q.gnote)}</small></div>`}
  const lab=done&&(s.res==='ok'||s.res==='er')?`<span class="lab ${s.res}">${s.res==='ok'?'Resolvi certo':'Resolvi errado'}</span>`:'';
- const cms=(q.c||[]).slice(0,5).map(c=>`<div class="cm"><span class="who">${esc(c.a)}</span><span class="meta2">${esc(c.d)} · ${c.l} curtidas</span><pre>${esc(c.t)}</pre></div>`).join('')||'<p>Sem comentários.</p>';
+ const cms=(q.c||[]).slice(0,5).map((c,i)=>`<div class="cm"><div class="cmh"><span class="cmn">Comentário ${i+1}</span><span class="who">${esc(c.a)}</span><span class="meta2">${esc(c.d)} · ${c.l} curtidas</span></div><pre>${esc(c.t)}</pre></div>`).join('')||'<p>Sem comentários.</p>';
  const d=q.disc||[];
  return `<article class="q" data-k="${esc(q.key)}"><div class="qh"><span class="n">${q.idx}</span><span class="code">${esc(q.code)}</span><span class="disc">${esc(d[0]||'')}</span><span class="ass">${d.length>1?'› '+esc(d.slice(1).join(' , ')):''}</span>${lab}</div>${meta(q.info||'')}
  <div class="qb"><div class="enun">${clean(q.enun)}</div><div class="alts">${alts}</div>
  ${done?res:`<div class="btns"><button class="btn pri" data-a="resp" ${s.sel?'':'disabled'}>Responder</button></div>`}</div>
- <div class="tabs"><div class="tabbar"><span class="tb" data-a="tog">💬 Comentários (${q.nc!=null?q.nc:(q.c||[]).length}) — 5 mais curtidos</span>${done?'<span class="tb" data-a="redo">↺ Refazer esta questão</span>':''}<span>${esc(q.nbn)}</span></div>
- <div class="cmts" style="display:${done||s.open?'block':'none'}">${done||s.open?cms:''}</div>${done?'':'<div class="locknote" '+(s.open?'hidden':'')+'>Responda para liberar os comentários (eles podem revelar o gabarito).</div>'}</div></article>`}
+ <div class="tabs"><div class="tabbar"><span class="tb" data-a="tog">${s.open?'▾':'▸'} 💬 Comentários (${q.nc!=null?q.nc:(q.c||[]).length}) — 5 mais curtidos${s.open?' (clique para minimizar)':''}</span>${done?'<span class="tb" data-a="redo">↺ Refazer esta questão</span>':''}<span>${esc(q.nbn)}</span></div>
+ <div class="cmts" style="display:${s.open?'block':'none'}">${s.open?cms:''}</div></div></article>`}
 function render(){const f=fs.value,term=fq.value.trim().toLowerCase();
  const arr=Q.filter(q=>(curNb==='all'||q.nb===curNb)&&!(hd.checked&&curNb==='all'&&S.__done[q.nb])&&(f==='all'||(f==='todo'&&!st(q).res)||(f==='ok'&&st(q).res==='ok')||(f==='er'&&st(q).res==='er'))&&(!term||(q.code+' '+q.info+' '+(q.disc||[]).join(' ')+' '+q.enun.replace(/<[^>]+>/g,' ')+' '+q.alts.map(a=>a[1]).join(' ')).toLowerCase().includes(term)));
  let pre='';if(curNb!=='all'&&S.__done[curNb])pre='<div class="alldone">✔ Este caderno está marcado como concluído.</div>';
@@ -171,7 +176,7 @@ list.addEventListener('click',e=>{const art=e.target.closest('.q');if(!art)retur
   if(act==='resp'&&s.sel){s.res=q.g?(s.sel===q.g?'ok':'er'):'nf';save();rerender(art,q);enqueue(q)}
   else if(act==='man-ok'||act==='man-er'){s.res=act==='man-ok'?'ok':'er';s.manual=true;save();rerender(art,q);enqueue(q)}
   else if(act==='redo'){delete S[q.key];save();rerender(art,q)}
-  else if(act==='tog'){return}
+  else if(act==='tog'){s.open=!s.open;save();rerender(art,q)}
   return}
  const alt=e.target.closest('.alt');if(!alt||s.res)return;const l=alt.dataset.l;
  if(e.target.closest('.cut')){s.cut=s.cut||[];const i=s.cut.indexOf(l);i>=0?s.cut.splice(i,1):s.cut.push(l);if(s.cut.includes(s.sel))delete s.sel}
@@ -182,6 +187,9 @@ window.addEventListener('hashchange',()=>{const h=hash();if(h&&DATA.some(n=>n.id
 reset.onclick=()=>{if(confirm('Apagar todas as suas respostas e conclusões neste navegador?')){S={__done:{}};save();render()}};
 ferr.onclick=()=>{const l=Q.filter(q=>st(q).res==='er').map(q=>q.code).join('\n');navigator.clipboard&&navigator.clipboard.writeText(l).then(()=>alert('Códigos copiados: '+(l?l.split('\n').length:0)),()=>prompt('Copie:',l))};
 if(location.protocol==='file:')homeLink.href='../Sistema do cronograma/cronograma-web/index.html';
+const setMin=m=>{asd.classList.toggle('min',m);aar.textContent=m?'▸':'▾';try{localStorage.setItem('qoffline_aside_min',m?'1':'0')}catch(e){}};
+try{setMin(localStorage.getItem('qoffline_aside_min')==='1')}catch(e){}
+ah.onclick=()=>setMin(!asd.classList.contains('min'));
 sY.onclick=()=>flush();
 resync.onclick=()=>{if(!confirm('Reenviar todas as questões já respondidas neste navegador?'))return;Q.forEach(q=>enqueue(q,true));flush()};
 window.addEventListener('online',flush);setInterval(flush,120000);
