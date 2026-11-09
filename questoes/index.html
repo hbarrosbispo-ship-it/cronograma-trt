@@ -109,7 +109,6 @@ main{flex:1;min-width:0}
     <select id="fs"><option value="all">Todas</option><option value="todo">Não respondidas</option><option value="ok">Acertos</option><option value="er">Erros</option></select>
     <input type="text" id="fq" placeholder="Buscar no enunciado, alternativas, assunto ou código…">
     <label><input type="checkbox" id="hd"> Ocultar cadernos concluídos</label>
-    <button class="btn gray" id="ferr">Copiar códigos dos erros</button>
   </div>
   <div id="list"></div>
 </main>
@@ -134,7 +133,7 @@ function showSync(){const e=document.getElementById('sY');if(!e)return;e.textCon
 function enqueue(q,noflush){const s=S[q.key]||{};if(s.res!=='ok'&&s.res!=='er')return;
  const nb=DATA.find(n=>n.id===q.nb),cut=s.cut||[],vivas=q.alts.length-cut.length;
  const id=String(q.code||'').replace(/\D/g,'')||String(q.key);
- const item={id,codigo:q.code||id,ts:new Date().toISOString(),sessao:SESSAO,resultado:s.res==='ok'?'acerto':'erro',marcada:s.sel||null,gabarito:q.g||(s.res==='ok'?s.sel:''),duvida:cut.length>0&&vivas>=2,vivas,motivo:s.res==='er'?(s.motivo||''):'',disciplina:(q.disc||[]).join(' › '),info:q.info||'',enunciado:plain(q.enun),alternativas:q.alts.map(([l,t])=>({l,t,d:cut.includes(l)})),pagina:'/cronograma-trt/questoes/#nb'+q.nb,filtro:nb?nb.desc+(nb.subj?' · '+nb.subj:''):'Filtro não identificado'};
+ const item={id,codigo:q.code||id,ts:new Date().toISOString(),sessao:SESSAO,resultado:s.res==='ok'?'acerto':'erro',marcada:s.sel||null,gabarito:q.g||(s.res==='ok'?s.sel:''),duvida:cut.length>0&&vivas>=2,vivas,motivo:s.res==='er'?(s.motivo||''):'',disciplina:(q.disc||[]).join(' › '),info:q.info||'',enunciado:plain(eEn(q)),alternativas:q.alts.map(([l,t])=>({l,t:eAl(q,l,t),d:cut.includes(l)})),pagina:'/cronograma-trt/questoes/#nb'+q.nb,filtro:nb?nb.desc+(nb.subj?' · '+nb.subj:''):'Filtro não identificado'};
  const com={id,codigo:item.codigo,comentarios:(q.c||[]).slice(0,5).map(c=>({autor:c.a,data:c.d,curtidas:c.l,texto:c.t})),ts:item.ts};
  SQ=SQ.filter(x=>!(x.item.id===id&&x.item.sessao===SESSAO));SQ.push({item,com});saveQ();showSync();if(!noflush)flush()}
 async function flush(){if(fl||!SQ.length||!navigator.onLine){showSync();return}fl=true;
@@ -153,6 +152,8 @@ const hash=()=>{const m=location.hash.match(/^#nb(\d+)$/);return m?+m[1]:null};
 if(hash()&&DATA.some(n=>n.id===hash()))curNb=hash();
 else{const first=DATA.find(n=>!S.__done[n.id]);curNb=first?first.id:'all'}
 function st(q){return S[q.key]||{}}
+function eEn(q){const e=st(q).ed;return e&&e.enun!=null?e.enun:q.enun}
+function eAl(q,l,t){const e=st(q).ed;return e&&e.alts&&e.alts[l]!=null?e.alts[l]:t}
 function stats(){let a=0,c=0,e=0;Q.forEach(q=>{const s=st(q);if(s.res){a++;if(s.res==='ok')c++;else if(s.res==='er')e++}});sA.textContent=a;sT.textContent=Q.length;sC.textContent=c;sE.textContent=e;sP.textContent=a?Math.round(c/a*100)+'% de acerto':'';sD.textContent=DATA.filter(n=>S.__done[n.id]).length+'/'+DATA.length}
 function side(){let h=`<div class="nbrow ${curNb==='all'?'on':''}"><button class="nb" data-id="all"><span class="t">Todos os cadernos</span><small>${Q.length} questões</small></button></div>`;
  DATA.forEach(nb=>{const tot=nb.qs.length;let d=0;nb.qs.forEach(q=>{if(st({key:q.code||q.path}).res)d++});const dn=S.__done[nb.id];
@@ -170,7 +171,7 @@ function meta(info){const g=(k,n)=>{const m=info.match(new RegExp(k+':\\s*(.*?)(
  return `<div class="meta"><b>Ano:</b><span style="color:var(--tx)">${esc(g('Ano'))}</span><b>Banca:</b><span>${esc(g('Banca'))}</span><b>Órgão:</b><span>${esc(g('Órgão'))}</span><b>Prova:</b><span>${esc(g('Provas?'))}</span></div>`}
 function card(q){const s=st(q),done=!!s.res,gab=q.g;
  let alts=q.alts.map(([l,t])=>{let cls='alt';if(s.cut&&s.cut.includes(l))cls+=' cutd';if(s.sel===l)cls+=' sel';if(done){cls+=' locked';if(gab&&l===gab)cls+=' right';else if(s.sel===l&&gab&&l!==gab)cls+=' wrong'}
-  return `<div class="${cls}" data-l="${esc(l)}">${done?'<span class="cutph"></span>':'<button class="cut" title="Riscar alternativa">✂</button>'}<span class="ltr">${esc(l)}</span><span class="tx">${esc(t)}</span></div>`}).join('');
+  return `<div class="${cls}" data-l="${esc(l)}">${done?'<span class="cutph"></span>':'<button class="cut" title="Riscar alternativa">✂</button>'}<span class="ltr">${esc(l)}</span><span class="tx" data-ed="alt">${esc(eAl(q,l,t))}</span></div>`}).join('');
  let res='';if(done){
   if(!gab)res=`<div class="res nf">Gabarito não confirmado nos comentários${q.gh?` (sugestão fraca: <b>${esc(q.gh)}</b>)`:''}. Você marcou <b>${esc(s.sel)}</b>. Confira nos comentários e registre:<div class="btns"><button class="btn gray" data-a="man-ok">Acertei</button><button class="btn gray" data-a="man-er">Errei</button></div>${s.manual?'<small>Registrado manualmente.</small>':''}</div>`;
   else if(s.res==='ok')res=`<div class="res ok"><b>Você acertou!</b> Gabarito: ${esc(gab)}<small>${esc(q.gnote)}</small></div>`;
@@ -180,7 +181,7 @@ function card(q){const s=st(q),done=!!s.res,gab=q.g;
  const cms=(q.c||[]).slice(0,5).map((c,i)=>hid.includes(i)?'':`<div class="cm"><div class="cmh"><span class="cmn">Comentário ${++vn}</span><span class="who">${esc(c.a)}</span><span class="meta2">${esc(c.d)} · ${c.l} curtidas</span><button class="btn gray" style="margin-left:auto;padding:2px 8px" data-a="delc" data-i="${i}" title="Excluir este comentário">🗑 Excluir</button></div><pre>${esc(c.t)}</pre></div>`).join('')||'<p>Sem comentários.</p>';
  const d=q.disc||[];
  return `<article class="q" data-k="${esc(q.key)}"><div class="qh"><span class="n">${q.idx}</span><span class="code">${esc(q.code)}</span><span class="disc">${esc(d[0]||'')}</span><span class="ass">${d.length>1?'› '+esc(d.slice(1).join(' , ')):''}</span>${lab}</div>${meta(q.info||'')}
- <div class="qb"><div class="enun">${clean(q.enun)}</div><div class="alts">${alts}</div>
+ <div class="qb"><div class="enun" data-ed="enun">${clean(eEn(q))}</div><div class="alts">${alts}</div>
  ${done?res:`<div class="btns"><button class="btn pri" data-a="resp" ${s.sel?'':'disabled'}>Responder</button></div>`}</div>
  <div class="tabs"><div class="tabbar"><span class="tb" data-a="tog">${s.open?'▾':'▸'} 💬 Comentários (${q.nc!=null?q.nc:(q.c||[]).length})${s.open?' (clique para minimizar)':''}</span>${done?'<span class="tb" data-a="redo">↺ Refazer esta questão</span>':''}</div>
  <div class="cmts" style="display:${s.open?'block':'none'}">${s.open?cms:''}</div></div></article>`}
@@ -188,18 +189,26 @@ function render(){const f=fs.value,term=fq.value.trim().toLowerCase();
  const arr=Q.filter(q=>(curNb==='all'||q.nb===curNb)&&!(hd.checked&&curNb==='all'&&S.__done[q.nb])&&(f==='all'||(f==='todo'&&!st(q).res)||(f==='ok'&&st(q).res==='ok')||(f==='er'&&st(q).res==='er'))&&(!term||(q.code+' '+q.info+' '+(q.disc||[]).join(' ')+' '+q.enun.replace(/<[^>]+>/g,' ')+' '+q.alts.map(a=>a[1]).join(' ')).toLowerCase().includes(term)));
  let pre='';if(curNb!=='all'&&S.__done[curNb])pre='<div class="alldone">✔ Este caderno está marcado como concluído.</div>';
  list.innerHTML=pre+(arr.length?arr.map(card).join(''):'<div class="empty">Nenhuma questão com esse filtro.</div>');head();stats();side();updBal(false)}
-list.addEventListener('click',e=>{const art=e.target.closest('.q');if(!art)return;const q=Q.find(x=>String(x.key)===art.dataset.k);const s=S[q.key]=S[q.key]||{};
+list.addEventListener('click',e=>{if(e.target.closest('[contenteditable="true"]'))return;const art=e.target.closest('.q');if(!art)return;const q=Q.find(x=>String(x.key)===art.dataset.k);const s=S[q.key]=S[q.key]||{};
  const a=e.target.closest('[data-a]');
  if(a){const act=a.dataset.a;
   if(act==='resp'&&s.sel){s.res=q.g?(s.sel===q.g?'ok':'er'):'nf';save();rerender(art,q);enqueue(q)}
   else if(act==='man-ok'||act==='man-er'){s.res=act==='man-ok'?'ok':'er';s.manual=true;save();rerender(art,q);enqueue(q)}
-  else if(act==='redo'){const h=s.hid;delete S[q.key];if(h&&h.length)S[q.key]={hid:h};save();rerender(art,q)}
+  else if(act==='redo'){const h=s.hid,ed=s.ed;delete S[q.key];if((h&&h.length)||ed)S[q.key]={hid:h,ed};save();rerender(art,q)}
   else if(act==='delc'){const i=+a.dataset.i;s.hid=s.hid||[];if(!s.hid.includes(i)&&confirm('Excluir este comentário?')){s.hid.push(i);save();rerender(art,q)}}
   else if(act==='tog'){s.open=!s.open;save();rerender(art,q)}
   return}
  const alt=e.target.closest('.alt');if(!alt||s.res)return;const l=alt.dataset.l;
  if(e.target.closest('.cut')){s.cut=s.cut||[];const i=s.cut.indexOf(l);i>=0?s.cut.splice(i,1):s.cut.push(l);if(s.cut.includes(s.sel))delete s.sel}
  else{if(s.cut&&s.cut.includes(l))return;s.sel=l}save();rerender(art,q)});
+list.addEventListener('dblclick',e=>{const el=e.target.closest('[data-ed]');if(!el||el.isContentEditable)return;const art=el.closest('.q');if(!art)return;
+ const q=Q.find(x=>String(x.key)===art.dataset.k);if(!q)return;const kind=el.dataset.ed,alt=kind==='alt'?el.closest('.alt'):null,l=alt?alt.dataset.l:null;
+ el.contentEditable='true';el.style.outline='2px solid var(--or)';el.style.background='#fffdf5';if(alt)alt.style.cursor='text';el.focus();
+ const fin=()=>{el.removeEventListener('blur',fin);el.contentEditable='false';el.style.outline='';el.style.background='';
+  const s=S[q.key]=S[q.key]||{};s.ed=s.ed||{};
+  if(kind==='enun')s.ed.enun=clean(el.innerHTML);else{s.ed.alts=s.ed.alts||{};s.ed.alts[l]=el.innerText.replace(/\n+$/,'')}
+  save();rerender(art,q);if(S[q.key]&&S[q.key].res)enqueue(q)};
+ el.addEventListener('blur',fin);el.addEventListener('keydown',ev=>{if(ev.key==='Escape'){ev.preventDefault();el.blur()}else if(ev.key==='Enter'&&kind==='alt'){ev.preventDefault();el.blur()}})});
 const MOT=['Não sabia','Confundi os conceitos','Li errado'];
 function balHtml(nb){const qs=Q.filter(q=>q.nb===nb.id);if(!qs.length||!qs.every(q=>st(q).res))return '';
  let ce=0,cd=[],er=[],nf=0;
@@ -220,7 +229,6 @@ function rerender(art,q){const keep=scrollY;const t=document.createElement('div'
 fs.onchange=render;fq.oninput=render;hd.onchange=render;
 window.addEventListener('hashchange',()=>{const h=hash();if(h&&DATA.some(n=>n.id===h)){curNb=h;render();scrollTo(0,0)}});
 reset.onclick=()=>{if(confirm('Apagar todas as suas respostas e conclusões neste navegador?')){S={__done:{}};save();render()}};
-ferr.onclick=()=>{const l=Q.filter(q=>st(q).res==='er').map(q=>q.code).join('\n');navigator.clipboard&&navigator.clipboard.writeText(l).then(()=>alert('Códigos copiados: '+(l?l.split('\n').length:0)),()=>prompt('Copie:',l))};
 if(location.protocol==='file:')homeLink.href='../Sistema do cronograma/cronograma-web/index.html';
 const setMin=m=>{asd.classList.toggle('min',m);aar.textContent=m?'▸':'▾';try{localStorage.setItem('qoffline_aside_min',m?'1':'0')}catch(e){}};
 try{setMin(localStorage.getItem('qoffline_aside_min')==='1')}catch(e){}
