@@ -124,7 +124,10 @@ S.__done=S.__done||{};
 // ---- Sincronização com o backend do cronograma (o mesmo que a extensão do qconcursos alimenta) ----
 // Funciona offline: cada resposta entra numa fila local e é enviada quando houver internet.
 const SYNC_URL='https://script.google.com/macros/s/AKfycbwrbaghAE1EsQzcvOCsTLn-B6lYzT29bXtrA_hPVM5A0qMlxBl_dfJ4P-zFi6VjdXuVqA/exec',SKEY='qoffline_sync_v1',SESSAO=new Date().toISOString();
-let SQ=[],SYNCERR='',fl=false;try{SQ=JSON.parse(localStorage.getItem(SKEY)||'[]')}catch(e){}
+let SQ=[],SYNCERR='',fl=false,SYN=new Set();try{SQ=JSON.parse(localStorage.getItem(SKEY)||'[]')}catch(e){}
+try{SYN=new Set(JSON.parse(localStorage.getItem('qoffline_synced_v1')||'[]'))}catch(e){}
+const saveSyn=()=>{try{localStorage.setItem('qoffline_synced_v1',JSON.stringify([...SYN]))}catch(e){}};
+const idOf=q=>String(q.code||'').replace(/\D/g,'')||String(q.key);
 const saveQ=()=>{try{localStorage.setItem(SKEY,JSON.stringify(SQ))}catch(e){}};
 function plain(h){const t=document.createElement('template');t.innerHTML=h||'';return(t.content.textContent||'').replace(/\s+/g,' ').trim()}
 function showSync(){const e=document.getElementById('sY');if(!e)return;e.textContent=SQ.length?(navigator.onLine?'⏳ ':'📴 ')+SQ.length+' a sincronizar'+(SYNCERR&&navigator.onLine?' (erro: tentando de novo)':''):'✔ sincronizado'}
@@ -138,7 +141,7 @@ async function flush(){if(fl||!SQ.length||!navigator.onLine){showSync();return}f
  try{const lote=SQ.slice(0,10);
   const r=await fetch(SYNC_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'capture',items:lote.map(x=>x.item),comentarios:lote.map(x=>x.com)})});
   const j=await r.json();if(!j.ok)throw new Error(j.erro||'resposta inválida');
-  const sent=new Set(lote);SQ=SQ.filter(x=>!sent.has(x));saveQ();SYNCERR='';fl=false;showSync();if(SQ.length)return flush();return}
+  const sent=new Set(lote);lote.forEach(x=>SYN.add(x.item.id));saveSyn();SQ=SQ.filter(x=>!sent.has(x));saveQ();SYNCERR='';fl=false;showSync();if(SQ.length)return flush();return}
  catch(e){SYNCERR=String(e)}
  fl=false;showSync()}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -223,7 +226,10 @@ ah.onclick=()=>setMin(!asd.classList.contains('min'));
 sY.onclick=()=>flush();
 resync.onclick=()=>{if(!confirm('Reenviar todas as questões já respondidas neste navegador?'))return;Q.forEach(q=>enqueue(q,true));flush()};
 window.addEventListener('online',flush);setInterval(flush,120000);
-render();showSync();flush();
+render();showSync();
+// respostas antigas que nunca foram enviadas entram na fila sozinhas
+Q.forEach(q=>{const r=st(q).res;if((r==='ok'||r==='er')&&!SYN.has(idOf(q))&&!SQ.some(x=>x.item.id===idOf(q)))enqueue(q,true)});
+flush();
 </script>
 </body>
 </html>
