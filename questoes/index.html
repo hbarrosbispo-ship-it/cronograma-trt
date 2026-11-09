@@ -176,12 +176,13 @@ function card(q){const s=st(q),done=!!s.res,gab=q.g;
   else if(s.res==='ok')res=`<div class="res ok"><b>Você acertou!</b> Gabarito: ${esc(gab)}<small>${esc(q.gnote)}</small></div>`;
   else res=`<div class="res er"><b>Você errou.</b> Marcou ${esc(s.sel)}; gabarito: <b>${esc(gab)}</b><small>${esc(q.gnote)}</small></div>`}
  const lab=done&&(s.res==='ok'||s.res==='er')?`<span class="lab ${s.res}">${s.res==='ok'?'Resolvi certo':'Resolvi errado'}</span>`:'';
- const cms=(q.c||[]).slice(0,5).map((c,i)=>`<div class="cm"><div class="cmh"><span class="cmn">Comentário ${i+1}</span><span class="who">${esc(c.a)}</span><span class="meta2">${esc(c.d)} · ${c.l} curtidas</span></div><pre>${esc(c.t)}</pre></div>`).join('')||'<p>Sem comentários.</p>';
+ const hid=s.hid||[];let vn=0;
+ const cms=(q.c||[]).slice(0,5).map((c,i)=>hid.includes(i)?'':`<div class="cm"><div class="cmh"><span class="cmn">Comentário ${++vn}</span><span class="who">${esc(c.a)}</span><span class="meta2">${esc(c.d)} · ${c.l} curtidas</span><button class="btn gray" style="margin-left:auto;padding:2px 8px" data-a="delc" data-i="${i}" title="Excluir este comentário">🗑 Excluir</button></div><pre>${esc(c.t)}</pre></div>`).join('')||'<p>Sem comentários.</p>';
  const d=q.disc||[];
  return `<article class="q" data-k="${esc(q.key)}"><div class="qh"><span class="n">${q.idx}</span><span class="code">${esc(q.code)}</span><span class="disc">${esc(d[0]||'')}</span><span class="ass">${d.length>1?'› '+esc(d.slice(1).join(' , ')):''}</span>${lab}</div>${meta(q.info||'')}
  <div class="qb"><div class="enun">${clean(q.enun)}</div><div class="alts">${alts}</div>
  ${done?res:`<div class="btns"><button class="btn pri" data-a="resp" ${s.sel?'':'disabled'}>Responder</button></div>`}</div>
- <div class="tabs"><div class="tabbar"><span class="tb" data-a="tog">${s.open?'▾':'▸'} 💬 Comentários (${q.nc!=null?q.nc:(q.c||[]).length}) — 5 mais curtidos${s.open?' (clique para minimizar)':''}</span>${done?'<span class="tb" data-a="redo">↺ Refazer esta questão</span>':''}<span>${esc(q.nbn)}</span></div>
+ <div class="tabs"><div class="tabbar"><span class="tb" data-a="tog">${s.open?'▾':'▸'} 💬 Comentários (${q.nc!=null?q.nc:(q.c||[]).length})${s.open?' (clique para minimizar)':''}</span>${done?'<span class="tb" data-a="redo">↺ Refazer esta questão</span>':''}</div>
  <div class="cmts" style="display:${s.open?'block':'none'}">${s.open?cms:''}</div></div></article>`}
 function render(){const f=fs.value,term=fq.value.trim().toLowerCase();
  const arr=Q.filter(q=>(curNb==='all'||q.nb===curNb)&&!(hd.checked&&curNb==='all'&&S.__done[q.nb])&&(f==='all'||(f==='todo'&&!st(q).res)||(f==='ok'&&st(q).res==='ok')||(f==='er'&&st(q).res==='er'))&&(!term||(q.code+' '+q.info+' '+(q.disc||[]).join(' ')+' '+q.enun.replace(/<[^>]+>/g,' ')+' '+q.alts.map(a=>a[1]).join(' ')).toLowerCase().includes(term)));
@@ -192,7 +193,8 @@ list.addEventListener('click',e=>{const art=e.target.closest('.q');if(!art)retur
  if(a){const act=a.dataset.a;
   if(act==='resp'&&s.sel){s.res=q.g?(s.sel===q.g?'ok':'er'):'nf';save();rerender(art,q);enqueue(q)}
   else if(act==='man-ok'||act==='man-er'){s.res=act==='man-ok'?'ok':'er';s.manual=true;save();rerender(art,q);enqueue(q)}
-  else if(act==='redo'){delete S[q.key];save();rerender(art,q)}
+  else if(act==='redo'){const h=s.hid;delete S[q.key];if(h&&h.length)S[q.key]={hid:h};save();rerender(art,q)}
+  else if(act==='delc'){const i=+a.dataset.i;s.hid=s.hid||[];if(!s.hid.includes(i)&&confirm('Excluir este comentário?')){s.hid.push(i);save();rerender(art,q)}}
   else if(act==='tog'){s.open=!s.open;save();rerender(art,q)}
   return}
  const alt=e.target.closest('.alt');if(!alt||s.res)return;const l=alt.dataset.l;
