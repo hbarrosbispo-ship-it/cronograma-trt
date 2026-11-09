@@ -241,7 +241,7 @@ body.tool-on #folha{cursor:cell}
       </div><div class="gl">Zoom</div></div>
 
       <div class="grp"><div class="rows">
-        <div class="r"><button id="btnInc" title="Mostra, ao lado de cada artigo citado, quantas vezes ele foi cobrado nos filtros do compilado de revisão">📊 Incidência</button><button id="btnSelos" title="Traz de volta os selos de incidência que você excluiu com o botão direito">↻ Selos excluídos</button></div>
+        <div class="r"><button id="btnInc" title="Mostra, ao lado de cada artigo citado, quantas vezes ele foi cobrado nos filtros do compilado de revisão">📊 Incidência</button></div>
         <div class="r"><button data-menu="mTR" title="Põe ao lado esquerdo do artigo a linha colorida de incidência do TRTeiros (1 a 5 vezes)">&#9612; Linha TRTeiros &#9662;</button></div>
         <div class="r"><span class="leg"><i class="f1"></i>1× <i class="f2"></i>2× <i class="f3"></i>3× <i class="f4"></i>4× <i class="f5"></i>5+ <i class="f0"></i>0×</span></div>
       </div><div class="gl" id="incInfo">incidência</div></div>
@@ -505,7 +505,7 @@ function aplicarTR(n,base,ignSel,lista){
   const antes=els.map(trEstado);
   // n=0 remove: marca como "removida" (tr=0), assim também esconde a linha natural/do PDF
   els.forEach(el=>{el.dataset.tr=n;el.dataset.trm='1'});
-  TR_UNDO.push({antes,depois:els.map(trEstado)});TR_REDO.length=0;trRecente=true;
+  TR_UNDO.push({antes,depois:els.map(trEstado)});TR_REDO.length=0;trRecente=true;seloRecente=false;
   marcar();atualizarIncidencia();
 }
 function trDesfazer(){const a=TR_UNDO.pop();if(!a)return false;trRestaura(a.antes);TR_REDO.push(a);marcar();atualizarIncidencia();return true}
@@ -527,11 +527,21 @@ $('#mCtx').querySelectorAll('[data-trc]').forEach(b=>b.onclick=()=>{aplicarTR(+b
 // clique direito na linha colorida posta à mão: mudar a cor ou remover
 $('#mCtx').insertAdjacentHTML('afterend','<div class="menu" id="mBarra">'+$('#mTR').innerHTML.replace(/data-tr=/g,'data-trb=').replace('Remover a linha','Remover esta linha')+'</div>');
 let barraAlvo=null;
-$('#mBarra').insertAdjacentHTML('afterend','<div class="menu" id="mSelo"><button data-x="del"><span class="sw">&#10005;</span>Excluir este selo</button><button data-x="back"><span class="sw">&#8635;</span>Trazer de volta os selos excluídos</button></div>');
+$('#mBarra').insertAdjacentHTML('afterend','<div class="menu" id="mSelo"><button data-x="del"><span class="sw">&#10005;</span>Excluir este selo</button></div>');
 let seloAlvo=null;$('#mSelo').onmousedown=e=>e.preventDefault();
-$('#mSelo').querySelector('button').onclick=()=>{const a=seloAlvo&&seloAlvo._anc;fechaMenus();if(!a||!a.dataset.k||!a._b)return;const l=(a._b.dataset.semSelo||'').split(';').filter(Boolean);l.push(a.dataset.k);a._b.dataset.semSelo=l.join(';');a.remove();seloAlvo=null;marcar();posicionarMargem()};
-function trazerSelos(){fechaMenus();folha.querySelectorAll('[data-sem-selo]').forEach(b=>b.removeAttribute('data-sem-selo'));marcar();atualizarIncidencia()}
-$('#mSelo').querySelector('[data-x=back]').onclick=trazerSelos;
+$('#mSelo').querySelector('button').onclick=()=>{const a=seloAlvo&&seloAlvo._anc;fechaMenus();if(!a||!a.dataset.k||!a._b)return;const e2={b:a._b,k:a.dataset.k};SELO_UNDO.push(e2);SELO_REDO.length=0;seloRecente=true;trRecente=false;a.remove();seloAlvo=null;seloMuda(e2,false)};
+const SELO_UNDO=[],SELO_REDO=[];let seloRecente=false;
+const semSeloLista=b=>(b.dataset.semSelo||'').split(';').filter(Boolean);
+function semSeloSet(b,l){if(l.length)b.dataset.semSelo=l.join(';');else b.removeAttribute('data-sem-selo')}
+function seloMuda(e,volta){const b=e.b;if(!b.isConnected)return false;const l=semSeloLista(b).filter(x=>x!==e.k);if(!volta)l.push(e.k);semSeloSet(b,l);marcar();atualizarIncidencia();return true}
+folha.addEventListener('input',()=>{seloRecente=false});
+document.addEventListener('keydown',e=>{
+  if(!(e.ctrlKey||e.metaKey)||e.altKey||!seloRecente)return;
+  const tag=(e.target.tagName||'').toLowerCase();if(['input','textarea','select'].includes(tag))return;
+  const k=(e.key||'').toLowerCase();
+  if(k==='z'&&!e.shiftKey){const x=SELO_UNDO.pop();if(x){SELO_REDO.push(x);seloMuda(x,true);e.preventDefault();e.stopImmediatePropagation()}}
+  else if(k==='y'||(k==='z'&&e.shiftKey)){const x=SELO_REDO.pop();if(x){SELO_UNDO.push(x);seloMuda(x,false);e.preventDefault();e.stopImmediatePropagation()}}
+},true);
 $('#margem').addEventListener('contextmenu',e=>{const b=e.target.closest('.inc-badge');if(!b)return;e.preventDefault();e.stopPropagation();seloAlvo=b;menuEm('mSelo',e.clientX,e.clientY)});
 $('#mBarra').onmousedown=e=>e.preventDefault();
 $('#mBarra').querySelectorAll('[data-trb]').forEach(b=>b.onclick=()=>{if(barraAlvo)aplicarTR(+b.dataset.trb,null,true,barraAlvo.filter(x=>x.isConnected));barraAlvo=null;fechaMenus()});
@@ -584,7 +594,7 @@ function limpaGrifoSub(){
   try{sel.removeAllRanges();if(!fim.collapsed)sel.addRange(fim)}catch(e){}
   const depois=blocos.map(b=>b.outerHTML);
   if(depois.every((h,k)=>h===antes[k]))return false;
-  HL_UNDO.push({nodes:blocos,antes,depois});HL_REDO.length=0;marcar();return true;
+  HL_UNDO.push({nodes:blocos,antes,depois});HL_REDO.length=0;seloRecente=false;marcar();return true;
 }
 document.addEventListener('keydown',e=>{
   if(!(e.ctrlKey||e.metaKey)||e.altKey||e.defaultPrevented)return;
@@ -895,7 +905,6 @@ async function atualizarIncidencia(){
 }
 $('#margem').addEventListener('click',e=>{const b=e.target.closest('.inc-badge,.barra:not(.tr)');if(b&&b.dataset.url){e.preventDefault();window.open(b.dataset.url,'_blank','noopener')}});
 folha.addEventListener('input',agendarMargem);addEventListener('resize',agendarMargem);if(window.ResizeObserver)new ResizeObserver(agendarMargem).observe(folha);
-$('#btnSelos').onmousedown=e=>e.preventDefault();$('#btnSelos').onclick=trazerSelos;
 $('#btnInc').onmousedown=e=>e.preventDefault();
 $('#btnInc').onclick=()=>{const on=LS.get('incOn')===false;LS.set('incOn',on);$('#btnInc').classList.toggle('on',on);atualizarIncidencia()};
 
