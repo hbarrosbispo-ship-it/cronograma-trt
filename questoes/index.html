@@ -23,7 +23,7 @@ aside h3{margin:0;padding:11px 14px;font-size:13px;font-weight:700;color:var(--t
 .nb .bar{height:3px;background:#e9ecef;margin-top:4px;overflow:hidden}.nb .bar i{display:block;height:100%;background:var(--ok)}
 .chk{flex:none;width:44px;border:0;border-left:1px solid var(--bd);background:none;cursor:pointer;font-size:18px;color:#c3c9cf}
 .chk:hover{background:#f6f7f8}.nbrow.done .chk{color:var(--ok)}.nbrow.done .nb{opacity:.55}.nbrow.done .nb .t{text-decoration:line-through}
-aside.min #nbs,aside.min .asf{display:none}aside.min h3{border-bottom:0}
+aside.min #nbs,aside.min .asf,aside.min #hd,aside.min label:has(#hd){display:none}aside.min h3{border-bottom:0}
 main{flex:1;min-width:0}
 .mh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .mh h2{margin:0;font-size:22px;font-weight:600}.mh h2 small{display:block;font-size:13px;font-weight:400;color:var(--mut)}
@@ -102,13 +102,12 @@ main{flex:1;min-width:0}
   <div class="st"><span hidden>Respondidas <b id="sA">0</b>/<span id="sT">0</span></span><span hidden>Acertos <b id="sC">0</b></span><span hidden>Erros <b id="sE">0</b></span><span hidden id="sP"></span><span id="sY" style="cursor:pointer;font-weight:700;color:var(--tx);border:1px solid var(--bd);border-radius:12px;padding:1px 10px" title="Clique para sincronizar agora com o Anki/skill"></span><span>Cadernos concluídos <b id="sD">0</b></span></div>
 </header>
 <div class="wrap">
-<aside id="asd"><h3 id="ah" style="cursor:pointer;display:flex;justify-content:space-between;user-select:none" title="Minimizar / expandir"><span>Cadernos (ordem do cronograma)</span><span id="aar">▾</span></h3><div id="nbs"></div><div class="asf" style="padding:12px"><button class="btn gray" style="width:100%;font-size:13px;margin-bottom:8px" id="resync">Reenviar tudo que já respondi</button><button class="btn gray" style="width:100%;font-size:13px" id="reset">Zerar minhas respostas</button></div></aside>
+<aside id="asd"><h3 id="ah" style="cursor:pointer;display:flex;justify-content:space-between;user-select:none" title="Minimizar / expandir"><span>Cadernos (ordem do cronograma)</span><span id="aar">▾</span></h3><label style="display:flex;gap:6px;align-items:center;padding:8px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--bd)"><input type="checkbox" id="hd"> Ocultar cadernos concluídos</label><div id="nbs"></div><div class="asf" style="padding:12px"><button class="btn gray" style="width:100%;font-size:13px;margin-bottom:8px" id="resync">Reenviar tudo que já respondi</button><button class="btn gray" style="width:100%;font-size:13px" id="reset">Zerar minhas respostas</button></div></aside>
 <main>
   <div class="mh" id="mh"></div>
   <div class="tools">
     <select id="fs"><option value="all">Todas</option><option value="todo">Não respondidas</option><option value="ok">Acertos</option><option value="er">Erros</option></select>
     <input type="text" id="fq" placeholder="Buscar no enunciado, alternativas, assunto ou código…">
-    <label><input type="checkbox" id="hd"> Ocultar cadernos concluídos</label>
   </div>
   <div id="list"></div>
 </main>
@@ -156,7 +155,7 @@ function eEn(q){const e=st(q).ed;return e&&e.enun!=null?e.enun:q.enun}
 function eAl(q,l,t){const e=st(q).ed;return e&&e.alts&&e.alts[l]!=null?e.alts[l]:t}
 function stats(){let a=0,c=0,e=0;Q.forEach(q=>{const s=st(q);if(s.res){a++;if(s.res==='ok')c++;else if(s.res==='er')e++}});sA.textContent=a;sT.textContent=Q.length;sC.textContent=c;sE.textContent=e;sP.textContent=a?Math.round(c/a*100)+'% de acerto':'';sD.textContent=DATA.filter(n=>S.__done[n.id]).length+'/'+DATA.length}
 function side(){let h=`<div class="nbrow ${curNb==='all'?'on':''}"><button class="nb" data-id="all"><span class="t">Todos os cadernos</span><small>${Q.length} questões</small></button></div>`;
- DATA.forEach(nb=>{const tot=nb.qs.length;let d=0;nb.qs.forEach(q=>{if(st({key:q.code||q.path}).res)d++});const dn=S.__done[nb.id];
+ DATA.forEach(nb=>{if(hd.checked&&S.__done[nb.id]&&curNb!==nb.id)return;const tot=nb.qs.length;let d=0;nb.qs.forEach(q=>{if(st({key:q.code||q.path}).res)d++});const dn=S.__done[nb.id];
   h+=`<div class="nbrow ${curNb===nb.id?'on':''} ${dn?'done':''}"><button class="nb" data-id="${nb.id}"><span class="t"><span class="dt">${esc(nb.dt)}</span> · ${esc(nb.subj)} · ${esc(nb.desc)}</span><small>${d}/${tot} respondidas${dn?' · concluído':''}</small><div class="bar"><i style="width:${tot?d/tot*100:0}%"></i></div></button><button class="chk" data-done="${nb.id}" title="${dn?'Desmarcar como concluído':'Marcar caderno como concluído'}">${dn?'✔':'○'}</button></div>`});
  nbs.innerHTML=h;
  nbs.querySelectorAll('.nb').forEach(b=>b.onclick=()=>{curNb=b.dataset.id==='all'?'all':+b.dataset.id;history.replaceState(null,'',curNb==='all'?location.pathname:'#nb'+curNb);render();scrollTo(0,0)});
@@ -171,7 +170,7 @@ function meta(info){const g=(k,n)=>{const m=info.match(new RegExp(k+':\\s*(.*?)(
  return `<div class="meta"><b>Ano:</b><span style="color:var(--tx)">${esc(g('Ano'))}</span><b>Banca:</b><span>${esc(g('Banca'))}</span><b>Órgão:</b><span>${esc(g('Órgão'))}</span><b>Prova:</b><span>${esc(g('Provas?'))}</span></div>`}
 function card(q){const s=st(q),done=!!s.res,gab=q.g;
  let alts=q.alts.map(([l,t])=>{let cls='alt';if(s.cut&&s.cut.includes(l))cls+=' cutd';if(s.sel===l)cls+=' sel';if(done){cls+=' locked';if(gab&&l===gab)cls+=' right';else if(s.sel===l&&gab&&l!==gab)cls+=' wrong'}
-  return `<div class="${cls}" data-l="${esc(l)}">${done?'<span class="cutph"></span>':'<button class="cut" title="Riscar alternativa">✂</button>'}<span class="ltr">${esc(l)}</span><span class="tx" data-ed="alt">${esc(eAl(q,l,t))}</span></div>`}).join('');
+  return `<div class="${cls}" data-l="${esc(l)}"><button class="cut" title="Riscar alternativa">✂</button><span class="ltr">${esc(l)}</span><span class="tx" data-ed="alt">${esc(eAl(q,l,t))}</span></div>`}).join('');
  let res='';if(done){
   if(!gab)res=`<div class="res nf">Gabarito não confirmado nos comentários${q.gh?` (sugestão fraca: <b>${esc(q.gh)}</b>)`:''}. Você marcou <b>${esc(s.sel)}</b>. Confira nos comentários e registre:<div class="btns"><button class="btn gray" data-a="man-ok">Acertei</button><button class="btn gray" data-a="man-er">Errei</button></div>${s.manual?'<small>Registrado manualmente.</small>':''}</div>`;
   else if(s.res==='ok')res=`<div class="res ok"><b>Você acertou!</b> Gabarito: ${esc(gab)}<small>${esc(q.gnote)}</small></div>`;
@@ -198,17 +197,20 @@ list.addEventListener('click',e=>{if(e.target.closest('[contenteditable="true"]'
   else if(act==='delc'){const i=+a.dataset.i;s.hid=s.hid||[];if(!s.hid.includes(i)&&confirm('Excluir este comentário?')){s.hid.push(i);save();rerender(art,q)}}
   else if(act==='tog'){s.open=!s.open;save();rerender(art,q)}
   return}
- const alt=e.target.closest('.alt');if(!alt||s.res)return;const l=alt.dataset.l;
- if(e.target.closest('.cut')){s.cut=s.cut||[];const i=s.cut.indexOf(l);i>=0?s.cut.splice(i,1):s.cut.push(l);if(s.cut.includes(s.sel))delete s.sel}
- else{if(s.cut&&s.cut.includes(l))return;s.sel=l}save();rerender(art,q)});
-list.addEventListener('dblclick',e=>{const el=e.target.closest('[data-ed]');if(!el||el.isContentEditable)return;const art=el.closest('.q');if(!art)return;
+ const alt=e.target.closest('.alt');if(!alt)return;const l=alt.dataset.l;if(s.res&&!e.target.closest('.cut'))return;
+ let enq=false;
+ if(e.target.closest('.cut')){s.cut=s.cut||[];const i=s.cut.indexOf(l);i>=0?s.cut.splice(i,1):s.cut.push(l);if(s.cut.includes(s.sel)&&!s.res)delete s.sel;if(s.res)enq=true}
+ else{if(s.cut&&s.cut.includes(l))return;if(s.sel===l)delete s.sel;else s.sel=l}save();rerender(art,q);if(enq)enqueue(q)});
+function startEdit(e,el){if(!el||el.isContentEditable)return;const art=el.closest('.q');if(!art)return;
  const q=Q.find(x=>String(x.key)===art.dataset.k);if(!q)return;const kind=el.dataset.ed,alt=kind==='alt'?el.closest('.alt'):null,l=alt?alt.dataset.l:null;
  el.contentEditable='true';el.style.outline='2px solid var(--or)';el.style.background='#fffdf5';if(alt)alt.style.cursor='text';el.focus();
  const fin=()=>{el.removeEventListener('blur',fin);el.contentEditable='false';el.style.outline='';el.style.background='';
   const s=S[q.key]=S[q.key]||{};s.ed=s.ed||{};
   if(kind==='enun')s.ed.enun=clean(el.innerHTML);else{s.ed.alts=s.ed.alts||{};s.ed.alts[l]=el.innerText.replace(/\n+$/,'')}
   save();rerender(art,q);if(S[q.key]&&S[q.key].res)enqueue(q)};
- el.addEventListener('blur',fin);el.addEventListener('keydown',ev=>{if(ev.key==='Escape'){ev.preventDefault();el.blur()}else if(ev.key==='Enter'&&kind==='alt'){ev.preventDefault();el.blur()}})});
+ el.addEventListener('blur',fin);el.addEventListener('keydown',ev=>{if(ev.key==='Escape'){ev.preventDefault();el.blur()}else if(ev.key==='Enter'&&kind==='alt'){ev.preventDefault();el.blur()}})}
+list.addEventListener('dblclick',e=>startEdit(e,e.target.closest('[data-ed]')));
+list.addEventListener('contextmenu',e=>{const alt=e.target.closest('.alt');if(!alt||e.target.closest('.cut'))return;e.preventDefault();startEdit(e,alt.querySelector('[data-ed="alt"]'))});
 const MOT=['Não sabia','Confundi os conceitos','Li errado'];
 function balHtml(nb){const qs=Q.filter(q=>q.nb===nb.id);if(!qs.length||!qs.every(q=>st(q).res))return '';
  let ce=0,cd=[],er=[],nf=0;
@@ -225,8 +227,9 @@ function updBal(scroll){const old=document.getElementById('bal');const nb=curNb=
  if(old)old.remove();if(!h)return false;list.insertAdjacentHTML('beforeend',h);if(scroll&&!old){document.getElementById('bal').scrollIntoView({behavior:'smooth',block:'start'});return true}return false}
 list.addEventListener('click',e=>{const b=e.target.closest('[data-mot]');if(!b)return;const row=b.closest('.er-row');const q=Q.find(x=>String(x.key)===row.dataset.k);const s=S[q.key];if(!s)return;
  s.motivo=s.motivo===b.dataset.mot?'':b.dataset.mot;save();const keep=scrollY;updBal(false);scrollTo(0,keep);enqueue(q)});
-function rerender(art,q){const keep=scrollY;const t=document.createElement('div');t.innerHTML=card(q);art.replaceWith(t.firstElementChild);stats();side();if(!updBal(true))scrollTo(0,keep)}
-fs.onchange=render;fq.oninput=render;hd.onchange=render;
+function rerender(art,q){const keep=scrollY;const t=document.createElement('div');t.innerHTML=card(q);art.replaceWith(t.firstElementChild);stats();side();updBal(false);scrollTo(0,keep)}
+try{hd.checked=localStorage.getItem('qoffline_hd')==='1'}catch(e){}
+fs.onchange=render;fq.oninput=render;hd.onchange=()=>{try{localStorage.setItem('qoffline_hd',hd.checked?'1':'0')}catch(e){}render()};
 window.addEventListener('hashchange',()=>{const h=hash();if(h&&DATA.some(n=>n.id===h)){curNb=h;render();scrollTo(0,0)}});
 reset.onclick=()=>{if(confirm('Apagar todas as suas respostas e conclusões neste navegador?')){S={__done:{}};save();render()}};
 if(location.protocol==='file:')homeLink.href='../Sistema do cronograma/cronograma-web/index.html';
