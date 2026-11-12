@@ -77,10 +77,6 @@ body.edicao .ed-b{display:inline}
 body.ver-ocultos .oculto{display:list-item!important;opacity:.45;text-decoration:line-through}
 body.ver-ocultos p.it.oculto{display:block!important}
 .ed-t[contenteditable=true]{outline:2px solid var(--blue);padding:1px 4px;background:#fff;border-radius:4px}
-.nota-txt{min-height:36px;border:1px dashed var(--border);border-radius:8px;padding:7px 11px;background:#fffdf5;white-space:pre-wrap;color:#444}
-.nota-txt:empty::before{content:"(sem anotações)";color:#aaa}
-.nota-txt{cursor:text}
-.nota-txt:focus{outline:2px solid var(--blue);border-style:solid;border-color:var(--blue);background:#fff}
 .edit-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
 .edit-bar .msg{font-size:12.5px;color:var(--green)}
 body.edicao .edit-bar .subtab-btn#btn-edicao{background:var(--blue);color:#fff;border-color:var(--blue)}
@@ -119,9 +115,18 @@ select.sel,select.cap-sel{padding:8px 10px;border:1px solid var(--border);border
 .w-time{font-size:21px;font-weight:bold;color:var(--blue-dark)}.w-sub{font-size:12.5px;color:var(--gray);margin-top:2px}
 
 details.lei-det{margin:12px 0 4px}details.lei-det>summary{cursor:pointer;list-style:none;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--gray);font-weight:bold;padding:2px 0}details.lei-det>summary::-webkit-details-marker{display:none}details.lei-det>summary::before{content:"▸ ";color:var(--blue-dark)}details.lei-det[open]>summary::before{content:"▾ "}details.lei-det>summary:hover{color:var(--blue-dark)}
+
+.parte{display:inline-block;font:700 11px Arial,sans-serif;background:#e8eefb;color:#305496;border:1px solid #c9d6f0;border-radius:9px;padding:0 8px;margin-right:7px;vertical-align:1px;white-space:nowrap}
+body.edicao li[data-ek] > .ed-t[contenteditable=true]{outline:1px dashed #9fb3da;border-radius:3px;padding:1px 3px;background:#fffef7;cursor:text;display:inline}
+body.edicao li[data-ek] > .ed-t[contenteditable=true]:focus{outline:2px solid var(--blue);background:#fff}
+#cx-menu{position:fixed;z-index:1000;display:none;background:#fff;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.28);padding:6px;min-width:250px;font:14px Arial,sans-serif}
+#cx-menu button{display:flex;width:100%;text-align:left;border:0;background:transparent;padding:8px 10px;border-radius:6px;cursor:pointer;font:inherit;color:#1f2937;gap:12px}
+#cx-menu button:hover{background:#eef1f7}
+#cx-menu small{margin-left:auto;color:#6b7280}
+#cx-menu hr{border:0;border-top:1px solid #e3e7ee;margin:4px 0}
 </style></head>
 <body><nav class="sitenav"><span class="logo" style="color:#fff;font-weight:bold;margin-right:10px">Cronograma TRT</span><a href="../../index.html#cronograma">Cronograma</a><a href="../../leitor.html">Biblioteca</a><a href="../../index.html#desempenho">Desempenho e Estatísticas</a><a href="../../index.html#edital">Edital</a><a href="../index.html" class=on>Compilado de Revisão</a></nav><header><div class="wrap"><h1>Jurisprudência: STF</h1><p><a href="../index.html">Biblioteca</a> › Jurisprudência: STF</p></div></header>
-<div class="wrap"><div class="progress-card"><div class="summary-stats"><span><b>4</b> Dispositivos cobrados</span><span><b>4</b> Citações</span><span><b>3</b> Filtros</span></div><div class="legenda"><strong>Legenda (vezes cobrado):</strong><span><i class="dot f1"></i>1 vez</span><span><i class="dot f2"></i>2 vezes</span><span><i class="dot f3"></i>3 vezes</span><span><i class="dot f4"></i>4 vezes</span><span><i class="dot f5"></i>5 ou mais vezes</span></div><div class="small" style="margin-top:8px">Filtros que cobraram esta norma: <a href="../Direito Administrativo/2026-10-05_16a.html">16A</a> <a href="../Direito Processual Civil/2026-10-02_62a.html">62A</a> <a href="../Direito do Trabalho/2026-11-09_convenção-87-da-oit---dt.html">Convenção 87 da OIT - DT</a></div></div><div class="tab-bar"><button class="tab-btn active" data-tab="lei">Na ordem da lei</button><button class="tab-btn" data-tab="inc">Por incidência</button><button class="tab-btn" data-tab="err">Meus erros e dúvidas</button></div><div class="subtab-bar"><input id="busca" type="search" placeholder="Buscar artigo, tema, palavra (funciona sem acento)"><button class="subtab-btn active" data-fx="*">Todas</button><button class="subtab-btn" data-fx="1"><i class="dot f1"></i>1×</button><label class="small"><input type="checkbox" id="ocultar"> ocultar dominados</label></div><div class="edit-bar"><button class="subtab-btn" id="btn-edicao" type="button">Modo edição</button><button class="subtab-btn" id="btn-ocultos" type="button">Mostrar ocultos</button><button class="subtab-btn" id="btn-salvar" type="button">Salvar edições</button><span class="msg" id="ed-msg"></span></div><section class="panel active" id="lei"><p class="note">Todos os filtros somados, na ordem da lei (artigos em ordem crescente). O número ao lado de cada artigo é o total de questões que o cobraram em todos os filtros.</p><div class="day-card" id="cap-súmulas"><div class="day-head"><span class="d-date">Súmulas</span><span class="d-act"><span class="d-badge">3 dispositivos · 3 questões</span><button type="button" class="mini" data-expand="cap">expandir artigos</button></span></div><details class="art" id="a-stf-sumula-346" data-f="1"><summary><span class="ref">Súmula 346 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit" data-ek="stf-sumula:346|titulo|0e7037a8" data-raw="Declaração de nulidade dos próprios atos"><span class="ed-t">Declaração de nulidade dos próprios atos</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></span><label class="dm" onclick="event.stopPropagation()"><input type="checkbox" class="dm-i"> dominado</label></summary><div class="body"><details class="lei-det"><summary>Enunciado (texto integral dos trechos cobrados)</summary><div class="lei-txt"><p class="it" data-ek="stf-sumula:346|lei|6a9e90f5" data-raw="Súmula 346 (STF). A administração pública pode declarar a nulidade dos seus próprios atos."><span class="ed-t">Súmula 346 (STF). A administração pública pode declarar a nulidade dos seus próprios atos.</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></p></div></details><h4>Minhas anotações</h4><div class="nota-txt" contenteditable="true" spellcheck="true" data-nota="stf-sumula:346"></div><h4>Onde caiu</h4><div class="qs"><span class="small">Filtro 16A:</span> <a href="../Direito Administrativo/2026-10-05_16a.html#q22" class="acerto" title="acerto sem dúvida">Q22 <span class="small">Q889500</span></a></div></div></details><details class="art" id="a-stf-sumula-473" data-f="1"><summary><span class="ref">Súmula 473 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit" data-ek="stf-sumula:473|titulo|a133d5e6" data-raw="Anulação e revogação dos próprios atos, ressalvada a apreciação judicial"><span class="ed-t">Anulação e revogação dos próprios atos, ressalvada a apreciação judicial</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></span><label class="dm" onclick="event.stopPropagation()"><input type="checkbox" class="dm-i"> dominado</label></summary><div class="body"><details class="lei-det"><summary>Enunciado (texto integral dos trechos cobrados)</summary><div class="lei-txt"><p class="it" data-ek="stf-sumula:473|lei|a0f6561b" data-raw="Súmula 473 (STF). A administração pode anular seus próprios atos, quando eivados de vícios que os tornam ilegais, porque deles não se originam direitos; ou revogá-los, por motivo de conveniência ou oportunidade, respeitados os direitos adquiridos, e ressalvada, em todos os casos, a apreciação judicial."><span class="ed-t">Súmula 473 (STF). A administração pode anular seus próprios atos, quando eivados de vícios que os tornam ilegais, porque deles não se originam direitos; ou revogá-los, por motivo de conveniência ou oportunidade, respeitados os direitos adquiridos, e ressalvada, em todos os casos, a apreciação judicial.</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></p></div></details><h4>Minhas anotações</h4><div class="nota-txt" contenteditable="true" spellcheck="true" data-nota="stf-sumula:473"></div><h4>Onde caiu</h4><div class="qs"><span class="small">Filtro 16A:</span> <a href="../Direito Administrativo/2026-10-05_16a.html#q23" class="acerto" title="acerto sem dúvida">Q23 <span class="small">Q890545</span></a></div></div></details><details class="art" id="a-stf-sumula-677" data-f="1"><summary><span class="ref">Súmula 677 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit" data-ek="stf-sumula:677|titulo|4ce9eb2d" data-raw="Registro das entidades sindicais e zelo pela unicidade"><span class="ed-t">Registro das entidades sindicais e zelo pela unicidade</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></span><label class="dm" onclick="event.stopPropagation()"><input type="checkbox" class="dm-i"> dominado</label></summary><div class="body"><details class="lei-det"><summary>Enunciado (texto integral dos trechos cobrados)</summary><div class="lei-txt"><p class="it" data-ek="stf-sumula:677|lei|0d1f76ab" data-raw="Súmula 677 (STF). Até que lei venha a dispor a respeito, incumbe ao Ministério do Trabalho proceder ao registro das entidades sindicais e zelar pela observância do princípio da unicidade."><span class="ed-t">Súmula 677 (STF). Até que lei venha a dispor a respeito, incumbe ao Ministério do Trabalho proceder ao registro das entidades sindicais e zelar pela observância do princípio da unicidade.</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></p></div></details><h4>Minhas anotações</h4><div class="nota-txt" contenteditable="true" spellcheck="true" data-nota="stf-sumula:677"></div><h4>Onde caiu</h4><div class="qs"><span class="small">Filtro Convenção 87 da OIT - DT:</span> <a href="../Direito do Trabalho/2026-11-09_convenção-87-da-oit---dt.html#q3" class="acerto" title="acerto sem dúvida">Q3 <span class="small">Q2017008</span></a></div></div></details></div><div class="day-card" id="cap-temas"><div class="day-head"><span class="d-date">Temas</span><span class="d-act"><span class="d-badge">1 dispositivo · 1 questão</span><button type="button" class="mini" data-expand="cap">expandir artigos</button></span></div><details class="art" id="a-stf-tema-961" data-f="1"><summary><span class="ref">Tema 961 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit" data-ek="stf-tema:961|titulo|089bf459" data-raw="Impenhorabilidade da pequena propriedade rural"><span class="ed-t">Impenhorabilidade da pequena propriedade rural</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></span><label class="dm" onclick="event.stopPropagation()"><input type="checkbox" class="dm-i"> dominado</label></summary><div class="body"><details class="lei-det"><summary>Enunciado (texto integral dos trechos cobrados)</summary><div class="lei-txt"><p class="it" data-ek="stf-tema:961|lei|3d785093" data-raw="Tema 961 (STF). É impenhorável a pequena propriedade rural familiar constituída de mais de um terreno, desde que contínuos e com área total inferior a quatro módulos fiscais do município de localização."><span class="ed-t">Tema 961 (STF). É impenhorável a pequena propriedade rural familiar constituída de mais de um terreno, desde que contínuos e com área total inferior a quatro módulos fiscais do município de localização.</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></p></div></details><h4>Minhas anotações</h4><div class="nota-txt" contenteditable="true" spellcheck="true" data-nota="stf-tema:961"></div><h4>Onde caiu</h4><div class="qs"><span class="small">Filtro 62A:</span> <a href="../Direito Processual Civil/2026-10-02_62a.html#q22" class="acerto" title="acerto sem dúvida">Q22 <span class="small">Q1956927</span></a></div></div></details></div></section><section class="panel" id="inc"><div class="day-card"><div class="day-head"><span class="d-date"><i class="dot f1"></i>Cobrados 1 vez</span><span class="d-badge">4 dispositivo(s)</span></div><details class="art" data-f="1" data-src="a-stf-sumula-346"><summary><span class="ref">Súmula 346 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit">Declaração de nulidade dos próprios atos <span class="ctx">· Jurisprudência: STF › Súmulas</span></span></summary><div class="body"></div></details><details class="art" data-f="1" data-src="a-stf-sumula-473"><summary><span class="ref">Súmula 473 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit">Anulação e revogação dos próprios atos, ressalvada a apreciação judicial <span class="ctx">· Jurisprudência: STF › Súmulas</span></span></summary><div class="body"></div></details><details class="art" data-f="1" data-src="a-stf-sumula-677"><summary><span class="ref">Súmula 677 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit">Registro das entidades sindicais e zelo pela unicidade <span class="ctx">· Jurisprudência: STF › Súmulas</span></span></summary><div class="body"></div></details><details class="art" data-f="1" data-src="a-stf-tema-961"><summary><span class="ref">Tema 961 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit">Impenhorabilidade da pequena propriedade rural <span class="ctx">· Jurisprudência: STF › Temas</span></span></summary><div class="body"></div></details></div></section><section class="panel" id="err"><p class="note">Conta só a partir da data de corte configurada. </p><p class="note">Nenhum erro ou dúvida registrado.</p></section></div><script>window.__ED={"ocultar": [], "editar": {}, "notas": {}};</script><script>(function () {
+<div class="wrap"><div class="progress-card"><div class="summary-stats"><span><b>4</b> Dispositivos cobrados</span><span><b>4</b> Citações</span><span><b>3</b> Filtros</span></div><div class="legenda"><strong>Legenda (vezes cobrado):</strong><span><i class="dot f1"></i>1 vez</span><span><i class="dot f2"></i>2 vezes</span><span><i class="dot f3"></i>3 vezes</span><span><i class="dot f4"></i>4 vezes</span><span><i class="dot f5"></i>5 ou mais vezes</span></div><div class="small" style="margin-top:8px">Filtros que cobraram esta norma: <a href="../Direito Administrativo/2026-10-05_16a.html">16A</a> <a href="../Direito Processual Civil/2026-10-02_62a.html">62A</a> <a href="../Direito do Trabalho/2026-11-09_convenção-87-da-oit---dt.html">Convenção 87 da OIT - DT</a></div></div><div class="tab-bar"><button class="tab-btn active" data-tab="lei">Na ordem da lei</button><button class="tab-btn" data-tab="inc">Por incidência</button><button class="tab-btn" data-tab="err">Meus erros e dúvidas</button></div><div class="subtab-bar"><input id="busca" type="search" placeholder="Buscar artigo, tema, palavra (funciona sem acento)"><button class="subtab-btn active" data-fx="*">Todas</button><button class="subtab-btn" data-fx="1"><i class="dot f1"></i>1×</button><label class="small"><input type="checkbox" id="ocultar"> ocultar dominados</label></div><div class="edit-bar"><button class="subtab-btn" id="btn-edicao" type="button">Modo edição</button><button class="subtab-btn" id="btn-ocultos" type="button">Mostrar ocultos</button><button class="subtab-btn" id="btn-salvar" type="button">Salvar edições</button><span class="msg" id="ed-msg"></span></div><section class="panel active" id="lei"><p class="note">Todos os filtros somados, na ordem da lei (artigos em ordem crescente). O número ao lado de cada artigo é o total de questões que o cobraram em todos os filtros.</p><div class="day-card" id="cap-súmulas"><div class="day-head"><span class="d-date">Súmulas</span><span class="d-act"><span class="d-badge">3 dispositivos · 3 questões</span><button type="button" class="mini" data-expand="cap">expandir artigos</button></span></div><details class="art" id="a-stf-sumula-346" data-f="1"><summary><span class="ref">Súmula 346 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit" data-ek="stf-sumula:346|titulo|0e7037a8" data-raw="Declaração de nulidade dos próprios atos"><span class="ed-t">Declaração de nulidade dos próprios atos</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></span><label class="dm" onclick="event.stopPropagation()"><input type="checkbox" class="dm-i"> dominado</label></summary><div class="body"><details class="lei-det"><summary>Enunciado (texto integral dos trechos cobrados)</summary><div class="lei-txt"><p class="it" data-ek="stf-sumula:346|lei|6a9e90f5" data-raw="Súmula 346 (STF). A administração pública pode declarar a nulidade dos seus próprios atos."><span class="ed-t">Súmula 346 (STF). A administração pública pode declarar a nulidade dos seus próprios atos.</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></p></div></details><h4>Onde caiu</h4><div class="qs"><span class="small">Filtro 16A:</span> <a href="../Direito Administrativo/2026-10-05_16a.html#q22" class="acerto" title="acerto sem dúvida">Q22 <span class="small">Q889500</span></a></div></div></details><details class="art" id="a-stf-sumula-473" data-f="1"><summary><span class="ref">Súmula 473 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit" data-ek="stf-sumula:473|titulo|a133d5e6" data-raw="Anulação e revogação dos próprios atos, ressalvada a apreciação judicial"><span class="ed-t">Anulação e revogação dos próprios atos, ressalvada a apreciação judicial</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></span><label class="dm" onclick="event.stopPropagation()"><input type="checkbox" class="dm-i"> dominado</label></summary><div class="body"><details class="lei-det"><summary>Enunciado (texto integral dos trechos cobrados)</summary><div class="lei-txt"><p class="it" data-ek="stf-sumula:473|lei|a0f6561b" data-raw="Súmula 473 (STF). A administração pode anular seus próprios atos, quando eivados de vícios que os tornam ilegais, porque deles não se originam direitos; ou revogá-los, por motivo de conveniência ou oportunidade, respeitados os direitos adquiridos, e ressalvada, em todos os casos, a apreciação judicial."><span class="ed-t">Súmula 473 (STF). A administração pode anular seus próprios atos, quando eivados de vícios que os tornam ilegais, porque deles não se originam direitos; ou revogá-los, por motivo de conveniência ou oportunidade, respeitados os direitos adquiridos, e ressalvada, em todos os casos, a apreciação judicial.</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></p></div></details><h4>Onde caiu</h4><div class="qs"><span class="small">Filtro 16A:</span> <a href="../Direito Administrativo/2026-10-05_16a.html#q23" class="acerto" title="acerto sem dúvida">Q23 <span class="small">Q890545</span></a></div></div></details><details class="art" id="a-stf-sumula-677" data-f="1"><summary><span class="ref">Súmula 677 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit" data-ek="stf-sumula:677|titulo|4ce9eb2d" data-raw="Registro das entidades sindicais e zelo pela unicidade"><span class="ed-t">Registro das entidades sindicais e zelo pela unicidade</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></span><label class="dm" onclick="event.stopPropagation()"><input type="checkbox" class="dm-i"> dominado</label></summary><div class="body"><details class="lei-det"><summary>Enunciado (texto integral dos trechos cobrados)</summary><div class="lei-txt"><p class="it" data-ek="stf-sumula:677|lei|0d1f76ab" data-raw="Súmula 677 (STF). Até que lei venha a dispor a respeito, incumbe ao Ministério do Trabalho proceder ao registro das entidades sindicais e zelar pela observância do princípio da unicidade."><span class="ed-t">Súmula 677 (STF). Até que lei venha a dispor a respeito, incumbe ao Ministério do Trabalho proceder ao registro das entidades sindicais e zelar pela observância do princípio da unicidade.</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></p></div></details><h4>Onde caiu</h4><div class="qs"><span class="small">Filtro Convenção 87 da OIT - DT:</span> <a href="../Direito do Trabalho/2026-11-09_convenção-87-da-oit---dt.html#q3" class="acerto" title="acerto sem dúvida">Q3 <span class="small">Q2017008</span></a></div></div></details></div><div class="day-card" id="cap-temas"><div class="day-head"><span class="d-date">Temas</span><span class="d-act"><span class="d-badge">1 dispositivo · 1 questão</span><button type="button" class="mini" data-expand="cap">expandir artigos</button></span></div><details class="art" id="a-stf-tema-961" data-f="1"><summary><span class="ref">Tema 961 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit" data-ek="stf-tema:961|titulo|089bf459" data-raw="Impenhorabilidade da pequena propriedade rural"><span class="ed-t">Impenhorabilidade da pequena propriedade rural</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></span><label class="dm" onclick="event.stopPropagation()"><input type="checkbox" class="dm-i"> dominado</label></summary><div class="body"><details class="lei-det"><summary>Enunciado (texto integral dos trechos cobrados)</summary><div class="lei-txt"><p class="it" data-ek="stf-tema:961|lei|3d785093" data-raw="Tema 961 (STF). É impenhorável a pequena propriedade rural familiar constituída de mais de um terreno, desde que contínuos e com área total inferior a quatro módulos fiscais do município de localização."><span class="ed-t">Tema 961 (STF). É impenhorável a pequena propriedade rural familiar constituída de mais de um terreno, desde que contínuos e com área total inferior a quatro módulos fiscais do município de localização.</span><span class="ed-b"><button class="ed-del" title="Ocultar ou restaurar">✕</button></span></p></div></details><h4>Onde caiu</h4><div class="qs"><span class="small">Filtro 62A:</span> <a href="../Direito Processual Civil/2026-10-02_62a.html#q22" class="acerto" title="acerto sem dúvida">Q22 <span class="small">Q1956927</span></a></div></div></details></div></section><section class="panel" id="inc"><div class="day-card"><div class="day-head"><span class="d-date"><i class="dot f1"></i>Cobrados 1 vez</span><span class="d-badge">4 dispositivo(s)</span></div><details class="art" data-f="1" data-src="a-stf-sumula-346"><summary><span class="ref">Súmula 346 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit">Declaração de nulidade dos próprios atos <span class="ctx">· Jurisprudência: STF › Súmulas</span></span></summary><div class="body"></div></details><details class="art" data-f="1" data-src="a-stf-sumula-473"><summary><span class="ref">Súmula 473 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit">Anulação e revogação dos próprios atos, ressalvada a apreciação judicial <span class="ctx">· Jurisprudência: STF › Súmulas</span></span></summary><div class="body"></div></details><details class="art" data-f="1" data-src="a-stf-sumula-677"><summary><span class="ref">Súmula 677 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit">Registro das entidades sindicais e zelo pela unicidade <span class="ctx">· Jurisprudência: STF › Súmulas</span></span></summary><div class="body"></div></details><details class="art" data-f="1" data-src="a-stf-tema-961"><summary><span class="ref">Tema 961 (STF)</span><span class="inc f1"><i class="dot f1"></i>1×</span><span class="tit">Impenhorabilidade da pequena propriedade rural <span class="ctx">· Jurisprudência: STF › Temas</span></span></summary><div class="body"></div></details></div></section><section class="panel" id="err"><p class="note">Conta só a partir da data de corte configurada. </p><p class="note">Nenhum erro ou dúvida registrado.</p></section></div><script>window.__ED={"ocultar": [], "editar": {}, "notas": {}};</script><script>(function () {
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
   var N = function (x) { return (x || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase(); };
@@ -200,11 +205,11 @@ details.lei-det{margin:12px 0 4px}details.lei-det>summary{cursor:pointer;list-st
     };
   });
 
-  /* ---------- edição: ocultar, editar texto, anotações ---------- */
+  /* ---------- edição: botão direito liga o modo edição; com ele ligado todo item é editável direto ---------- */
   var BASE = window.__ED || { ocultar: [], editar: {}, notas: {} };
-  var LOC = { ocultar: {}, editar: {}, notas: {} };
+  var LOC = { ocultar: {}, editar: {} };
   try { var raw = JSON.parse(st('cr:ed:v1') || 'null'); if (raw) LOC = raw; } catch (e) {}
-  LOC.ocultar = LOC.ocultar || {}; LOC.editar = LOC.editar || {}; LOC.notas = LOC.notas || {};
+  LOC.ocultar = LOC.ocultar || {}; LOC.editar = LOC.editar || {};
   function persist() { st('cr:ed:v1', JSON.stringify(LOC)); }
   function setText(el, raw) { el.dataset.raw = raw; var t = $('.ed-t', el); if (t) t.innerHTML = rich(raw); }
   $$('[data-ek]').forEach(function (el) {
@@ -212,49 +217,52 @@ details.lei-det{margin:12px 0 4px}details.lei-det>summary{cursor:pointer;list-st
     if (k in LOC.ocultar) el.classList.toggle('oculto', !!LOC.ocultar[k]);
     if (k in LOC.editar) setText(el, LOC.editar[k]);
   });
-  $$('.nota-txt').forEach(function (n) { var k = n.dataset.nota; if (k in LOC.notas) n.textContent = LOC.notas[k]; });
 
   function msg(t) { var m = $('#ed-msg'); if (m) { m.textContent = t; setTimeout(function () { m.textContent = ''; }, 6000); } }
+  function toggleOculto(el) {
+    var k = el.dataset.ek, now = el.classList.contains('oculto');
+    LOC.ocultar[k] = !now; el.classList.toggle('oculto', !now); persist();
+    msg(now ? 'Item restaurado.' : 'Item ocultado (use "Mostrar ocultos" para restaurar).');
+  }
   document.addEventListener('click', function (e) {
     var t = e.target;
-    if (t.classList.contains('ed-del')) {
-      e.preventDefault(); e.stopPropagation();
-      var el = t.closest('[data-ek]'), k = el.dataset.ek, now = el.classList.contains('oculto');
-      LOC.ocultar[k] = !now; el.classList.toggle('oculto', !now); persist();
-      msg(now ? 'Item restaurado.' : 'Item ocultado (use "Mostrar ocultos" para restaurar).');
-    } else if (t.classList.contains('ed-edit')) {
-      e.preventDefault(); e.stopPropagation();
-      var li = t.closest('[data-ek]'), sp = $('.ed-t', li), antes = li.dataset.raw;
-      sp.textContent = antes; sp.contentEditable = 'true'; sp.focus();
-      var fim = function (salvar) {
-        sp.contentEditable = 'false';
-        if (salvar) { var novo = sp.innerText.replace(/\s+/g, ' ').trim(); if (novo && novo !== antes) { LOC.editar[li.dataset.ek] = novo; persist(); setText(li, novo); msg('Texto editado.'); return; } }
-        setText(li, antes);
-      };
-      sp.onkeydown = function (ev) { if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); sp.onblur = null; fim(true); } else if (ev.key === 'Escape') { sp.onblur = null; fim(false); } };
-      sp.onblur = function () { fim(true); };
-    }
+    if (t.classList && t.classList.contains('ed-del')) { e.preventDefault(); e.stopPropagation(); toggleOculto(t.closest('[data-ek]')); }
   }, true);
 
-  function editMode(on) { document.body.classList.toggle('edicao', on); }
+  // itens de lista (li) ficam editáveis no modo edição: mostra o texto cru (com **negrito**) e salva a cada digitação
+  function campos() { return $$('li[data-ek] > .ed-t'); }
+  function editMode(on) {
+    document.body.classList.toggle('edicao', on);
+    campos().forEach(function (sp) {
+      var li = sp.parentNode;
+      if (on) { sp.textContent = li.dataset.raw; sp.contentEditable = 'true'; sp.spellcheck = true; }
+      else { sp.contentEditable = 'false'; setText(li, li.dataset.raw); }
+    });
+    if (on) msg('Modo edição ligado: clique em qualquer item para editar. Enter confirma; botão direito para sair.');
+  }
+  document.addEventListener('input', function (e) {
+    var sp = e.target.closest && e.target.closest('li[data-ek] > .ed-t');
+    if (!sp || !document.body.classList.contains('edicao')) return;
+    var li = sp.parentNode, novo = (sp.innerText || sp.textContent).replace(/\s+/g, ' ').trim();
+    if (novo) { LOC.editar[li.dataset.ek] = novo; li.dataset.raw = novo; persist(); }
+  });
+  document.addEventListener('keydown', function (e) {
+    var sp = e.target.closest && e.target.closest('li[data-ek] > .ed-t');
+    if (sp && e.key === 'Enter') { e.preventDefault(); sp.blur(); }
+  });
   var be = $('#btn-edicao'); if (be) be.onclick = function () { editMode(!document.body.classList.contains('edicao')); };
   var bo = $('#btn-ocultos'); if (bo) bo.onclick = function () { document.body.classList.toggle('ver-ocultos'); };
-  document.addEventListener('input', function (e) {
-    var n = e.target.closest && e.target.closest('.nota-txt');
-    if (n) { LOC.notas[n.dataset.nota] = n.innerText; persist(); }
-  });
   function merged() {
     var o = BASE.ocultar.filter(function (k) { return !(k in LOC.ocultar) || LOC.ocultar[k]; });
     Object.keys(LOC.ocultar).forEach(function (k) { if (LOC.ocultar[k] && o.indexOf(k) < 0) o.push(k); });
-    return { ocultar: o, editar: Object.assign({}, BASE.editar, LOC.editar), notas: Object.assign({}, BASE.notas, LOC.notas) };
+    return { ocultar: o, editar: Object.assign({}, BASE.editar, LOC.editar), notas: BASE.notas || {} };
   }
   function baixar(txt) {
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' }));
     a.download = 'compilado-edicoes.json'; document.body.appendChild(a); a.click(); a.remove();
     msg('Arquivo "compilado-edicoes.json" baixado. Ele é importado sozinho na próxima geração do compilado.');
   }
-  var bs = $('#btn-salvar');
-  if (bs) bs.onclick = function () {
+  function salvar() {
     var txt = JSON.stringify(merged(), null, 1);
     if (window.showSaveFilePicker) {
       window.showSaveFilePicker({ suggestedName: 'edicoes.json', types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }] })
@@ -262,7 +270,40 @@ details.lei-det{margin:12px 0 4px}details.lei-det>summary{cursor:pointer;list-st
         .then(function () { msg('Edições salvas no arquivo escolhido.'); })
         .catch(function (e) { if (!e || e.name !== 'AbortError') baixar(txt); });
     } else baixar(txt);
-  };
+  }
+  var bs = $('#btn-salvar'); if (bs) bs.onclick = salvar;
+
+  /* menu do botão direito */
+  var cx = document.createElement('div'); cx.id = 'cx-menu'; document.body.appendChild(cx);
+  var cxAlvo = null;
+  function fechaCx() { cx.style.display = 'none'; }
+  function item(txt, fn, extra) {
+    var b = document.createElement('button'); b.type = 'button'; b.innerHTML = txt + (extra ? '<small>' + extra + '</small>' : '');
+    b.onmousedown = function (e) { e.preventDefault(); };
+    b.onclick = function () { fechaCx(); fn(); }; cx.appendChild(b);
+  }
+  function hr() { cx.appendChild(document.createElement('hr')); }
+  document.addEventListener('contextmenu', function (e) {
+    if (e.shiftKey) return;                       // Shift + botão direito: menu normal do navegador
+    e.preventDefault(); cx.innerHTML = '';
+    var on = document.body.classList.contains('edicao'), el = e.target.closest ? e.target.closest('[data-ek]') : null;
+    item(on ? '✓ Sair do modo edição' : '✎ Ativar modo edição (editar tudo direto)', function () { editMode(!on); });
+    if (el) { var oc = el.classList.contains('oculto'); item(oc ? 'Restaurar este item' : 'Ocultar este item', function () { toggleOculto(el); }); }
+    item(document.body.classList.contains('ver-ocultos') ? 'Esconder itens ocultos' : 'Mostrar itens ocultos', function () { document.body.classList.toggle('ver-ocultos'); });
+    hr();
+    item('Copiar', function () { document.execCommand('copy'); }, 'Ctrl+C');
+    if (on) {
+      item('Recortar', function () { document.execCommand('cut'); }, 'Ctrl+X');
+      item('Colar', function () { if (navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(function (t) { document.execCommand('insertText', false, t); }); }, 'Ctrl+V');
+    }
+    hr(); item('Salvar edições em arquivo', salvar);
+    cx.style.display = 'block';
+    cx.style.left = Math.max(6, Math.min(innerWidth - cx.offsetWidth - 6, e.clientX)) + 'px';
+    cx.style.top = Math.max(6, Math.min(innerHeight - cx.offsetHeight - 6, e.clientY)) + 'px';
+  });
+  document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('#cx-menu')) fechaCx(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fechaCx(); });
+  window.addEventListener('scroll', fechaCx, true);
 
   /* ---------- links entre abas/páginas ---------- */
   $$('a[href^="#a-"]').forEach(function (a) {

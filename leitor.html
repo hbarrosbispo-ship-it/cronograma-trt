@@ -145,6 +145,17 @@ body.tool-on #folha{cursor:cell}
 #folha h2.c,#folha h3.c{text-align:center;margin:1.8em 0 .9em;line-height:1.5}
 #folha p.tit{text-align:center;font-weight:bold;margin:1.2em 0 .8em}
 #folha.leiseca p{margin-bottom:1.55em}
+#folha .call p,#folha.leiseca .call p,#folha>div:not(.band) p,#folha.leiseca>div:not(.band) p{margin:0 0 .85em}
+#folha .call p:last-child,#folha>div:not(.band) p:last-child{margin-bottom:0}
+.aa-hl{background:#fff176;padding:0 3px;border-radius:2px;text-decoration:underline;font-weight:normal}
+.menu .mini{padding:2px 2px 0}
+.menu .mini .mrow{display:flex;gap:2px;align-items:center;padding:2px 0;flex-wrap:nowrap}
+.menu .mini button{width:auto;padding:4px 7px;min-width:28px;justify-content:center;font-size:14px;gap:2px}
+.menu .mini .split{display:inline-flex;align-items:stretch}
+.menu .mini .split .main{flex-direction:column;gap:0;align-items:center;padding:2px 6px}
+.menu .mini .split .arr{padding:4px 3px;font-size:10px;min-width:0}
+.menu .mini .bar{display:block;width:16px;height:3px;background:#d90000;border-radius:1px}
+body.pincel-on #folha{cursor:copy}
 #margem .barra{position:absolute;left:62px;width:5px;border-radius:2px;cursor:pointer;pointer-events:auto}
 #margem .barra.tr{cursor:help}
 #margem .barra:hover{box-shadow:0 0 0 2px rgba(48,84,150,.35)}
@@ -217,7 +228,7 @@ body.tool-on #folha{cursor:cell}
       </div><div class="gl">Fonte</div></div>
 
       <div class="grp"><div class="rows">
-        <div class="r"><span class="split"><button class="main" id="btnMk" title="Marcador: clique e depois selecione os trechos (Alt+1, Alt+2...)"><span class="ic">🖍</span><i id="barMk" style="background:#fff176"></i></button><button class="arr" data-menu="mMk">▾</button></span>
+        <div class="r"><span class="split"><button class="main" id="btnMk" title="Marcador: clique e depois selecione os trechos (Alt+1, Alt+2...)"><span class="ic aa-hl">Aa</span><i id="barMk" style="background:#fff176"></i></button><button class="arr" data-menu="mMk">▾</button></span>
           <button id="tBor" title="Borracha (Alt+E): tira marca-texto, negrito, sublinhado e cor da fonte">⌫ Borracha</button></div>
         <div class="r"><span class="dots" id="dots"></span></div>
       </div><div class="gl">Marcador</div></div>
@@ -241,7 +252,7 @@ body.tool-on #folha{cursor:cell}
       </div><div class="gl">Zoom</div></div>
 
       <div class="grp"><div class="rows">
-        <div class="r"><button id="btnInc" title="Mostra, ao lado de cada artigo citado, quantas vezes ele foi cobrado nos filtros do compilado de revisão">📊 Incidência</button></div>
+        <div class="r"><button id="btnInc" title="Liga ou desliga a incidência ao lado dos artigos">📊 Incidência</button><button data-menu="mVer" id="btnVer" title="Escolher qual incidência aparece: compilado, TRTeiros ou as duas">Ver: tudo ▾</button></div>
         <div class="r"><button data-menu="mTR" title="Põe ao lado esquerdo do artigo a linha colorida de incidência do TRTeiros (1 a 5 vezes)">&#9612; Linha TRTeiros &#9662;</button></div>
         <div class="r"><span class="leg"><i class="f1"></i>1× <i class="f2"></i>2× <i class="f3"></i>3× <i class="f4"></i>4× <i class="f5"></i>5+ <i class="f0"></i>0×</span></div>
       </div><div class="gl" id="incInfo">incidência</div></div>
@@ -261,6 +272,7 @@ body.tool-on #folha{cursor:cell}
 <div class="menu" id="mTxt"></div>
 <div class="menu" id="mMk"></div>
 <div class="menu" id="mCtx"></div>
+<div class="menu" id="mVer"><button data-ver="ambas"><span class="sw">&#9680;</span>Compilado + TRTeiros<small>padrão</small></button><button data-ver="comp"><span class="sw">&#9632;</span>Só o compilado</button><button data-ver="trt"><span class="sw">&#9612;</span>Só o TRTeiros</button><hr><button disabled style="cursor:default;font-size:12px;color:#6b7280;white-space:normal">Na opção padrão, o compilado vale onde tem dado e a legenda do TRTeiros aparece onde ele ainda não tem.</button></div>
 <div class="menu" id="mTR"><button data-tr="1"><span class="sw" style="background:#FFD966"></span>1 vez (amarelo)</button><button data-tr="2"><span class="sw" style="background:#7ED957"></span>2 vezes (verde)</button><button data-tr="3"><span class="sw" style="background:#5271FF"></span>3 vezes (azul)</button><button data-tr="4"><span class="sw" style="background:#F45B8F"></span>4 vezes (rosa)</button><button data-tr="5"><span class="sw" style="background:#FF3131"></span>5 ou mais (vermelho)</button><button data-tr="0"><span class="sw">&#10005;</span>Remover a linha</button></div>
 <div class="menu" id="mCase">
   <button data-case="up">MAIÚSCULAS</button><button data-case="low">minúsculas</button><button data-case="cap">Primeira Letra De Cada Palavra</button>
@@ -453,6 +465,7 @@ function aparaSelecao(){
 }
 folha.addEventListener('dblclick',()=>setTimeout(aparaSelecao,0));
 function aplicar(){
+  if(pincel&&selecaoNaFolha()){aplicarPincel();return}
   if(!tool||!selecaoNaFolha())return;
   aparaSelecao();
   document.execCommand('styleWithCSS',false,true);
@@ -469,7 +482,7 @@ function aplicar(){
 document.addEventListener('keydown',e=>{
   if(!meta||e.metaKey||e.shiftKey)return;
   const tag=(e.target.tagName||'').toLowerCase();if(['input','textarea','select'].includes(tag))return;
-  if(e.key==='Escape'){if(tool)ligar(tool,false);fechaMenus();return}
+  if(e.key==='Escape'){if(tool)ligar(tool,false);if(pincel){pincel=null;document.body.classList.remove('pincel-on')}fechaMenus();return}
   if(!e.ctrlKey&&!e.altKey)return;
   const code=e.code||'';
   if(/^(Digit|Numpad)[0-9]$/.test(code)){e.preventDefault();ligar(ATALHO[code.slice(-1)],true);return}
@@ -477,12 +490,48 @@ document.addEventListener('keydown',e=>{
 });
 
 // ---- botão direito: escolher a ferramenta (Alt+1, Alt+2...) ----
-$('#mCtx').innerHTML=listaFerramentas()+'<hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
+const FONTES=['Arial','Calibri','Times New Roman','Georgia','Verdana','Courier New'];
+const itensCtx=()=>[ATALHO['1'],ATALHO['2'],ATALHO['5']].map((t,i)=>itemFerr(t,t.n,'Alt+'+['1','2','5'][i])).join('')+itemFerr({k:'st'},'Tachado','')+itemFerr({k:'er'},'Borracha','Alt+E');
+$('#mCtx').innerHTML=`<div class="mini">
+ <div class="mrow"><button data-x="fonte" id="cxFonte" title="Fonte">Arial ▾</button><button data-x="tam" id="cxTam" title="Tamanho da fonte">11 ▾</button><button data-x="mais" title="Aumentar a fonte">A<sup>▲</sup></button><button data-x="menos" title="Diminuir a fonte">A<sub>▼</sub></button><button data-x="pincel" title="Pincel de formatação: copia o formato do trecho e aplica no próximo que você selecionar">🖌</button></div>
+ <div class="mrow"><button data-x="n" title="Negrito"><b>N</b></button><button data-x="i" title="Itálico"><i>I</i></button><button data-x="s" title="Sublinhado"><u>S</u></button>
+  <span class="split"><button data-x="hl" class="main" title="Marca-texto"><span class="aa-hl">Aa</span></button><button data-x="hlArr" class="arr" title="Escolher a cor do marca-texto">▾</button></span>
+  <button data-x="limpa" title="Limpar o grifo e o sublinhado do trecho"><span class="aa-hl">Aa</span>⌫</button>
+  <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
+  <button data-x="ul" title="Lista com marcadores">•≡</button><button data-x="ol" title="Lista numerada">1≡</button></div></div><hr>`
+ +itensCtx()+'<hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
+$('#mCtx').insertAdjacentHTML('afterend',`<div class="menu" id="mFonte">${FONTES.map(f=>`<button data-f="${f}" style="font-family:'${f}'">${f}</button>`).join('')}</div><div class="menu" id="mTam">${[8,9,10,11,12,14,16,18,20,24,28,32,36,48].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div><div class="menu" id="mHl3">${[ATALHO['1'],ATALHO['2'],ATALHO['5']].map(t=>itemFerr(t,t.n,'')).join('')}</div>`);
+['mFonte','mTam','mHl3'].forEach(id=>$('#'+id).onmousedown=e=>e.preventDefault());
+ligaBotoes($('#mHl3'));
+$('#mFonte').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{exec('fontName',b.dataset.f);fechaMenus()});
+$('#mTam').querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{definirTamanho(+b.dataset.n);fechaMenus()});
+function definirTamanho(n){substituirSelecao(c=>c.querySelectorAll('[style*="font-size"]').forEach(e=>e.style.removeProperty('font-size')),`font-size:${n}pt`)}
+function fonteAtual(){const s=getSelection();let el=s.rangeCount?s.getRangeAt(0).startContainer:null;if(el&&el.nodeType===3)el=el.parentElement;
+  if(!el||!folha.contains(el))return 'Arial';const f=getComputedStyle(el).fontFamily.split(',')[0].replace(/["']/g,'').trim();return f||'Arial'}
+// pincel de formatação: copia o formato do trecho e aplica no próximo trecho selecionado
+let pincel=null;
+function pegaFormato(){const s=getSelection();let el=s.rangeCount?s.getRangeAt(0).startContainer:null;if(el&&el.nodeType===3)el=el.parentElement;if(!el||!folha.contains(el))return null;
+  const cs=getComputedStyle(el),bloco=/^(P|DIV|H[1-6]|LI|TD|TH)$/.test(el.tagName),bg=cs.backgroundColor;
+  return {w:cs.fontWeight,i:cs.fontStyle,td:cs.textDecorationLine,c:cs.color,bg:(!bloco&&bg&&bg!=='rgba(0, 0, 0, 0)')?bg:'',fs:Math.round(parseFloat(cs.fontSize)*0.75*2)/2,ff:cs.fontFamily}}
+function aplicarPincel(){const f=pincel;pincel=null;document.body.classList.remove('pincel-on');if(!f)return;
+  const est=`font-weight:${f.w};font-style:${f.i};color:${f.c};font-size:${f.fs}pt;font-family:${f.ff};text-decoration-line:${f.td==='none'?'none':f.td}${f.bg?`;background-color:${f.bg}`:''}`;
+  substituirSelecao(c=>c.querySelectorAll('[style]').forEach(e=>{['font-weight','font-style','color','font-size','font-family','text-decoration','text-decoration-line','background-color','background'].forEach(k=>e.style.removeProperty(k))}),est)}
+const acaoCtx={
+  fonte:b=>{const r=b.getBoundingClientRect();fechaMenus();menuEm('mFonte',r.left,r.bottom+4)},
+  tam:b=>{const r=b.getBoundingClientRect();fechaMenus();menuEm('mTam',r.left,r.bottom+4)},
+  hlArr:b=>{const r=b.getBoundingClientRect();fechaMenus();menuEm('mHl3',r.left,r.bottom+4)},
+  corArr:b=>{const r=b.getBoundingClientRect();fechaMenus();menuEm('mTxt',r.left,r.bottom+4)},
+  mais:()=>{fechaMenus();mudarTamanho(1)},menos:()=>{fechaMenus();mudarTamanho(-1)},
+  n:()=>{fechaMenus();exec('bold')},i:()=>{fechaMenus();exec('italic')},s:()=>{fechaMenus();exec('underline')},
+  hl:()=>{fechaMenus();ligar({k:'hl',c:corMk},true)},limpa:()=>{fechaMenus();$('#bLimpaGrifo').click()},
+  cor:()=>{fechaMenus();exec('foreColor',corTx)},ul:()=>{fechaMenus();exec('insertUnorderedList')},ol:()=>{fechaMenus();exec('insertOrderedList')},
+  pincel:()=>{fechaMenus();pincel=pegaFormato();document.body.classList.toggle('pincel-on',!!pincel)}};
+$('#mCtx').querySelectorAll('.mini [data-x]').forEach(b=>{b.onclick=()=>acaoCtx[b.dataset.x](b)});
 ligaBotoes($('#mCtx'));
 $('#mCtx').querySelector('[data-x=off]').onclick=()=>{if(tool)ligar(tool,false);fechaMenus()};
 $('#mCtx').querySelector('[data-x=copy]').onclick=()=>{document.execCommand('copy');fechaMenus()};
 $('#mCtx').querySelector('[data-x=cut]').onclick=()=>{document.execCommand('cut');fechaMenus();marcar()};
-folha.addEventListener('contextmenu',e=>{e.preventDefault();ctxBloco=blocoDe(e.target);menuEm('mCtx',e.clientX,e.clientY)});
+folha.addEventListener('contextmenu',e=>{e.preventDefault();ctxBloco=blocoDe(e.target);$('#cxFonte').textContent=fonteAtual()+' ▾';$('#cxTam').textContent=tamanhoAtual()+' ▾';$('#cxBarTxt').style.background=corTx;menuEm('mCtx',e.clientX,e.clientY)});
 // ---- linha de incidência do TRTeiros posta à mão (ao lado esquerdo do artigo) ----
 let ctxBloco=null;
 const blocoDe=n=>{while(n&&n.parentNode!==folha)n=n.parentNode;return n&&n.parentNode===folha?n:null};
@@ -520,8 +569,6 @@ document.addEventListener('keydown',e=>{
   else if(k==='y'||(k==='z'&&e.shiftKey)){if(TR_REDO.length&&trRefazer()){e.preventDefault();trRecente=true}}
 },true);
 $('#mTR').querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{const sel=getSelection();aplicarTR(+b.dataset.tr,ctxBloco||(sel.anchorNode&&blocoDe(sel.anchorNode)));ctxBloco=null;fechaMenus()});
-$('#mCtx').insertAdjacentHTML('beforeend','<hr>'+$('#mTR').innerHTML.replace(/data-tr=/g,'data-trc='));
-$('#mCtx').querySelectorAll('[data-trc]').forEach(b=>b.onclick=()=>{aplicarTR(+b.dataset.trc,ctxBloco);ctxBloco=null;fechaMenus()});
 
 
 // clique direito na linha colorida posta à mão: mudar a cor ou remover
@@ -748,7 +795,15 @@ function restaurarPosicao(params){
 
 // ---- incidência: quantas vezes o artigo foi cobrado, lida do compilado de revisão ----
 let INC=null,BARRAS=[],BARRAS_TR=[],LEISECA=false;
+// quadros (Caiu em prova, Anotação, Atenção...): o PDF junta tudo com <br>; separa em parágrafos para dar respiro entre os itens
+function separarCaixas(){
+  [...folha.children].filter(el=>el.tagName==='DIV'&&!el.classList.contains('band')&&el.querySelector(':scope>br')&&!el.querySelector(':scope>p,:scope>div,:scope>ul,:scope>ol,:scope>table')).forEach(el=>{
+    const grupos=[[]];[...el.childNodes].forEach(n=>{if(n.nodeName==='BR')grupos.push([]);else grupos[grupos.length-1].push(n)});
+    const uteis=grupos.filter(g=>g.some(n=>(n.textContent||'').trim()||(n.nodeType===1&&n.querySelector&&n.querySelector('img'))));
+    if(uteis.length<2)return;
+    el.textContent='';uteis.forEach(g=>{const p=document.createElement('p');g.forEach(n=>p.appendChild(n));el.appendChild(p)})})}
 function marcarLeiSeca(){
+  separarCaixas();
   const k=[...folha.children];const n=k.filter(e=>/^\s*Art\.?\s*\d/.test(e.textContent)).length;
   LEISECA=n>=8&&n/Math.max(1,k.length)>=0.12;folha.classList.toggle('leiseca',LEISECA)}
 function leiPadrao(inc){
@@ -873,7 +928,9 @@ async function atualizarIncidencia(){
   if(LS.get('incOn')===false){info.textContent='desligada';return}
   let inc;try{inc=await carregarIncidencia()}catch(e){info.textContent='compilado indisponível';return}
   const padrao=PADRAO_LEI[meta&&meta.codigo]||null;let total=0,leis=new Set();
-  for(const bloco of blocosFolha()){
+  const modo=LS.get('incModo')||'ambas',usaComp=modo!=='trt',usaTR=modo!=='comp';
+  // em capítulo de lei seca não há selos por citação (os artigos citados dentro do texto são acessórios): o selo fica só no próprio artigo
+  for(const bloco of (usaComp&&!LEISECA?blocosFolha():[])){
     const tw=document.createTreeWalker(bloco,NodeFilter.SHOW_TEXT);const mapa=[];let full='',n;
     while((n=tw.nextNode())){mapa.push({node:n,ini:full.length});full+=n.data}
     if(!/Art|art|Súmula|SÚMULA/.test(full))continue;
@@ -906,7 +963,7 @@ async function atualizarIncidencia(){
     }
     ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
   }
-  const leiBase=LEISECA?leiPadrao(inc):null;
+  const leiBase=(LEISECA&&usaComp)?leiPadrao(inc):null;
   if(leiBase){let atual=null;
     for(const el of [...folha.children]){
       const t=el.textContent.trim(),m=/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[º°o]?(?:\s*-\s*([A-Z]))?/.exec(t);
@@ -915,6 +972,11 @@ async function atualizarIncidencia(){
         atual={els:[el],n:reg?reg.n:0,url:reg?reg.url:'',art:m[1]+(m[2]||''),lei:inc.slugs[leiBase]};BARRAS.push(atual)}
       else if(quebra)atual=null;else if(atual)atual.els.push(el);
     }}
+  // selo "N×" no próprio artigo (total do artigo no compilado), nunca em artigos citados no texto
+  if(leiBase)BARRAS.forEach(g=>{if(!g.n)return;const el0=g.els[0],k='art-'+g.art+'|1';
+    if((el0.dataset.semSelo||'').split(';').includes(k))return;
+    const a=badge(g.n,`Art. ${g.art} · ${g.lei}\nCobrado em ${g.n} ${g.n===1?'questão':'questões'} dos filtros (total do artigo; clique para abrir no compilado)`,g.url,g.art);
+    a.dataset.k=k;a._b=el0;el0.insertBefore(a,el0.firstChild);total++});
   // incidência por item (inciso, alínea, parágrafo), quando o compilado traz o detalhe da lei
   let porItem=false;
   if(leiBase){const it=(await carregarItens())[leiBase];
@@ -935,15 +997,19 @@ async function atualizarIncidencia(){
       BARRAS=novo}}
   // onde o compilado não tem incidência, mostra a legenda do TRTeiros (cores que já vinham no PDF)
   const cobertos=new Set();BARRAS.filter(b=>b.n).forEach(b=>b.els.forEach(e=>cobertos.add(e)));
-  [...folha.children].forEach(el=>{const man=!!(el.dataset&&el.dataset.trm);if(cobertos.has(el)&&!man)return;const t=+(el.dataset&&el.dataset.tr||0);if(t)BARRAS_TR.push({el,n:t,man});
+  if(usaTR)[...folha.children].forEach(el=>{const man=!!(el.dataset&&el.dataset.trm);if(cobertos.has(el)&&!man)return;const t=+(el.dataset&&el.dataset.tr||0);if(t)BARRAS_TR.push({el,n:t,man});
     el.querySelectorAll('.trs[data-tr]').forEach(sp=>{const q=+sp.dataset.tr;if(q)BARRAS_TR.push({el:sp,n:q,man:!!sp.dataset.trm})})});
   const comBarra=BARRAS.filter(b=>b.n).length;
-  const partes=[];if(total)partes.push(`${total} citações`);if(comBarra)partes.push(`${comBarra} ${porItem?'itens':'artigos'} pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);
-  info.textContent=partes.length?partes.join(' · '):(LEISECA&&!leiBase?'lei ainda não está no compilado':'nenhuma citação encontrada');
+  const partes=[];if(total)partes.push(LEISECA?`${total} selos de artigo`:`${total} citações`);if(comBarra)partes.push(`${comBarra} ${porItem?'itens':'artigos'} pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);
+  info.textContent=partes.length?partes.join(' · '):(LEISECA&&usaComp&&!leiBase?'lei ainda não está no compilado':'nenhuma incidência encontrada');
   posicionarMargem();
 }
 $('#margem').addEventListener('click',e=>{const b=e.target.closest('.inc-badge,.barra:not(.tr)');if(b&&b.dataset.url){e.preventDefault();window.open(b.dataset.url,'_blank','noopener')}});
 folha.addEventListener('input',agendarMargem);addEventListener('resize',agendarMargem);if(window.ResizeObserver)new ResizeObserver(agendarMargem).observe(folha);
+const ROT_VER={ambas:'Ver: tudo ▾',comp:'Ver: compilado ▾',trt:'Ver: TRTeiros ▾'};
+function pintaVer(){const m=LS.get('incModo')||'ambas';$('#btnVer').textContent=ROT_VER[m];$('#btnVer').classList.toggle('on',m!=='ambas');document.querySelectorAll('#mVer [data-ver]').forEach(b=>b.classList.toggle('ativo',b.dataset.ver===m))}
+document.querySelectorAll('#mVer [data-ver]').forEach(b=>b.onclick=()=>{LS.set('incModo',b.dataset.ver);pintaVer();fechaMenus();atualizarIncidencia()});
+pintaVer();
 $('#btnInc').onmousedown=e=>e.preventDefault();
 $('#btnInc').onclick=()=>{const on=LS.get('incOn')===false;LS.set('incOn',on);$('#btnInc').classList.toggle('on',on);atualizarIncidencia()};
 
