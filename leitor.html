@@ -763,6 +763,27 @@ function leiPadrao(inc){
   return null}
 
 const FAIXA=n=>n>=5?5:n; // 1,2,3,4,5+
+let ITENS=null; // incidência por item (caput, inciso, alínea, §) por lei: {slug:{"art|trecho":n}}
+async function carregarItens(){
+  if(ITENS)return ITENS;
+  try{ITENS=await (await fetch('leitor/incidencia-itens.json',{cache:'no-cache'})).json()}catch(e){ITENS={}}
+  return ITENS}
+// divide as linhas de um artigo em itens (caput, incisos, alíneas, parágrafos) e devolve [{el,trecho}]
+function itensDoArtigo(els){
+  const out=[];let par='',inc='';
+  els.forEach((el,i)=>{
+    const t=el.textContent.trim();let m,tr=null;
+    if(i===0)tr='caput';
+    else if((m=/^§\s*(\d+)/.exec(t))){par='§'+m[1];inc='';tr=par}
+    else if(/^Par[aá]grafo\s+[uú]nico/i.test(t)){par='PU';inc='';tr=par}
+    else if((m=/^([IVXLC]+)\s*[-–—]/.exec(t))){inc=m[1];tr=(par?par+'.':'')+inc}
+    else if(inc&&(m=/^([a-z])\)/.exec(t)))tr=(par?par+'.':'')+inc+'.'+m[1];
+    const x={el,trecho:tr};
+    if(tr&&/\.[a-z]$/.test(tr)){ // a conversão do PDF às vezes junta alíneas na mesma linha ("a) ... ou b) ...")
+      const base=tr.slice(0,-1),mais=[...t.matchAll(/\s([a-z])\)\s/g)].map(z=>base+z[1]);
+      if(mais.length)x.extra=mais}
+    out.push(x)});
+  return out}
 async function carregarIncidencia(){
   if(INC)return INC;
   try{const c=JSON.parse(sessionStorage.getItem('incMap')||'null');if(c&&Date.now()-c.t<10*60*1000){INC=c;return INC}}catch(e){}
@@ -827,7 +848,7 @@ function posicionarMargem(){
     if(!g.n)return;const els=g.els.filter(e=>e.isConnected);if(!els.length)return;if(els.some(e=>e.dataset&&e.dataset.trm))return;
     const a=els[0].getBoundingClientRect(),b=els[els.length-1].getBoundingClientRect();
     const d=document.createElement('div');d.className='barra f'+FAIXA(g.n);d.dataset.url=g.url;d._els=els;
-    d.title=`Art. ${g.art} · ${g.lei}\nCobrado ${g.n}× nos filtros já resolvidos (clique para abrir no compilado)`;
+    d.title=g.rot||`Art. ${g.art} · ${g.lei}\nCobrado ${g.n}× nos filtros já resolvidos (clique para abrir no compilado)`;
     d.style.top=((a.top-pr.top)/z)+'px';d.style.height=Math.max(6,(b.bottom-a.top)/z)+'px';mg.appendChild(d)});
   grupos.forEach(g=>{
     const multi=g.itens.length>1;
@@ -894,12 +915,30 @@ async function atualizarIncidencia(){
         atual={els:[el],n:reg?reg.n:0,url:reg?reg.url:'',art:m[1]+(m[2]||''),lei:inc.slugs[leiBase]};BARRAS.push(atual)}
       else if(quebra)atual=null;else if(atual)atual.els.push(el);
     }}
+  // incidência por item (inciso, alínea, parágrafo), quando o compilado traz o detalhe da lei
+  let porItem=false;
+  if(leiBase){const it=(await carregarItens())[leiBase];
+    if(it){const novo=[];
+      for(const g of BARRAS){
+        const mm=/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[º°o]?(?:\s*-\s*([A-Z]))?/.exec(g.els[0].textContent.trim());
+        const chaveArt=mm?mm[1].replace(/\./g,'')+(mm[2]?'-'+mm[2]:''):null;
+        if(!chaveArt||!Object.keys(it).some(k=>k.startsWith(chaveArt+'|'))){novo.push(g);continue}
+        porItem=true;
+        const rotArt='Art. '+mm[1]+(mm[2]?'-'+mm[2]:'');
+        itensDoArtigo(g.els).forEach(x=>{
+          const todos=x.trecho?[x.trecho,...(x.extra||[])]:[];
+          const n=Math.max(0,...todos.map(t=>it[chaveArt+'|'+t]||0));
+          const fmt=t=>t.replace(/^PU/,'parágrafo único').replace(/§(\d+)/g,'§ $1º').replace(/\./g,', ');
+          const nome=(!x.trecho||x.trecho==='caput')?'':', '+(x.extra?todos.map(t=>t.split('.').pop()).join(' e '):fmt(x.trecho)).replace(/^(?=[a-z](?: e [a-z])*$)/,fmt(x.trecho.slice(0,-2))+', ');
+          novo.push({els:[x.el],n,url:g.url,art:rotArt,lei:inc.slugs[leiBase],
+            rot:`${rotArt}${nome} · ${inc.slugs[leiBase]}\nCobrado em ${n} ${n===1?'questão':'questões'} dos filtros (clique para abrir no compilado)`})})}
+      BARRAS=novo}}
   // onde o compilado não tem incidência, mostra a legenda do TRTeiros (cores que já vinham no PDF)
   const cobertos=new Set();BARRAS.filter(b=>b.n).forEach(b=>b.els.forEach(e=>cobertos.add(e)));
   [...folha.children].forEach(el=>{const man=!!(el.dataset&&el.dataset.trm);if(cobertos.has(el)&&!man)return;const t=+(el.dataset&&el.dataset.tr||0);if(t)BARRAS_TR.push({el,n:t,man});
     el.querySelectorAll('.trs[data-tr]').forEach(sp=>{const q=+sp.dataset.tr;if(q)BARRAS_TR.push({el:sp,n:q,man:!!sp.dataset.trm})})});
   const comBarra=BARRAS.filter(b=>b.n).length;
-  const partes=[];if(total)partes.push(`${total} citações`);if(comBarra)partes.push(`${comBarra} artigos pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);
+  const partes=[];if(total)partes.push(`${total} citações`);if(comBarra)partes.push(`${comBarra} ${porItem?'itens':'artigos'} pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);
   info.textContent=partes.length?partes.join(' · '):(LEISECA&&!leiBase?'lei ainda não está no compilado':'nenhuma citação encontrada');
   posicionarMargem();
 }
