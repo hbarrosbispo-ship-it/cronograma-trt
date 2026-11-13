@@ -499,7 +499,7 @@ $('#mCtx').innerHTML=`<div class="mini">
   <button data-x="limpa" title="Limpar o grifo e o sublinhado do trecho"><span class="aa-hl">Aa</span>⌫</button>
   <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
   <button data-x="ul" title="Lista com marcadores">•≡</button><button data-x="ol" title="Lista numerada">1≡</button></div></div><hr>`
- +itensCtx()+'<hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
+ +itensCtx()+'<hr><button data-x="trmenu" title="Põe a linha colorida de incidência do TRTeiros ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#FFD966,#7ED957,#5271FF,#F45B8F,#FF3131)"></span>Barra de incidência ▸</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
 $('#mCtx').insertAdjacentHTML('afterend',`<div class="menu" id="mFonte">${FONTES.map(f=>`<button data-f="${f}" style="font-family:'${f}'">${f}</button>`).join('')}</div><div class="menu" id="mTam">${[8,9,10,11,12,14,16,18,20,24,28,32,36,48].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div><div class="menu" id="mHl3">${[ATALHO['1'],ATALHO['2'],ATALHO['5']].map(t=>itemFerr(t,t.n,'')).join('')}</div>`);
 ['mFonte','mTam','mHl3'].forEach(id=>$('#'+id).onmousedown=e=>e.preventDefault());
 ligaBotoes($('#mHl3'));
@@ -528,6 +528,7 @@ const acaoCtx={
   pincel:()=>{fechaMenus();pincel=pegaFormato();document.body.classList.toggle('pincel-on',!!pincel)}};
 $('#mCtx').querySelectorAll('.mini [data-x]').forEach(b=>{b.onclick=()=>acaoCtx[b.dataset.x](b)});
 ligaBotoes($('#mCtx'));
+$('#mCtx').querySelector('[data-x=trmenu]').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();const bl=ctxBloco;fechaMenus();ctxBloco=bl;menuEm('mTR',r.right+2,r.top)};
 $('#mCtx').querySelector('[data-x=off]').onclick=()=>{if(tool)ligar(tool,false);fechaMenus()};
 $('#mCtx').querySelector('[data-x=copy]').onclick=()=>{document.execCommand('copy');fechaMenus()};
 $('#mCtx').querySelector('[data-x=cut]').onclick=()=>{document.execCommand('cut');fechaMenus();marcar()};
