@@ -127,7 +127,7 @@ body.tool-on #folha{cursor:cell}
 .inc-badge.f3{background:#DDE3FF;color:#2a3fb0;border-color:#5271FF}
 .inc-badge.f4{background:#FDDCE8;color:#9c1a4a;border-color:#F45B8F}
 .inc-badge.f5{background:#FFD9D9;color:#a30f0f;border-color:#FF3131}
-#margem .rec-barra{position:absolute;left:52px;width:4px;border-radius:2px;background:#A855F7;pointer-events:none}
+#margem .rec-barra{position:absolute;left:52px;width:4px;border-radius:2px;background:#A855F7;cursor:help}
 #margem .rec-badge{position:absolute;left:6px;display:inline-block;font:700 7pt Arial,sans-serif;line-height:1.05;text-align:center;padding:1px 4px;border-radius:6px;background:#F3E8FF;color:#6b21a8;border:1px solid #A855F7;cursor:help;user-select:none;white-space:nowrap}
 @media(max-width:700px){#margem .rec-badge{left:2px;font-size:6pt;padding:0 2px}}
 #margem .inc-badge:hover{filter:brightness(.95);box-shadow:0 0 0 2px rgba(48,84,150,.3)}
@@ -994,12 +994,16 @@ function posicionarMargem(){
     });
   });
   const ocup=[...mg.querySelectorAll('.inc-badge')].map(b=>parseFloat(b.style.top)||0),recs=[];
+  // onde há linha roxa cobrindo uma sequência, os selos dessa sequência ficam de fora (seria redundante)
+  const cobertoRec=new Set();REC.forEach(g=>{if(!g.fim)return;const bl=blocosFolha();for(let i=bl.indexOf(g.el);i>=0&&i<bl.length;i++){cobertoRec.add(bl[i]);if(bl[i]===g.fim)break}});
   REC.forEach(g=>{
     if(!g.el.isConnected||g.el.closest('[data-fo]'))return;
+    if(cobertoRec.has(g.el)&&!g.fim){return}
     let t=(g.el.getBoundingClientRect().top-pr.top)/z+3;
     const alt=g.curto?13:24;while(ocup.some(y=>t>y-(g.curto?13:22)&&t<y+14)||recs.some(y=>Math.abs(y-t)<alt))t+=g.curto?13:14;
     recs.push(t);
     if(g.fim&&g.fim.isConnected){const a=g.el.getBoundingClientRect(),f=g.fim.getBoundingClientRect(),r=document.createElement('div');r.className='rec-barra';r.title=g.rot;r.style.top=((a.top-pr.top)/z)+'px';r.style.height=Math.max(6,(f.bottom-a.top)/z)+'px';mg.appendChild(r)}
+    if(g.fim&&g.fim.isConnected)return;
     const b=document.createElement('span');b.className='rec-badge';b._el=g.el;b.innerHTML=g.curto?'Novidade':'Alteração<br>recente';b.title=g.rot;b.style.top=t+'px';mg.appendChild(b)});
 }
 let _pm=null;function agendarMargem(){clearTimeout(_pm);_pm=setTimeout(posicionarMargem,120)}
