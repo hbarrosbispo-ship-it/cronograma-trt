@@ -211,7 +211,7 @@ function startEdit(e,el){if(!el||el.isContentEditable)return;const art=el.closes
  el.addEventListener('blur',fin);el.addEventListener('keydown',ev=>{if(ev.key==='Escape'){ev.preventDefault();el.blur()}else if(ev.key==='Enter'&&kind==='alt'){ev.preventDefault();el.blur()}})}
 list.addEventListener('dblclick',e=>startEdit(e,e.target.closest('[data-ed]')));
 list.addEventListener('contextmenu',e=>{const alt=e.target.closest('.alt');if(!alt||e.target.closest('.cut'))return;e.preventDefault();startEdit(e,alt.querySelector('[data-ed="alt"]'))});
-const MOT=['Não sabia','Confundi os conceitos','Li errado'];
+const MOT=['Não sabia','Confundi os conceitos','Interpretei errado'];
 function balHtml(nb){const qs=Q.filter(q=>q.nb===nb.id);if(!qs.length||!qs.every(q=>st(q).res))return '';
  let ce=0,cd=[],er=[],nf=0;
  qs.forEach(q=>{const s=st(q);if(s.res==='nf'){nf++;return}if(s.res==='er'){er.push(q);return}const cut=s.cut||[];if(cut.length>0&&q.alts.length-cut.length>=2)cd.push(q);else ce++});
