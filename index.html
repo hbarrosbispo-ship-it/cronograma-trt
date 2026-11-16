@@ -3323,6 +3323,14 @@ document.getElementById('dupSubmit').addEventListener('click', ()=>{
       document.getElementById('dupList').value = id;
       dupOnPick();
     });
+    const elegivel = t.type!=='Flashcards' && !/videoaula do curso Rezende/i.test(t.desc) && lsGet('status_'+t.id,'Pendente')!=='Concluído';
+    if(elegivel) item('Selecionar no cronômetro', ()=>{
+      timerTaskId = id;
+      saveTimerState();
+      populateTaskSelect();
+      updateSwDisplay();
+      renderAll();
+    });
     if(!menu.children.length) return;
     menu.style.display='block';
     const w = menu.offsetWidth, h = menu.offsetHeight;
