@@ -500,7 +500,7 @@ function aplicar(){
   aparaSelecao();
   document.execCommand('styleWithCSS',false,true);
   if(tool.k==='er')limparMarca();
-  else if(tool.k==='hl'){if(todoMarcado('hl'))limparFundo();else document.execCommand('hiliteColor',false,tool.c)}
+  else if(tool.k==='hl'){document.execCommand('hiliteColor',false,tool.c)}   // marca-texto não alterna: só negrito e sublinhado desfazem ao selecionar de novo
   else{
     const cmd={bd:'bold',ul:'underline',st:'strikeThrough'}[tool.k];
     // trecho inteiro já marcado com esta ferramenta: selecionar de novo desfaz; senão aplica em todo o trecho
