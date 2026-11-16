@@ -105,6 +105,7 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 #folha{width:100%;margin:0;background:#fff;color:#111;padding:44px 56px 44px 72px;border-radius:4px;border:3px solid #305496;box-shadow:0 0 0 4px rgba(48,84,150,.18);
  font:11pt/1.55 Arial,Helvetica,sans-serif;text-align:justify;outline:none;min-height:60vh;flex:none}
 body.tool-on #folha{cursor:cell}
+#folha [data-fo]{display:none!important}
 @media(max-width:700px){#folha{padding:22px 16px 22px 44px}#margem{width:40px}#margem .inc-badge{left:2px;font-size:7.5pt;padding:0 3px}}
 #folha p{margin:0 0 .9em}
 #folha p.ind{margin-left:35px}
@@ -252,7 +253,7 @@ body.pincel-on #folha{cursor:copy}
       </div><div class="gl">Zoom</div></div>
 
       <div class="grp"><div class="rows">
-        <div class="r"><button id="btnInc" title="Liga ou desliga a incidência ao lado dos artigos">📊 Incidência</button><button data-menu="mVer" id="btnVer" title="Escolher qual incidência aparece: compilado, TRTeiros ou as duas">Ver: tudo ▾</button></div>
+        <div class="r"><button id="btnInc" title="Liga ou desliga a incidência ao lado dos artigos">📊 Incidência</button><button id="btnSo" title="Mostra só os artigos, incisos e parágrafos que têm incidência (compilado ou legenda do TRTeiros), com os quadros de Caiu em prova, anotações e observações deles">🔎 Só incidência</button><button data-menu="mVer" id="btnVer" title="Escolher qual incidência aparece: compilado, TRTeiros ou as duas">Ver: tudo ▾</button></div>
         <div class="r"><button data-menu="mTR" title="Põe ao lado esquerdo do artigo a linha colorida de incidência do TRTeiros (1 a 5 vezes)">&#9612; Linha TRTeiros &#9662;</button></div>
         <div class="r"><span class="leg"><i class="f1"></i>1× <i class="f2"></i>2× <i class="f3"></i>3× <i class="f4"></i>4× <i class="f5"></i>5+ <i class="f0"></i>0×</span></div>
       </div><div class="gl" id="incInfo">incidência</div></div>
@@ -464,16 +465,47 @@ function aparaSelecao(){
   try{const n=document.createRange();n.setStart(sc,so);n.setEnd(ec,eo);if(!n.collapsed){s.removeAllRanges();s.addRange(n)}}catch(e){}
 }
 folha.addEventListener('dblclick',()=>setTimeout(aparaSelecao,0));
+// ---- selecionar de novo um trecho já marcado desfaz a marca ----
+function nosDaSelecao(){
+  const s=getSelection();if(!s.rangeCount)return [];const r=s.getRangeAt(0);
+  const raiz=r.commonAncestorContainer.nodeType===3?r.commonAncestorContainer.parentNode:r.commonAncestorContainer;
+  const tw=document.createTreeWalker(raiz,NodeFilter.SHOW_TEXT),out=[];let n;
+  while((n=tw.nextNode())){
+    if(!r.intersectsNode(n)||(n.parentElement&&n.parentElement.closest('.inc-anc')))continue;
+    let a=0,b=n.length;if(n===r.startContainer)a=r.startOffset;if(n===r.endContainer)b=r.endOffset;
+    if(n.data.slice(a,b).trim())out.push(n)}
+  return out}
+function corRgb(c){const d=document.createElement('span');d.style.color=c;document.body.appendChild(d);const v=getComputedStyle(d).color;d.remove();return v}
+const EH_BLOCO=/^(P|DIV|LI|TD|TH|TABLE|H[1-6])$/;
+function temMarca(no,k){
+  for(let e=no.parentElement;e&&e!==folha;e=e.parentElement){
+    const st=e.style||{};
+    if(k==='hl'){if((e.tagName==='MARK'||st.backgroundColor)&&!EH_BLOCO.test(e.tagName)){const bg=getComputedStyle(e).backgroundColor;if(bg&&bg!=='rgba(0, 0, 0, 0)'&&bg!=='transparent')return bg===corRgb(tool.c)}}
+    else if(k==='bd'){if(e.tagName==='B'||e.tagName==='STRONG'||/bold|[6-9]00/.test(st.fontWeight||''))return true}
+    else if(k==='ul'){if(e.tagName==='U'||/underline/.test((st.textDecorationLine||'')+(st.textDecoration||'')))return true}
+    else if(k==='st'){if(/^(S|STRIKE|DEL)$/.test(e.tagName)||/line-through/.test((st.textDecorationLine||'')+(st.textDecoration||'')))return true}
+    if(EH_BLOCO.test(e.tagName))break}
+  return false}
+function todoMarcado(k){const ns=nosDaSelecao();return ns.length>0&&ns.every(n=>temMarca(n,k))}
+function limparFundo(){
+  const s=getSelection();document.execCommand('hiliteColor',false,'transparent');
+  folha.querySelectorAll('mark').forEach(m=>{if(s.containsNode(m,true)){const bg=m.style.backgroundColor;if(!bg||bg==='transparent'||bg==='rgba(0, 0, 0, 0)')unwrap(m)}});
+  folha.querySelectorAll('span[style]').forEach(sp=>{if(/background-color:\s*(transparent|rgba\(0, 0, 0, 0\))/.test(sp.getAttribute('style'))){
+    sp.style.removeProperty('background-color');if(!sp.getAttribute('style').trim())unwrap(sp)}})}
 function aplicar(){
   if(pincel&&selecaoNaFolha()){aplicarPincel();return}
   if(!tool||!selecaoNaFolha())return;
   aparaSelecao();
   document.execCommand('styleWithCSS',false,true);
-  if(tool.k==='hl')document.execCommand('hiliteColor',false,tool.c);
-  else if(tool.k==='bd'){if(!document.queryCommandState('bold'))document.execCommand('bold')}
-  else if(tool.k==='ul'){if(!document.queryCommandState('underline'))document.execCommand('underline')}
-  else if(tool.k==='st'){if(!document.queryCommandState('strikeThrough'))document.execCommand('strikeThrough')}
-  else if(tool.k==='er')limparMarca();
+  if(tool.k==='er')limparMarca();
+  else if(tool.k==='hl'){if(todoMarcado('hl'))limparFundo();else document.execCommand('hiliteColor',false,tool.c)}
+  else{
+    const cmd={bd:'bold',ul:'underline',st:'strikeThrough'}[tool.k];
+    // trecho inteiro já marcado com esta ferramenta: selecionar de novo desfaz; senão aplica em todo o trecho
+    if(todoMarcado(tool.k)){for(let i=0;i<2&&todoMarcado(tool.k);i++)document.execCommand(cmd)}
+    else if(!document.queryCommandState(cmd))document.execCommand(cmd);
+    else{document.execCommand(cmd);if(!document.queryCommandState(cmd))document.execCommand(cmd)}   // trecho misto: garante que tudo fique marcado
+  }
   getSelection().collapseToEnd();marcar();
 }
 ['pointerup','keyup'].forEach(ev=>folha.addEventListener(ev,e=>{if(ev==='keyup'&&!e.shiftKey)return;setTimeout(aplicar,0)}));
@@ -741,7 +773,7 @@ addEventListener('resize',fixoAltura);
 
 // ---- salvar texto ----
 function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(salvar,500);montarSumario()}
-function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,.inc-badge').forEach(b=>b.remove());return c.innerHTML}
+function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,.inc-badge').forEach(b=>b.remove());c.querySelectorAll('[data-fo]').forEach(b=>b.removeAttribute('data-fo'));return c.innerHTML}
 function salvar(){try{localStorage.setItem('doc:'+slug,htmlLimpo());$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
 folha.addEventListener('input',marcar);
 folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
@@ -897,12 +929,12 @@ function posicionarMargem(){
     if(!grupos.has(chave))grupos.set(chave,{top,itens:[]});grupos.get(chave).itens.push(a);
   });
   BARRAS_TR.forEach(g=>{
-    if(!g.el.isConnected)return;const r=g.el.getBoundingClientRect();
+    if(!g.el.isConnected||g.el.closest('[data-fo]'))return;const r=g.el.getBoundingClientRect();
     const d=document.createElement('div');d.className='barra tr f'+g.n+(g.man?' man':'');
     d.title=g.man?'Linha de incidência do TRTeiros posta por você ('+(g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes'))+')':`Legenda do TRTeiros: ${g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes')} cobrado em prova\n(o compilado de revisão ainda não tem incidência para este trecho)`;
     d._els=(g.man||g.el.classList.contains('trs'))?(g.el.classList.contains('trs')?[g.el]:alvosTR(g.el,true)):[g.el];d.style.top=((r.top-pr.top)/z)+'px';d.style.height=Math.max(6,r.height/z)+'px';mg.appendChild(d)});
   BARRAS.forEach(g=>{
-    if(!g.n)return;const els=g.els.filter(e=>e.isConnected);if(!els.length)return;if(els.some(e=>e.dataset&&e.dataset.trm))return;
+    if(!g.n)return;const els=g.els.filter(e=>e.isConnected&&!e.hasAttribute('data-fo'));if(!els.length)return;if(els.some(e=>e.dataset&&e.dataset.trm))return;
     const a=els[0].getBoundingClientRect(),b=els[els.length-1].getBoundingClientRect();
     const d=document.createElement('div');d.className='barra f'+FAIXA(g.n);d.dataset.url=g.url;d._els=els;
     d.title=g.rot||`Art. ${g.art} · ${g.lei}\nCobrado ${g.n}× nos filtros já resolvidos (clique para abrir no compilado)`;
@@ -1004,8 +1036,41 @@ async function atualizarIncidencia(){
   const comBarra=BARRAS.filter(b=>b.n).length;
   const partes=[];if(total)partes.push(LEISECA?`${total} selos de artigo`:`${total} citações`);if(comBarra)partes.push(`${comBarra} ${porItem?'itens':'artigos'} pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);
   info.textContent=partes.length?partes.join(' · '):(LEISECA&&usaComp&&!leiBase?'lei ainda não está no compilado':'nenhuma incidência encontrada');
+  const nf=aplicarFiltroInc();if(nf!==null)info.textContent=(nf?nf+' trechos com incidência':'nenhum trecho com incidência')+' (filtro ligado)';
   posicionarMargem();
 }
+// filtro: só o que tem incidência (artigo/inciso/§ marcado) + os quadros (Caiu em prova, anotação, observação) do mesmo artigo
+function aplicarFiltroInc(){
+  const kids=[...folha.children];kids.forEach(e=>e.removeAttribute('data-fo'));
+  const on=LS.get('soInc')===true&&LS.get('incOn')!==false;
+  $('#btnSo').classList.toggle('on',on);
+  if(!on)return null;
+  const filho=n=>{while(n&&n.parentNode!==folha)n=n.parentNode;return n&&n.parentNode===folha?n:null};
+  const tem=new Set();
+  BARRAS.forEach(g=>{if(g.n)g.els.forEach(e=>{const f=filho(e);if(f)tem.add(f)})});
+  BARRAS_TR.forEach(g=>{const f=filho(g.el);if(f)tem.add(f)});
+  folha.querySelectorAll('.inc-anc').forEach(a=>{const f=filho(a);if(f)tem.add(f)});
+  const eCaixa=e=>e.tagName==='DIV'&&!e.classList.contains('band');
+  const nivel=e=>e.classList.contains('band')?1:/^H[1-6]$/.test(e.tagName)?+e.tagName[1]:e.classList.contains('tit')?2:0;
+  const grupos=[];let at=null;
+  kids.forEach(e=>{
+    if(nivel(e)){grupos.push({tit:true,els:[e]});at=null;return}
+    const novo=LEISECA?/^\s*Art\.?\s*\d/.test(e.textContent):!eCaixa(e);
+    if(!at||novo){at={els:[]};grupos.push(at)}
+    at.els.push(e)});
+  let n=0;
+  grupos.forEach(g=>{if(g.tit)return;
+    g.vis=g.els.some(e=>tem.has(e));
+    g.els.forEach((e,i)=>{if(g.vis&&(i===0||tem.has(e)||eCaixa(e))){if(tem.has(e))n++}else e.setAttribute('data-fo','1')})});
+  grupos.forEach((g,i)=>{if(!g.tit)return;const nv=nivel(g.els[0]);let vis=false;
+    for(let j=i+1;j<grupos.length;j++){if(grupos[j].tit){if(nivel(grupos[j].els[0])<=nv)break;continue}if(grupos[j].vis){vis=true;break}}
+    if(!vis)g.els[0].setAttribute('data-fo','1')});
+  return n}
+$('#btnSo').onmousedown=e=>e.preventDefault();
+$('#btnSo').onclick=()=>{const on=LS.get('soInc')!==true;LS.set('soInc',on);
+  if(on&&LS.get('incOn')===false){LS.set('incOn',true);$('#btnInc').classList.add('on');atualizarIncidencia();return}
+  const nf=aplicarFiltroInc();if(on)$('#incInfo').textContent=(nf?nf+' trechos com incidência':'nenhum trecho com incidência')+' (filtro ligado)';
+  posicionarMargem();if(on)scrollTo(0,0)};
 $('#margem').addEventListener('click',e=>{const b=e.target.closest('.inc-badge,.barra:not(.tr)');if(b&&b.dataset.url){e.preventDefault();window.open(b.dataset.url,'_blank','noopener')}});
 folha.addEventListener('input',agendarMargem);addEventListener('resize',agendarMargem);if(window.ResizeObserver)new ResizeObserver(agendarMargem).observe(folha);
 const ROT_VER={ambas:'Ver: tudo ▾',comp:'Ver: compilado ▾',trt:'Ver: TRTeiros ▾'};
