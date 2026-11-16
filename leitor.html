@@ -1054,6 +1054,11 @@ async function atualizarIncidencia(){
         atual={els:[el],n:reg?reg.n:0,url:reg?reg.url:'',art:m[1]+(m[2]||''),lei:inc.slugs[leiBase]};BARRAS.push(atual)}
       else if(quebra)atual=null;else if(atual)atual.els.push(el);
     }}
+  // artigo com o mesmo número aparecendo mais de uma vez no capítulo (ex.: dois "Art. 3º" na Res. 65): a incidência vale só para a ocorrência indicada em leitor/docs/incidencia-ocorrencia.json
+  if(leiBase){let OC={};try{OC=(await (await fetch('leitor/docs/incidencia-ocorrencia.json',{cache:'no-cache'})).json())[slug]||{}}catch(e){}
+    const vistos={};BARRAS.forEach(g=>{const mm=/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[º°o]?(?:\s*-\s*([A-Z]))?/.exec(g.els[0].textContent.trim());if(!mm)return;
+      const num=mm[1].replace(/\./g,'')+(mm[2]?'-'+mm[2].toLowerCase():'');vistos[num]=(vistos[num]||0)+1;
+      if(OC[num]&&OC[num]!==vistos[num]){g.n=0;g.semItens=true}})}
   // selo "N×" no próprio artigo (total do artigo no compilado), nunca em artigos citados no texto
   if(leiBase)BARRAS.forEach(g=>{if(!g.n)return;const el0=g.els[0],k='art-'+g.art+'|1';
     if((el0.dataset.semSelo||'').split(';').includes(k))return;
@@ -1066,6 +1071,7 @@ async function atualizarIncidencia(){
       for(const g of BARRAS){
         const mm=/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[º°o]?(?:\s*-\s*([A-Z]))?/.exec(g.els[0].textContent.trim());
         const chaveArt=mm?mm[1].replace(/\./g,'')+(mm[2]?'-'+mm[2]:''):null;
+        if(g.semItens){novo.push(g);continue}
         if(!chaveArt||!Object.keys(it).some(k=>k.startsWith(chaveArt+'|'))){novo.push(g);continue}
         porItem=true;
         const rotArt='Art. '+mm[1]+(mm[2]?'-'+mm[2]:'');
