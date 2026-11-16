@@ -127,6 +127,7 @@ body.tool-on #folha{cursor:cell}
 .inc-badge.f3{background:#DDE3FF;color:#2a3fb0;border-color:#5271FF}
 .inc-badge.f4{background:#FDDCE8;color:#9c1a4a;border-color:#F45B8F}
 .inc-badge.f5{background:#FFD9D9;color:#a30f0f;border-color:#FF3131}
+#margem .rec-barra{position:absolute;left:52px;width:4px;border-radius:2px;background:#A855F7;pointer-events:none}
 #margem .rec-badge{position:absolute;left:6px;display:inline-block;font:700 7pt Arial,sans-serif;line-height:1.05;text-align:center;padding:1px 4px;border-radius:6px;background:#F3E8FF;color:#6b21a8;border:1px solid #A855F7;cursor:help;user-select:none;white-space:nowrap}
 @media(max-width:700px){#margem .rec-badge{left:2px;font-size:6pt;padding:0 2px}}
 #margem .inc-badge:hover{filter:brightness(.95);box-shadow:0 0 0 2px rgba(48,84,150,.3)}
@@ -838,7 +839,7 @@ let INC=null,BARRAS=[],BARRAS_TR=[],LEISECA=false,REC=[],RECJ=null;
 // ---- alterações legislativas recentes (selo roxo na margem): vêm do próprio PDF (rótulo "Alteração recente", "Atualização (Lei ...)", texto em azul de dispositivo incluído/alterado) e da lista leitor/docs/alteracoes-recentes.json (PDF de atualizações do TRTeiros) ----
 async function carregarRec(){if(RECJ)return RECJ;try{RECJ=await (await fetch('leitor/docs/alteracoes-recentes.json',{cache:'no-cache'})).json()}catch(e){RECJ={}}return RECJ}
 function achaRecentes(){
-  const out=new Map(),blocos=blocosFolha();
+  const out=new Map(),fins=new Map(),blocos=blocosFolha();
   const put=(el,rot)=>{if(el&&!out.has(el)&&!(el.dataset&&el.dataset.semNov))out.set(el,rot)};
   blocos.forEach(el=>{
     const t=el.textContent.replace(/\s+/g,' ').trim();
@@ -850,9 +851,11 @@ function achaRecentes(){
     const ND=x=>semAcento(x).replace(/​/g,'').replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
     const ini=a.ini?ND(a.ini):'',txt=a.txt?ND(a.txt):'';
     for(const el of blocos){const t=ND(el.textContent);
-      if((ini&&t.startsWith(ini))||(txt&&t.includes(txt))){put(el,a.rot);if(!a.todos)break}}});
+      if((ini&&t.startsWith(ini))||(txt&&t.includes(txt))){put(el,a.rot);
+        if(a.ate){const ate=ND(a.ate);let fim=el;for(let j=blocos.indexOf(el)+1;j<blocos.length;j++){if(ND(blocos[j].textContent).startsWith(ate))break;fim=blocos[j]}if(fim!==el)fins.set(el,fim)}
+        if(!a.todos)break}}});
   blocos.forEach(el=>{if(el.dataset&&el.dataset.nov)put(el,'Novidade marcada por você')});
-  return [...out].map(([el,rot])=>({el,rot}))}
+  return [...out].map(([el,rot])=>({el,rot,fim:fins.get(el)}))}
 // quadros (Caiu em prova, Anotação, Atenção...): o PDF junta tudo com <br>; separa em parágrafos para dar respiro entre os itens
 function separarCaixas(){
   [...folha.children].filter(el=>el.tagName==='DIV'&&!el.classList.contains('band')&&el.querySelector(':scope>br')&&!el.querySelector(':scope>p,:scope>div,:scope>ul,:scope>ol,:scope>table')).forEach(el=>{
@@ -996,6 +999,7 @@ function posicionarMargem(){
     let t=(g.el.getBoundingClientRect().top-pr.top)/z+3;
     while(ocup.some(y=>t>y-22&&t<y+14)||recs.some(y=>Math.abs(y-t)<24))t+=14;
     recs.push(t);
+    if(g.fim&&g.fim.isConnected){const a=g.el.getBoundingClientRect(),f=g.fim.getBoundingClientRect(),r=document.createElement('div');r.className='rec-barra';r.title=g.rot;r.style.top=((a.top-pr.top)/z)+'px';r.style.height=Math.max(6,(f.bottom-a.top)/z)+'px';mg.appendChild(r)}
     const b=document.createElement('span');b.className='rec-badge';b._el=g.el;b.innerHTML='Alteração<br>recente';b.title=g.rot;b.style.top=t+'px';mg.appendChild(b)});
 }
 let _pm=null;function agendarMargem(){clearTimeout(_pm);_pm=setTimeout(posicionarMargem,120)}
