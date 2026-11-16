@@ -1191,6 +1191,9 @@ async function editor(){
     }else if(salvo){folha.innerHTML=salvo}
     else{folha.innerHTML=semMarcas(orig);if(meta.ver)LS.set('dv:'+slug,meta.ver)}
   }catch(e){folha.textContent='Capítulo não encontrado.'}
+  try{ // texto salvo vazio/corrompido: volta ao original em vez de mostrar folha em branco
+    if(folha.innerText.trim().length<30){const o=await original();if(o&&o.length>100){folha.innerHTML=semMarcas(o);try{localStorage.removeItem('doc:'+slug)}catch(e){}}}
+  }catch(e){}
   montarSumario();marcarLeiSeca();mostrarAtu();
   atualizarIncidencia();prepararBotoes();
   const z=LS.get('zoom');if(z)setZoom(z);
