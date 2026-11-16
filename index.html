@@ -1166,6 +1166,7 @@ const BUILTIN_TASKS = [
   {date:'16/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
   {date:'19/11/2026', subj:'DT', type:'Questões', desc:'Meio ambiente do trabalho', amount:1, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15496291', mins:2},
   {date:'24/11/2026', subj:'DT', type:'Questões', desc:'Trabalho escravo contemporâneo', amount:1, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15496292', mins:2},
+  {date:'18/11/2026', subj:'LEG', type:'Questões', desc:'Regimento Interno do TRT-8 (simulado offline)', amount:30, unit:'questões', off:'questoes/simulado-ri-trt8.html', mins:41},
 ];
 function estudoCasoEffort(desc){ return /assistir aula/i.test(desc||'') ? 120 : 60; }
 BUILTIN_TASKS.forEach((t,i)=>{ t.id='t'+i; t.effort = t.mins!=null ? t.mins : t.type==='Leitura' ? t.amount*6 : (t.type==='Questões' ? t.amount*3 : (t.type==='Estudo de Caso' ? estudoCasoEffort(t.desc) : 20)); });
@@ -1239,6 +1240,7 @@ function duplicateTask(id, copyPages, copyDate){
   const amt = effectiveAmount(t);
   const copy = {date: (copyDate && DAY_INFO[copyDate]) ? copyDate : effectiveDate(t), subj: t.subj, type: t.type, desc: t.desc, amount: amt, unit: t.unit};
   if(t.link) copy.link = t.link;
+  if(t.off) copy.off = t.off;
   if(t.file) copy.file = t.file;
   const tp = effectiveTopics(t);
   if(tp) copy.topics = tp;
@@ -2163,8 +2165,7 @@ function rowHtml(t, firstCol, draggableRow){
   const typeClass = t.type==='Leitura' ? 'leitura' : (t.type==='Questões' ? 'questoes' : (t.type==='Estudo de Caso' ? 'estudocaso' : 'flashcards'));
   const rowClass = (timerTaskId===t.id) ? 'timing' : '';
   const linkHtml = t.link ? ` <a href="${t.link}" target="_blank" rel="noopener" class="qc-link" title="Abrir filtro no QConcursos">QConcursos ↗</a>` : '';
-  const offM = t.link ? t.link.match(/^[^&]*notebook_ids%5B%5D=(\d+)$/) : null;
-  const offHtml = (offM && QOFF_IDS.indexOf(offM[1]) >= 0) ? ` <a href="questoes/index.html#nb${offM[1]}" target="_blank" rel="noopener" class="qc-link" title="Abrir este caderno nas Questões offline (com gabarito e 5 comentários)">Offline ↗</a>` : '';
+  const offHtml = t.off ? ` <a href="${t.off}" target="_blank" rel="noopener" class="qc-link" title="Abrir o simulado offline (com gabarito comentado)">Offline ↗</a>` : '';
   const bibSlug = t.file && window.LEITOR_MAPA ? window.LEITOR_MAPA[t.file.split(String.fromCharCode(92)).pop().toLowerCase()] : null;
   const bibHtml = bibSlug ? ` <a href="leitor.html?doc=${bibSlug}" target="_blank" rel="noopener" class="file-link-lib" title="Abrir este capítulo na Biblioteca (editor com marcador, volta de onde você parou)">Biblioteca ↗</a>` : '';
   const fileHtml = t.file ? bibHtml + ` <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>` : '';

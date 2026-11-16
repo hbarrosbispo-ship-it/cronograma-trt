@@ -812,6 +812,7 @@ function leiPadrao(inc){
   const pre=x=>Object.keys(inc.slugs).find(s=>s.startsWith(x))||null;
   const fixo={DCO:'cf-1988',DPC:'cpc-2015'};
   if(fixo[cod]&&inc.slugs[fixo[cod]])return fixo[cod];
+  if(/\bRI TRT8\b|Regimento Interno/i.test(tit)&&inc.slugs['ri-trt8'])return 'ri-trt8';
   if(cod==='DCI')return pre('cc-')||pre('codigo-civil');
   if(['DT','DPT','DCT'].includes(cod)||/\bCLT\b/.test(tit))return pre('clt');
   const m=/\bLei(?:\s+Complementar)?\s*(?:n[º°o.]*)?\s*(\d[\d.]*)/i.exec(tit)||/\bL(\d{4})\b/.exec(tit);
