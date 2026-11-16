@@ -864,6 +864,7 @@ function leiPadrao(inc){
   const fixo={DCO:'cf-1988',DPC:'cpc-2015'};
   if(fixo[cod]&&inc.slugs[fixo[cod]])return fixo[cod];
   if(/\bRI TRT8\b|Regimento Interno/i.test(tit)&&inc.slugs['ri-trt8'])return 'ri-trt8';
+  if(/Resolu[çc][ãa]o n[º°o.]*\s*65\/2025 do TRT-?8/i.test(tit)&&inc.slugs['res-trt8-65-2025'])return 'res-trt8-65-2025';
   if(cod==='DCI')return pre('cc-')||pre('codigo-civil');
   if(['DT','DPT','DCT'].includes(cod)||/\bCLT\b/.test(tit))return pre('clt');
   const m=/\bLei(?:\s+Complementar)?\s*(?:n[º°o.]*)?\s*(\d[\d.]*)/i.exec(tit)||/\bL(\d{4})\b/.exec(tit);
@@ -885,7 +886,7 @@ function itensDoArtigo(els){
     else if((m=/^§\s*(\d+)/.exec(t))){par='§'+m[1];inc='';tr=par}
     else if(/^Par[aá]grafo\s+[uú]nico/i.test(t)){par='PU';inc='';tr=par}
     else if((m=/^([IVXLC]+)(?:\.[\s​]*[-–—]?|[\s​]*[-–—])/.exec(t))){inc=m[1];tr=(par?par+'.':'')+inc}
-    else if(inc&&(m=/^([a-z])\)/.exec(t)))tr=(par?par+'.':'')+inc+'.'+m[1];
+    else if(inc&&(m=/^([a-z])(?:\)|\.[\s​])/.exec(t)))tr=(par?par+'.':'')+inc+'.'+m[1];
     const x={el,trecho:tr};
     if(tr&&/\.[a-z]$/.test(tr)){ // a conversão do PDF às vezes junta alíneas na mesma linha ("a) ... ou b) ...")
       const base=tr.slice(0,-1),mais=[...t.matchAll(/\s([a-z])\)\s/g)].map(z=>base+z[1]);
@@ -1028,7 +1029,7 @@ async function atualizarIncidencia(){
     for(const el of [...folha.children]){
       const t=el.textContent.trim(),m=/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[º°o]?(?:\s*-\s*([A-Z]))?/.exec(t);
       const quebra=/^H[1-6]$/.test(el.tagName)||el.classList.contains('band')||el.classList.contains('tit');
-      if(m){const num=m[1].replace(/\./g,'')+(m[2]?'-'+m[2].toLowerCase():''),reg=inc.m[leiBase+'|'+num];
+      if(m&&!el.classList.contains('call')){const num=m[1].replace(/\./g,'')+(m[2]?'-'+m[2].toLowerCase():''),reg=inc.m[leiBase+'|'+num];
         atual={els:[el],n:reg?reg.n:0,url:reg?reg.url:'',art:m[1]+(m[2]||''),lei:inc.slugs[leiBase]};BARRAS.push(atual)}
       else if(quebra)atual=null;else if(atual)atual.els.push(el);
     }}
@@ -1083,7 +1084,7 @@ function aplicarFiltroInc(){
   const grupos=[];let at=null;
   kids.forEach(e=>{
     if(nivel(e)){grupos.push({tit:true,els:[e]});at=null;return}
-    const novo=LEISECA?/^\s*Art\.?\s*\d/.test(e.textContent):!eCaixa(e);
+    const novo=LEISECA?(/^\s*Art\.?\s*\d/.test(e.textContent)&&!e.classList.contains('call')):!eCaixa(e);
     if(!at||novo){at={els:[]};grupos.push(at)}
     at.els.push(e)});
   let n=0;
