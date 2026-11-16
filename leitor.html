@@ -127,6 +127,8 @@ body.tool-on #folha{cursor:cell}
 .inc-badge.f3{background:#DDE3FF;color:#2a3fb0;border-color:#5271FF}
 .inc-badge.f4{background:#FDDCE8;color:#9c1a4a;border-color:#F45B8F}
 .inc-badge.f5{background:#FFD9D9;color:#a30f0f;border-color:#FF3131}
+#margem .rec-badge{position:absolute;left:6px;display:inline-block;font:700 7pt Arial,sans-serif;line-height:1.05;text-align:center;padding:1px 4px;border-radius:6px;background:#F3E8FF;color:#6b21a8;border:1px solid #A855F7;cursor:help;user-select:none;white-space:nowrap}
+@media(max-width:700px){#margem .rec-badge{left:2px;font-size:6pt;padding:0 2px}}
 #margem .inc-badge:hover{filter:brightness(.95);box-shadow:0 0 0 2px rgba(48,84,150,.3)}
 .leg{font-size:11px;color:var(--mute);display:inline-flex;align-items:center;gap:3px;padding:0 4px}
 .leg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:5px}
@@ -253,7 +255,7 @@ body.pincel-on #folha{cursor:copy}
       </div><div class="gl">Zoom</div></div>
 
       <div class="grp"><div class="rows">
-        <div class="r"><button id="btnInc" title="Liga ou desliga a incidência ao lado dos artigos">📊 Incidência</button><button id="btnSo" title="Mostra só os artigos, incisos e parágrafos que têm incidência (compilado ou legenda do TRTeiros), com os quadros de Caiu em prova, anotações e observações deles">🔎 Só incidência</button><button data-menu="mVer" id="btnVer" title="Escolher qual incidência aparece: compilado, TRTeiros ou as duas">Ver: tudo ▾</button></div>
+        <div class="r"><button id="btnInc" title="Liga ou desliga a incidência ao lado dos artigos">📊 Incidência</button><button id="btnSo" title="Mostra só os artigos, incisos e parágrafos que têm incidência (compilado ou legenda do TRTeiros) ou alteração legislativa recente, com os quadros de Caiu em prova, anotações e observações deles">🔎 Só incidência</button><button data-menu="mVer" id="btnVer" title="Escolher qual incidência aparece: compilado, TRTeiros ou as duas">Ver: tudo ▾</button></div>
         <div class="r"><button data-menu="mTR" title="Põe ao lado esquerdo do artigo a linha colorida de incidência do TRTeiros (1 a 5 vezes)">&#9612; Linha TRTeiros &#9662;</button></div>
         <div class="r"><span class="leg"><i class="f1"></i>1× <i class="f2"></i>2× <i class="f3"></i>3× <i class="f4"></i>4× <i class="f5"></i>5+ <i class="f0"></i>0×</span></div>
       </div><div class="gl" id="incInfo">incidência</div></div>
@@ -827,7 +829,23 @@ function restaurarPosicao(params){
 }
 
 // ---- incidência: quantas vezes o artigo foi cobrado, lida do compilado de revisão ----
-let INC=null,BARRAS=[],BARRAS_TR=[],LEISECA=false;
+let INC=null,BARRAS=[],BARRAS_TR=[],LEISECA=false,REC=[],RECJ=null;
+// ---- alterações legislativas recentes (selo roxo na margem): vêm do próprio PDF (rótulo "Alteração recente", "Atualização (Lei ...)", texto em azul de dispositivo incluído/alterado) e da lista leitor/docs/alteracoes-recentes.json (PDF de atualizações do TRTeiros) ----
+async function carregarRec(){if(RECJ)return RECJ;try{RECJ=await (await fetch('leitor/docs/alteracoes-recentes.json',{cache:'no-cache'})).json()}catch(e){RECJ={}}return RECJ}
+function achaRecentes(){
+  const out=new Map(),blocos=blocosFolha();
+  const put=(el,rot)=>{if(el&&!out.has(el))out.set(el,rot)};
+  blocos.forEach(el=>{
+    const t=el.textContent.replace(/\s+/g,' ').trim();
+    if(/^Altera[çc][ãa]o recente\b/i.test(t))return put(el,'Alteração recente (marcada no PDF): '+t.replace(/^Altera[çc][ãa]o recente:?\s*/i,'').slice(0,220)+(t.length>260?'…':''));
+    if(/^Atualiza[çc][ãa]o (\(|de \d)/i.test(t))return put(el,t.slice(0,240)+(t.length>240?'…':''));
+    const az=el.querySelector('[style*="3d85c6" i]');
+    if(az){const x=az.textContent.replace(/\s+/g,' ').trim();put(el,'Dispositivo incluído ou alterado recentemente (texto em azul no PDF)'+(x?': '+x.slice(0,160):''))}});
+  (RECJ&&RECJ[slug]||[]).forEach(a=>{
+    const ini=a.ini?semAcento(a.ini).replace(/\s+/g,' '):'',txt=a.txt?semAcento(a.txt).replace(/\s+/g,' '):'';
+    for(const el of blocos){const t=semAcento(el.textContent).replace(/\s+/g,' ').trim();
+      if((ini&&t.startsWith(ini))||(txt&&t.includes(txt))){put(el,a.rot);if(!a.todos)break}}});
+  return [...out].map(([el,rot])=>({el,rot}))}
 // quadros (Caiu em prova, Anotação, Atenção...): o PDF junta tudo com <br>; separa em parágrafos para dar respiro entre os itens
 function separarCaixas(){
   [...folha.children].filter(el=>el.tagName==='DIV'&&!el.classList.contains('band')&&el.querySelector(':scope>br')&&!el.querySelector(':scope>p,:scope>div,:scope>ul,:scope>ol,:scope>table')).forEach(el=>{
@@ -949,13 +967,20 @@ function posicionarMargem(){
       mg.appendChild(b);
     });
   });
+  const ocup=[...mg.querySelectorAll('.inc-badge')].map(b=>parseFloat(b.style.top)||0),recs=[];
+  REC.forEach(g=>{
+    if(!g.el.isConnected||g.el.closest('[data-fo]'))return;
+    let t=(g.el.getBoundingClientRect().top-pr.top)/z+3;
+    while(ocup.some(y=>t>y-22&&t<y+14)||recs.some(y=>Math.abs(y-t)<24))t+=14;
+    recs.push(t);
+    const b=document.createElement('span');b.className='rec-badge';b.innerHTML='Alteração<br>recente';b.title=g.rot;b.style.top=t+'px';mg.appendChild(b)});
 }
 let _pm=null;function agendarMargem(){clearTimeout(_pm);_pm=setTimeout(posicionarMargem,120)}
 function inserirNaPosicao(mapa,pos,el){
   for(const e of mapa){if(pos>=e.ini&&pos<=e.ini+e.node.length){const t=pos-e.ini;
     if(t===0)e.node.parentNode.insertBefore(el,e.node);else if(t===e.node.length)e.node.parentNode.insertBefore(el,e.node.nextSibling);else{const resto=e.node.splitText(t);resto.parentNode.insertBefore(el,resto)}return true}}
   return false}
-function limparIncidencia(){BARRAS=[];BARRAS_TR=[];folha.querySelectorAll('.inc-anc').forEach(b=>b.remove());folha.normalize();if($('#margem'))$('#margem').innerHTML=''}
+function limparIncidencia(){REC=[];BARRAS=[];BARRAS_TR=[];folha.querySelectorAll('.inc-anc').forEach(b=>b.remove());folha.normalize();if($('#margem'))$('#margem').innerHTML=''}
 async function atualizarIncidencia(){
   limparIncidencia();
   const info=$('#incInfo');
@@ -1033,8 +1058,9 @@ async function atualizarIncidencia(){
   const cobertos=new Set();BARRAS.filter(b=>b.n).forEach(b=>b.els.forEach(e=>cobertos.add(e)));
   if(usaTR)[...folha.children].forEach(el=>{const man=!!(el.dataset&&el.dataset.trm);if(cobertos.has(el)&&!man)return;const t=+(el.dataset&&el.dataset.tr||0);if(t)BARRAS_TR.push({el,n:t,man});
     el.querySelectorAll('.trs[data-tr]').forEach(sp=>{const q=+sp.dataset.tr;if(q)BARRAS_TR.push({el:sp,n:q,man:!!sp.dataset.trm})})});
+  await carregarRec();REC=achaRecentes();
   const comBarra=BARRAS.filter(b=>b.n).length;
-  const partes=[];if(total)partes.push(LEISECA?`${total} selos de artigo`:`${total} citações`);if(comBarra)partes.push(`${comBarra} ${porItem?'itens':'artigos'} pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);
+  const partes=[];if(total)partes.push(LEISECA?`${total} selos de artigo`:`${total} citações`);if(comBarra)partes.push(`${comBarra} ${porItem?'itens':'artigos'} pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);if(REC.length)partes.push(`${REC.length} alterações recentes`);
   info.textContent=partes.length?partes.join(' · '):(LEISECA&&usaComp&&!leiBase?'lei ainda não está no compilado':'nenhuma incidência encontrada');
   const nf=aplicarFiltroInc();if(nf!==null)info.textContent=(nf?nf+' trechos com incidência':'nenhum trecho com incidência')+' (filtro ligado)';
   posicionarMargem();
@@ -1050,6 +1076,7 @@ function aplicarFiltroInc(){
   BARRAS.forEach(g=>{if(g.n)g.els.forEach(e=>{const f=filho(e);if(f)tem.add(f)})});
   BARRAS_TR.forEach(g=>{const f=filho(g.el);if(f)tem.add(f)});
   folha.querySelectorAll('.inc-anc').forEach(a=>{const f=filho(a);if(f)tem.add(f)});
+  REC.forEach(g=>{const f=filho(g.el);if(f)tem.add(f)});
   const eCaixa=e=>e.tagName==='DIV'&&!e.classList.contains('band');
   const nivel=e=>e.classList.contains('band')?1:/^H[1-6]$/.test(e.tagName)?+e.tagName[1]:e.classList.contains('tit')?2:0;
   const grupos=[];let at=null;
