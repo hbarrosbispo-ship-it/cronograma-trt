@@ -838,7 +838,7 @@ let INC=null,BARRAS=[],BARRAS_TR=[],LEISECA=false,REC=[],RECJ=null;
 // ---- alterações legislativas recentes (selo roxo na margem): vêm do próprio PDF (rótulo "Alteração recente", "Atualização (Lei ...)", texto em azul de dispositivo incluído/alterado) e da lista leitor/docs/alteracoes-recentes.json (PDF de atualizações do TRTeiros) ----
 async function carregarRec(){if(RECJ)return RECJ;try{RECJ=await (await fetch('leitor/docs/alteracoes-recentes.json',{cache:'no-cache'})).json()}catch(e){RECJ={}}return RECJ}
 function achaRecentes(){
-  const out=new Map(),blocos=blocosFolha();
+  const out=new Map(),curtos=new Set(),blocos=blocosFolha();
   const put=(el,rot)=>{if(el&&!out.has(el)&&!(el.dataset&&el.dataset.semNov))out.set(el,rot)};
   blocos.forEach(el=>{
     const t=el.textContent.replace(/\s+/g,' ').trim();
@@ -850,9 +850,9 @@ function achaRecentes(){
     const ND=x=>semAcento(x).replace(/​/g,'').replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
     const ini=a.ini?ND(a.ini):'',txt=a.txt?ND(a.txt):'';
     for(const el of blocos){const t=ND(el.textContent);
-      if((ini&&t.startsWith(ini))||(txt&&t.includes(txt))){put(el,a.rot);if(!a.todos)break}}});
+      if((ini&&t.startsWith(ini))||(txt&&t.includes(txt))){put(el,a.rot);if(a.curto)curtos.add(el);if(!a.todos)break}}});
   blocos.forEach(el=>{if(el.dataset&&el.dataset.nov)put(el,'Novidade marcada por você')});
-  return [...out].map(([el,rot])=>({el,rot}))}
+  return [...out].map(([el,rot])=>({el,rot,curto:curtos.has(el)}))}
 // quadros (Caiu em prova, Anotação, Atenção...): o PDF junta tudo com <br>; separa em parágrafos para dar respiro entre os itens
 function separarCaixas(){
   [...folha.children].filter(el=>el.tagName==='DIV'&&!el.classList.contains('band')&&el.querySelector(':scope>br')&&!el.querySelector(':scope>p,:scope>div,:scope>ul,:scope>ol,:scope>table')).forEach(el=>{
@@ -994,9 +994,9 @@ function posicionarMargem(){
   REC.forEach(g=>{
     if(!g.el.isConnected||g.el.closest('[data-fo]'))return;
     let t=(g.el.getBoundingClientRect().top-pr.top)/z+3;
-    while(ocup.some(y=>t>y-22&&t<y+14)||recs.some(y=>Math.abs(y-t)<24))t+=14;
+    const alt=g.curto?13:24;while(ocup.some(y=>t>y-(g.curto?13:22)&&t<y+14)||recs.some(y=>Math.abs(y-t)<alt))t+=g.curto?13:14;
     recs.push(t);
-    const b=document.createElement('span');b.className='rec-badge';b._el=g.el;b.innerHTML='Alteração<br>recente';b.title=g.rot;b.style.top=t+'px';mg.appendChild(b)});
+    const b=document.createElement('span');b.className='rec-badge';b._el=g.el;b.innerHTML=g.curto?'Novidade':'Alteração<br>recente';b.title=g.rot;b.style.top=t+'px';mg.appendChild(b)});
 }
 let _pm=null;function agendarMargem(){clearTimeout(_pm);_pm=setTimeout(posicionarMargem,120)}
 function inserirNaPosicao(mapa,pos,el){
