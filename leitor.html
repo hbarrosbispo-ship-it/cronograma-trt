@@ -842,8 +842,9 @@ function achaRecentes(){
     const az=el.querySelector('[style*="3d85c6" i]');
     if(az){const x=az.textContent.replace(/\s+/g,' ').trim();put(el,'Dispositivo incluído ou alterado recentemente (texto em azul no PDF)'+(x?': '+x.slice(0,160):''))}});
   (RECJ&&RECJ[slug]||[]).forEach(a=>{
-    const ini=a.ini?semAcento(a.ini).replace(/\s+/g,' '):'',txt=a.txt?semAcento(a.txt).replace(/\s+/g,' '):'';
-    for(const el of blocos){const t=semAcento(el.textContent).replace(/\s+/g,' ').trim();
+    const ND=x=>semAcento(x).replace(/​/g,'').replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
+    const ini=a.ini?ND(a.ini):'',txt=a.txt?ND(a.txt):'';
+    for(const el of blocos){const t=ND(el.textContent);
       if((ini&&t.startsWith(ini))||(txt&&t.includes(txt))){put(el,a.rot);if(!a.todos)break}}});
   return [...out].map(([el,rot])=>({el,rot}))}
 // quadros (Caiu em prova, Anotação, Atenção...): o PDF junta tudo com <br>; separa em parágrafos para dar respiro entre os itens
@@ -1068,7 +1069,7 @@ async function atualizarIncidencia(){
 // filtro: só o que tem incidência (artigo/inciso/§ marcado) + os quadros (Caiu em prova, anotação, observação) do mesmo artigo
 function aplicarFiltroInc(){
   const kids=[...folha.children];kids.forEach(e=>e.removeAttribute('data-fo'));
-  const on=LS.get('soInc')===true&&LS.get('incOn')!==false;
+  const on=LS.get('soInc:'+slug)===true&&LS.get('incOn')!==false;
   $('#btnSo').classList.toggle('on',on);
   if(!on)return null;
   const filho=n=>{while(n&&n.parentNode!==folha)n=n.parentNode;return n&&n.parentNode===folha?n:null};
@@ -1094,7 +1095,7 @@ function aplicarFiltroInc(){
     if(!vis)g.els[0].setAttribute('data-fo','1')});
   return n}
 $('#btnSo').onmousedown=e=>e.preventDefault();
-$('#btnSo').onclick=()=>{const on=LS.get('soInc')!==true;LS.set('soInc',on);
+$('#btnSo').onclick=()=>{const on=LS.get('soInc:'+slug)!==true;LS.set('soInc:'+slug,on);
   if(on&&LS.get('incOn')===false){LS.set('incOn',true);$('#btnInc').classList.add('on');atualizarIncidencia();return}
   const nf=aplicarFiltroInc();if(on)$('#incInfo').textContent=(nf?nf+' trechos com incidência':'nenhum trecho com incidência')+' (filtro ligado)';
   posicionarMargem();if(on)scrollTo(0,0)};

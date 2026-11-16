@@ -2170,14 +2170,14 @@ function rowHtml(t, firstCol, draggableRow){
   const bibHtml = bibSlug ? ` <a href="leitor.html?doc=${bibSlug}" target="_blank" rel="noopener" class="file-link-lib" title="Abrir este capítulo na Biblioteca (editor com marcador, volta de onde você parou)">Biblioteca ↗</a>` : '';
   const fileHtml = t.file ? bibHtml + ` <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>` : '';
   const topicsHtml = isQ ? `<textarea class="topicsedit" data-id="${t.id}" rows="1" placeholder="Assuntos abordados pelo filtro">${escapeHtml(effectiveTopics(t))}</textarea>` : '';
-  const descHtml = `<span class="descedit" data-id="${t.id}" title="Clique duas vezes (ou com o botão direito) para editar o nome da tarefa">${escapeHtml(effectiveDesc(t))}</span>${linkHtml}${offHtml}${fileHtml}${topicsHtml}`;
+  const descHtml = `<span class="descedit" data-id="${t.id}" title="Clique duas vezes para editar o nome (botão direito: mais opções)">${escapeHtml(effectiveDesc(t))}</span>${linkHtml}${offHtml}${fileHtml}${topicsHtml}`;
   const amt = effectiveAmount(t);
   const qtdHtml = isQ
     ? `<input type="number" min="1" class="qtdedit" data-id="${t.id}" value="${amt}" title="Ajuste conforme a quantidade real de questões no filtro"> ${t.unit}`
     : isFlash
     ? `<input type="number" min="0" class="flashqtd" data-id="${t.id}" value="${flashcardsQtd(t)}" title="Quantidade de flashcards feitos" placeholder="qtd">`
-    : t.type==='Leitura'
-    ? `<span class="pgedit" data-id="${t.id}" title="Clique duas vezes para alterar a quantidade de páginas${t.amount!=null && amt!==t.amount ? ' (original: '+t.amount+')' : ''}">${amt!=null ? `${amt} ${t.unit||'páginas'}` : '<span class="dash">-</span>'}</span>`
+    : (t.type==='Leitura' && amt!=null)
+    ? `<input type="number" min="1" class="qtdedit" data-id="${t.id}" value="${amt}" title="Ajuste a quantidade de páginas${t.amount!=null && amt!==t.amount ? ' (original: '+t.amount+')' : ''}"> ${t.unit||'páginas'}`
     : (t.amount!=null ? `${t.amount} ${t.unit}` : '<span class="dash">-</span>');
   const studyMin = lsGet('min_'+t.id, '');
   const timeCell = `<td data-label="Tempo total (min)" class="time-cell"><input type="number" min="0" step="1" class="studymin" data-id="${t.id}" value="${studyMin}" placeholder="min"></td>`;
@@ -2331,7 +2331,6 @@ function attachRowEvents(){
       });
     };
     sp.addEventListener('dblclick', edit);
-    sp.addEventListener('contextmenu', edit);
   });
   document.querySelectorAll('span.pgedit').forEach(sp=>{
     sp.addEventListener('dblclick', ()=>{
@@ -3293,6 +3292,47 @@ document.getElementById('dupSubmit').addEventListener('click', ()=>{
   duplicateTask(id, pages, document.getElementById('dupDate').value);
   closeDupForm();
 });
+// ---------- Botão direito numa tarefa: duplicar (e editar o nome, se for no nome) ----------
+(function(){
+  const menu = document.createElement('div');
+  menu.id = 'taskCtxMenu';
+  menu.style.cssText = 'position:fixed;display:none;z-index:9999;background:#fff;border:1px solid #c8d0dc;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.18);padding:4px;min-width:170px;font-size:13px;';
+  document.body.appendChild(menu);
+  const hide = ()=>{ menu.style.display='none'; };
+  const item = (txt, fn)=>{
+    const b = document.createElement('button');
+    b.type='button'; b.textContent=txt;
+    b.style.cssText='display:block;width:100%;text-align:left;background:none;border:0;padding:7px 12px;border-radius:6px;cursor:pointer;font:inherit;color:#1F4E78;';
+    b.onmouseenter=()=>{ b.style.background='#eef3fb'; }; b.onmouseleave=()=>{ b.style.background='none'; };
+    b.onclick=()=>{ hide(); fn(); };
+    menu.appendChild(b);
+  };
+  document.addEventListener('contextmenu', (e)=>{
+    const tr = e.target.closest && e.target.closest('tr[data-id]');
+    if(!tr || e.target.closest('input,select,textarea,a,button')) return;
+    const id = tr.dataset.id;
+    const t = tasks.find(x=>x.id===id);
+    if(!t) return;
+    e.preventDefault();
+    menu.innerHTML = '';
+    const desc = e.target.closest('span.descedit');
+    if(desc) item('Editar nome', ()=>{ desc.dispatchEvent(new MouseEvent('dblclick',{bubbles:true})); });
+    if(t.type!=='Flashcards') item('Duplicar tarefa', ()=>{
+      openDupForm();
+      document.getElementById('dupList').value = id;
+      dupOnPick();
+    });
+    if(!menu.children.length) return;
+    menu.style.display='block';
+    const w = menu.offsetWidth, h = menu.offsetHeight;
+    menu.style.left = Math.min(e.clientX, innerWidth-w-6)+'px';
+    menu.style.top = Math.min(e.clientY, innerHeight-h-6)+'px';
+  });
+  document.addEventListener('click', hide);
+  document.addEventListener('scroll', hide, true);
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hide(); });
+  window.addEventListener('blur', hide);
+})();
 document.getElementById('tfCancel').addEventListener('click', closeTaskForm);
 document.getElementById('taskFormOverlay').addEventListener('click', (e)=>{
   if(e.target.id==='taskFormOverlay') closeTaskForm();
