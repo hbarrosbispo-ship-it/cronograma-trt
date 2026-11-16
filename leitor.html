@@ -533,7 +533,7 @@ $('#mCtx').innerHTML=`<div class="mini">
   <button data-x="limpa" title="Limpar o grifo e o sublinhado do trecho"><span class="aa-hl">Aa</span>⌫</button>
   <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
   <button data-x="ul" title="Lista com marcadores">•≡</button><button data-x="ol" title="Lista numerada">1≡</button></div></div><hr>`
- +itensCtx()+'<hr><button data-x="trmenu" title="Põe a linha colorida de incidência do TRTeiros ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#FFD966,#7ED957,#5271FF,#F45B8F,#FF3131)"></span>Barra de incidência ▸</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
+ +itensCtx()+'<hr><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência do TRTeiros ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#FFD966,#7ED957,#5271FF,#F45B8F,#FF3131)"></span>Barra de incidência ▸</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
 $('#mCtx').insertAdjacentHTML('afterend',`<div class="menu" id="mFonte">${FONTES.map(f=>`<button data-f="${f}" style="font-family:'${f}'">${f}</button>`).join('')}</div><div class="menu" id="mTam">${[8,9,10,11,12,14,16,18,20,24,28,32,36,48].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div><div class="menu" id="mHl3">${[ATALHO['1'],ATALHO['2'],ATALHO['5']].map(t=>itemFerr(t,t.n,'')).join('')}</div>`);
 ['mFonte','mTam','mHl3'].forEach(id=>$('#'+id).onmousedown=e=>e.preventDefault());
 ligaBotoes($('#mHl3'));
@@ -562,6 +562,7 @@ const acaoCtx={
   pincel:()=>{fechaMenus();pincel=pegaFormato();document.body.classList.toggle('pincel-on',!!pincel)}};
 $('#mCtx').querySelectorAll('.mini [data-x]').forEach(b=>{b.onclick=()=>acaoCtx[b.dataset.x](b)});
 ligaBotoes($('#mCtx'));
+$('#mCtx').querySelector('[data-x=novidade]').onclick=()=>{const sel=getSelection();const bl=ctxBloco||(sel.anchorNode&&blocoDe(sel.anchorNode));fechaMenus();ctxBloco=null;if(!bl)return;bl.dataset.nov='1';bl.removeAttribute('data-sem-nov');atualizarIncidencia();marcar()};
 $('#mCtx').querySelector('[data-x=trmenu]').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();const bl=ctxBloco;fechaMenus();ctxBloco=bl;menuEm('mTR',r.right+2,r.top)};
 $('#mCtx').querySelector('[data-x=off]').onclick=()=>{if(tool)ligar(tool,false);fechaMenus()};
 $('#mCtx').querySelector('[data-x=copy]').onclick=()=>{document.execCommand('copy');fechaMenus()};
@@ -610,6 +611,10 @@ $('#mTR').querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{const sel=getS
 $('#mCtx').insertAdjacentHTML('afterend','<div class="menu" id="mBarra">'+$('#mTR').innerHTML.replace(/data-tr=/g,'data-trb=').replace('Remover a linha','Remover esta linha')+'</div>');
 let barraAlvo=null;
 $('#mBarra').insertAdjacentHTML('afterend','<div class="menu" id="mSelo"><button data-x="del"><span class="sw">&#10005;</span>Excluir este selo</button></div>');
+$('#mSelo').insertAdjacentHTML('afterend','<div class="menu" id="mNov"><button data-x="delnov"><span class="sw">&#10005;</span>Excluir este selo de novidade</button></div>');
+let novAlvo=null;$('#mNov').onmousedown=e=>e.preventDefault();
+$('#mNov').querySelector('button').onclick=()=>{const el=novAlvo&&novAlvo._el;fechaMenus();if(!el)return;el.dataset.semNov='1';el.removeAttribute('data-nov');novAlvo=null;atualizarIncidencia();marcar()};
+$('#margem').addEventListener('contextmenu',e=>{const b=e.target.closest('.rec-badge');if(!b)return;e.preventDefault();e.stopPropagation();novAlvo=b;menuEm('mNov',e.clientX,e.clientY)});
 let seloAlvo=null;$('#mSelo').onmousedown=e=>e.preventDefault();
 $('#mSelo').querySelector('button').onclick=()=>{const a=seloAlvo&&seloAlvo._anc;fechaMenus();if(!a||!a.dataset.k||!a._b)return;const e2={b:a._b,k:a.dataset.k};SELO_UNDO.push(e2);SELO_REDO.length=0;seloRecente=true;trRecente=false;a.remove();seloAlvo=null;seloMuda(e2,false)};
 const SELO_UNDO=[],SELO_REDO=[];let seloRecente=false;
@@ -834,7 +839,7 @@ let INC=null,BARRAS=[],BARRAS_TR=[],LEISECA=false,REC=[],RECJ=null;
 async function carregarRec(){if(RECJ)return RECJ;try{RECJ=await (await fetch('leitor/docs/alteracoes-recentes.json',{cache:'no-cache'})).json()}catch(e){RECJ={}}return RECJ}
 function achaRecentes(){
   const out=new Map(),blocos=blocosFolha();
-  const put=(el,rot)=>{if(el&&!out.has(el))out.set(el,rot)};
+  const put=(el,rot)=>{if(el&&!out.has(el)&&!(el.dataset&&el.dataset.semNov))out.set(el,rot)};
   blocos.forEach(el=>{
     const t=el.textContent.replace(/\s+/g,' ').trim();
     if(/^Altera[çc][ãa]o recente\b/i.test(t))return put(el,'Alteração recente (marcada no PDF): '+t.replace(/^Altera[çc][ãa]o recente:?\s*/i,'').slice(0,220)+(t.length>260?'…':''));
@@ -846,6 +851,7 @@ function achaRecentes(){
     const ini=a.ini?ND(a.ini):'',txt=a.txt?ND(a.txt):'';
     for(const el of blocos){const t=ND(el.textContent);
       if((ini&&t.startsWith(ini))||(txt&&t.includes(txt))){put(el,a.rot);if(!a.todos)break}}});
+  blocos.forEach(el=>{if(el.dataset&&el.dataset.nov)put(el,'Novidade marcada por você')});
   return [...out].map(([el,rot])=>({el,rot}))}
 // quadros (Caiu em prova, Anotação, Atenção...): o PDF junta tudo com <br>; separa em parágrafos para dar respiro entre os itens
 function separarCaixas(){
@@ -857,7 +863,22 @@ function separarCaixas(){
 function marcarLeiSeca(){
   separarCaixas();
   const k=[...folha.children];const n=k.filter(e=>/^\s*Art\.?\s*\d/.test(e.textContent)).length;
-  LEISECA=n>=8&&n/Math.max(1,k.length)>=0.12;folha.classList.toggle('leiseca',LEISECA)}
+  LEISECA=n>=8&&n/Math.max(1,k.length)>=0.12;folha.classList.toggle('leiseca',LEISECA);if(LEISECA)separarIncisos()}
+// parágrafo com vários incisos corridos ("I - ...; II - ...; III - ...") vira um parágrafo por inciso, para a incidência de cada item aparecer
+function separarIncisos(){
+  const RE=/([;:.])(\s+)(?=([IVXLC]{1,5})\.?[​\s]*[-–—]\s)/g;
+  const romano=r=>{const v={I:1,V:5,X:10,L:50,C:100};let t=0;for(let i=0;i<r.length;i++){const a=v[r[i]],b=v[r[i+1]]||0;t+=a<b?-a:a}return t};
+  [...folha.children].filter(el=>el.tagName==='P'&&!el.closest('[data-fo]')).forEach(el=>{
+    const tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);const mapa=[];let full='',n;
+    while((n=tw.nextNode())){mapa.push({node:n,ini:full.length});full+=n.data}
+    const cortes=[];let m;RE.lastIndex=0;
+    while((m=RE.exec(full))){const r=romano(m[3]);if(r>=1&&r<=40)cortes.push(m.index+m[1].length+m[2].length)}
+    if(!cortes.length)return;
+    cortes.reverse().forEach(pos=>{
+      const e=mapa.find(x=>pos>=x.ini&&pos<=x.ini+x.node.length);if(!e)return;
+      const rg=document.createRange();rg.setStart(e.node,pos-e.ini);rg.setEndAfter(el.lastChild);
+      const novo=el.cloneNode(false);novo.appendChild(rg.extractContents());
+      if(!novo.textContent.trim())return;el.after(novo)})})}
 function leiPadrao(inc){
   const cod=(meta&&meta.codigo)||'',tit=(meta&&meta.titulo)||'';
   const pre=x=>Object.keys(inc.slugs).find(s=>s.startsWith(x))||null;
@@ -975,7 +996,7 @@ function posicionarMargem(){
     let t=(g.el.getBoundingClientRect().top-pr.top)/z+3;
     while(ocup.some(y=>t>y-22&&t<y+14)||recs.some(y=>Math.abs(y-t)<24))t+=14;
     recs.push(t);
-    const b=document.createElement('span');b.className='rec-badge';b.innerHTML='Alteração<br>recente';b.title=g.rot;b.style.top=t+'px';mg.appendChild(b)});
+    const b=document.createElement('span');b.className='rec-badge';b._el=g.el;b.innerHTML='Alteração<br>recente';b.title=g.rot;b.style.top=t+'px';mg.appendChild(b)});
 }
 let _pm=null;function agendarMargem(){clearTimeout(_pm);_pm=setTimeout(posicionarMargem,120)}
 function inserirNaPosicao(mapa,pos,el){
