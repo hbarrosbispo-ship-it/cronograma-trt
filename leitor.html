@@ -865,7 +865,7 @@ function itensDoArtigo(els){
     if(i===0)tr='caput';
     else if((m=/^§\s*(\d+)/.exec(t))){par='§'+m[1];inc='';tr=par}
     else if(/^Par[aá]grafo\s+[uú]nico/i.test(t)){par='PU';inc='';tr=par}
-    else if((m=/^([IVXLC]+)\s*[-–—]/.exec(t))){inc=m[1];tr=(par?par+'.':'')+inc}
+    else if((m=/^([IVXLC]+)(?:\.[\s​]*[-–—]?|[\s​]*[-–—])/.exec(t))){inc=m[1];tr=(par?par+'.':'')+inc}
     else if(inc&&(m=/^([a-z])\)/.exec(t)))tr=(par?par+'.':'')+inc+'.'+m[1];
     const x={el,trecho:tr};
     if(tr&&/\.[a-z]$/.test(tr)){ // a conversão do PDF às vezes junta alíneas na mesma linha ("a) ... ou b) ...")
