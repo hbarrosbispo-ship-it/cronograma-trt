@@ -345,7 +345,7 @@ function fundirAtualizacao(salvoHtml,novoHtml,rm){
   novo.forEach(nb=>{
     if(nb.dataset.u){if(nb.dataset.old)nb.title='Trecho alterado pelo TRTeiros. Antes: '+nb.dataset.old;else nb.title='Trecho novo do TRTeiros';out.push(nb);return}
     const q=pool.get(chaveB(nb));
-    if(q&&q.length){const e=q.shift();usado.add(e);lugar.set(e,out.length);out.push(e)}else out.push(nb)});
+    if(q&&q.length){const e=q.shift();usado.add(e);lugar.set(e,out.length);if(nb.dataset.pg)e.dataset.pg=nb.dataset.pg;out.push(e)}else out.push(nb)});
   // o que o leitor escreveu à mão e não casa com nada fica no mesmo lugar
   let ancora=-1;const extras=new Map();
   salvo.forEach(el=>{
