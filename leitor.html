@@ -751,10 +751,10 @@ function blocosSel(){const sel=getSelection();if(!sel.rangeCount||sel.isCollapse
   return[...folha.children].filter(el=>{try{return r.intersectsNode(el)}catch(_){return false}})}
 $('#caixa').onclick=()=>{
   const bs=blocosSel();
-  if(bs.length&&bs.every(eQuad)){
+  if(bs.length&&bs.every(el=>eQuad(el)||(bs.length>1&&el.tagName==='P'))){
     const r=document.createRange();r.setStartBefore(bs[0]);r.setEndAfter(bs[bs.length-1]);
     const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
-    if(bs.length>1)exec('insertHTML',bs[0].cloneNode(false).outerHTML.replace(/<\/div>$/,'')+bs.map(corpoQuad).join('')+'</div>');   // une os quadros em um só
+    if(bs.length>1)exec('insertHTML',(bs.find(eQuad)||document.createElement('div')).cloneNode(false).outerHTML.replace(/<\/div>$/,'')+bs.map(corpoQuad).join('')+'</div>');   // une os quadros em um só
     else exec('insertHTML',corpoQuad(bs[0]));   // quadro inteiro selecionado: o quadro some, o texto fica
     return}
   const b=blocoAtual();if(!b)return;
