@@ -318,7 +318,7 @@ function mostrarAtu(){
   const lst=ATU[slug],bar=$('#updbar');
   if(!lst||!lst.length){bar.hidden=true;return}
   const u=ultAtu(slug),novo=atuNovo(slug),d=DIFF[slug];
-  const itens=lst.slice().sort((a,b)=>a.d<b.d?1:-1).map(x=>`<li><b>${dtbr(x.d)}</b> · pág. ${esc(x.pg)} · ${esc(x.t)}</li>`).join('');
+  const itens=lst.slice().sort((a,b)=>a.d<b.d?1:-1).map(x=>`<li class="irpg" data-pgs="${esc(x.pg)}" title="Clique para ir até este trecho" style="cursor:pointer"><b>${dtbr(x.d)}</b> · pág. ${esc(x.pg)} · ${esc(x.t)}</li>`).join('');
   const marcados=folha.querySelectorAll('[data-u]').length;
   // já marcado como visto e sem trechos marcados: o aviso some de vez
   if(!novo&&!marcados){bar.hidden=true;return}
@@ -331,6 +331,18 @@ function mostrarAtu(){
     folha.querySelectorAll('[data-u]').forEach(x=>{x.removeAttribute('data-u');x.removeAttribute('data-old');x.removeAttribute('title')});
     if(typeof marcar==='function')marcar();
     mostrarAtu()};
+  bar.querySelectorAll('li.irpg').forEach(li=>li.onclick=()=>{
+    const pgs=(li.dataset.pgs.match(/\d+/g)||[]).map(Number);
+    const blocos=[...folha.children];
+    let alvo=null;
+    if(pgs.length){
+      const ini=Math.min(...pgs),fim=Math.max(...pgs);
+      const naFaixa=blocos.filter(e=>{const n=+e.dataset.pg;return n>=ini&&n<=fim});
+      alvo=naFaixa.find(e=>e.dataset.u)||naFaixa[0]||blocos.find(e=>+e.dataset.pg>=ini);
+    }
+    if(!alvo)alvo=blocos[0];
+    if(alvo){alvo.scrollIntoView({behavior:'smooth',block:'center'});const o=alvo.style.outline;alvo.style.outline='3px solid #f29900';setTimeout(()=>alvo.style.outline=o,2000)}
+  });
   const pb=$('#btnProx');if(pb)pb.onclick=()=>{const l=[...folha.querySelectorAll('[data-u]')];const y=scrollY+120;const n=l.find(e=>e.getBoundingClientRect().top+scrollY>y)||l[0];n.scrollIntoView({behavior:'smooth',block:'center'})};
   const lb=$('#btnLimpaU');if(lb)lb.onclick=()=>{folha.querySelectorAll('[data-u]').forEach(e=>{e.removeAttribute('data-u');e.removeAttribute('data-old');e.removeAttribute('title')});marcar();mostrarAtu()};
 }
