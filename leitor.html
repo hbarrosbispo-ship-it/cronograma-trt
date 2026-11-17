@@ -745,7 +745,19 @@ folha.addEventListener('click',e=>{
 function blocoAtual(){let n=getSelection().anchorNode;if(!n)return null;if(n.nodeType===3)n=n.parentNode;
   while(n&&n!==folha&&n.parentNode!==folha)n=n.parentNode;return n&&n!==folha?n:null}
 $('#caixa').onmousedown=e=>e.preventDefault();
-$('#caixa').onclick=()=>{const b=blocoAtual();if(!b)return;
+const eQuad=el=>el&&el.nodeType===1&&el.tagName==='DIV'&&!el.classList.contains('band');
+const corpoQuad=d=>d.querySelector(':scope>p,:scope>div,:scope>ul,:scope>ol,:scope>table')?d.innerHTML:'<p>'+d.innerHTML+'</p>';
+function blocosSel(){const sel=getSelection();if(!sel.rangeCount||sel.isCollapsed)return[];const r=sel.getRangeAt(0);
+  return[...folha.children].filter(el=>{try{return r.intersectsNode(el)}catch(_){return false}})}
+$('#caixa').onclick=()=>{
+  const bs=blocosSel();
+  if(bs.length&&bs.every(eQuad)){
+    const r=document.createRange();r.setStartBefore(bs[0]);r.setEndAfter(bs[bs.length-1]);
+    const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+    if(bs.length>1)exec('insertHTML',bs[0].cloneNode(false).outerHTML.replace(/<\/div>$/,'')+bs.map(corpoQuad).join('')+'</div>');   // une os quadros em um só
+    else exec('insertHTML',corpoQuad(bs[0]));   // quadro inteiro selecionado: o quadro some, o texto fica
+    return}
+  const b=blocoAtual();if(!b)return;
   const eQuadro=b.tagName==='DIV'&&!b.classList.contains('band');
   if(!eQuadro&&b.tagName!=='P')return;
   exec('formatBlock',eQuadro?'p':'div')};   // pelo histórico do navegador: Ctrl+Z desfaz e Ctrl+Y refaz
