@@ -181,6 +181,8 @@ body.pincel-on #folha{cursor:copy}
 #updbar .st{display:inline-block;border-radius:9px;padding:0 7px;font-size:11.5px;font-weight:bold;margin-left:4px}
 #updbar .ok{background:#e3f4e1;color:#1e6b2a}
 #updbar .no{background:#fde8e8;color:#8a1f11}
+#updbar .irs{white-space:nowrap}
+#updbar button.irpg{background:#fff;border:1px solid #e0a800;border-radius:6px;color:#7a4b00;font-weight:bold;margin-left:6px}
 #updbar button{margin-left:10px;font-size:12px;padding:3px 10px;cursor:pointer}
 .linha .tag.atu{background:#fff3cd;color:#7a4b00}
 .linha .tag.atu.novo{background:#d93025;color:#fff}
@@ -209,7 +211,7 @@ body.pincel-on #folha{cursor:copy}
 <div id="ed" hidden>
   <div class="fixo" id="fixo">
     <div id="topo">
-      <a href="leitor.html">← Biblioteca</a><span class="t" id="titulo"></span>
+      <a href="leitor.html">← Biblioteca</a><span class="t" id="titulo"></span><button id="btnUlt" hidden title="Mostra de novo o resumo das últimas alterações do TRTeiros neste capítulo" style="margin-left:10px;font-size:12px;padding:3px 10px;cursor:pointer">↻ Últimas alterações</button>
       <button id="btnSum" hidden title="Mostrar ou esconder o sumário do capítulo">☰ Sumário</button>
       <button id="btnRib" title="Mostrar ou esconder a faixa de ferramentas">Ferramentas ▴</button>
       <button id="btnPdf" hidden title="Abrir o PDF original no Google Chrome (só neste computador)">📄 PDF no Chrome</button>
@@ -308,40 +310,46 @@ const ICONE={'Direito do Trabalho':'⚖️','Direito Processual do Trabalho':'�
 const ORDEM=['Direito do Trabalho','Direito Processual do Trabalho','Direito Constitucional','Direito Administrativo','Direito Civil','Direito Processual Civil','Direito Coletivo do Trabalho'];
 
 let ATU={};
-async function carregarAtu(){try{ATU=await (await fetch('leitor/docs/atualizacoes.json')).json()}catch(e){ATU={}}}
+async function carregarAtu(){try{ATU=await (await fetch('leitor/docs/atualizacoes.json',{cache:'no-cache'})).json()}catch(e){ATU={}}}
 const dtbr=d=>d.split('-').reverse().join('/');
 const ultAtu=sl=>(ATU[sl]||[]).reduce((m,x)=>x.d>m?x.d:m,'');
 const atuNovo=sl=>{const u=ultAtu(sl);return !!u&&u>(LS.get('upvis:'+sl)||'')};
 let DIFF={};
-async function carregarDiff(){try{DIFF=await (await fetch('leitor/docs/_diff.json')).json()}catch(e){DIFF={}}}
-function mostrarAtu(){
+async function carregarDiff(){try{DIFF=await (await fetch('leitor/docs/_diff.json',{cache:'no-cache'})).json()}catch(e){DIFF={}}}
+function mostrarAtu(force){
   const lst=ATU[slug],bar=$('#updbar');
   if(!lst||!lst.length){bar.hidden=true;return}
   const u=ultAtu(slug),novo=atuNovo(slug),d=DIFF[slug];
-  const itens=lst.slice().sort((a,b)=>a.d<b.d?1:-1).map(x=>`<li class="irpg" data-pgs="${esc(x.pg)}" title="Clique para ir até este trecho" style="cursor:pointer"><b>${dtbr(x.d)}</b> · pág. ${esc(x.pg)} · ${esc(x.t)}</li>`).join('');
+  const faixas=pg=>(String(pg).match(/\d+(?:\s*[-–a]\s*\d+)?/g)||[]).map(f=>f.replace(/\s*a\s*/,'-').replace(/\s/g,''));
+  const itens=lst.slice().sort((a,b)=>a.d<b.d?1:-1).map(x=>{const fx=faixas(x.pg);const bt=fx.length?fx.map(f=>`<button class="irpg" data-f="${f}" title="Ir até este trecho (clique de novo para o próximo)">↓ pág. ${f}</button>`).join(''):`<button class="irpg" data-f="todo">↓ início</button>`;return `<li><b>${dtbr(x.d)}</b> · pág. ${esc(x.pg)} · ${esc(x.t)} <span class="irs">${bt}</span></li>`}).join('');
   const marcados=folha.querySelectorAll('[data-u]').length;
   // já marcado como visto e sem trechos marcados: o aviso some de vez
-  if(!novo&&!marcados){bar.hidden=true;return}
+  if(!novo&&!marcados&&!force){bar.hidden=true;return}
   const resumo=d?`<div style="margin:6px 0">Comparei o PDF novo com a sua versão: <b>${d.n}</b> trecho(s) novo(s) e <b>${d.c}</b> alterado(s)${d.r?`, <b>${d.r}</b> removido(s) do material`:''}. Seus grifos nos trechos que continuam iguais foram mantidos.</div>`:'';
   const leg=marcados?`<div style="margin:6px 0"><span style="border-left:5px solid #1a73e8;background:rgba(26,115,232,.09);padding:1px 8px">azul = trecho novo</span> <span style="border-left:5px solid #f29900;background:rgba(242,153,0,.12);padding:1px 8px;margin-left:8px">laranja = trecho alterado (passe o mouse para ver o texto antigo)</span> <button id="btnProx">Ir para o próximo ↓</button> <button id="btnLimpaU">Limpar as marcas</button></div>`:'';
-  bar.innerHTML=`<details${novo||marcados?' open':''}><summary>↻ Capítulo atualizado pelo TRTeiros · ${lst.length} alteração(ões), a última em ${dtbr(u)}${novo?'<span class="nv">novo</span>':''}<button id="btnVisto">Marcar como visto</button></summary>${resumo}${leg}<ul>${itens}</ul></details>`;
+  bar.innerHTML=`<details${novo||marcados||force?' open':''}><summary>↻ Capítulo atualizado pelo TRTeiros · ${lst.length} alteração(ões), a última em ${dtbr(u)}${novo?'<span class="nv">novo</span>':''}<button id="btnVisto">Marcar como visto</button></summary>${resumo}${leg}<ul>${itens}</ul></details>`;
   bar.hidden=false;
   $('#btnVisto').onclick=e=>{e.preventDefault();LS.set('upvis:'+slug,u);
     // "visto" também limpa as marcas azul/laranja dos trechos e esconde o aviso
     folha.querySelectorAll('[data-u]').forEach(x=>{x.removeAttribute('data-u');x.removeAttribute('data-old');x.removeAttribute('title')});
     if(typeof marcar==='function')marcar();
     mostrarAtu()};
-  bar.querySelectorAll('li.irpg').forEach(li=>li.onclick=()=>{
-    const pgs=(li.dataset.pgs.match(/\d+/g)||[]).map(Number);
-    const blocos=[...folha.children];
+  bar.querySelectorAll('button.irpg').forEach(bt=>bt.onclick=e=>{
+    e.preventDefault();e.stopPropagation();
+    const blocos=[...folha.children];const f=bt.dataset.f;
+    const n=(f.match(/\d+/g)||[]).map(Number);
     let alvo=null;
-    if(pgs.length){
-      const ini=Math.min(...pgs),fim=Math.max(...pgs);
-      const naFaixa=blocos.filter(e=>{const n=+e.dataset.pg;return n>=ini&&n<=fim});
-      alvo=naFaixa.find(e=>e.dataset.u)||naFaixa[0]||blocos.find(e=>+e.dataset.pg>=ini);
+    if(n.length){
+      const ini=Math.min(...n),fim=Math.max(...n);
+      const faixa=blocos.filter(x=>{const q=+x.dataset.pg;return q>=ini&&q<=fim});
+      const marc=faixa.filter(x=>x.dataset.u);
+      const lista=marc.length?marc:faixa;
+      const k=((+bt.dataset.k||0))%Math.max(lista.length,1);
+      bt.dataset.k=marc.length?k+1:0;
+      alvo=lista[k]||blocos.find(x=>+x.dataset.pg>=ini);
     }
     if(!alvo)alvo=blocos[0];
-    if(alvo){alvo.scrollIntoView({behavior:'smooth',block:'center'});const o=alvo.style.outline;alvo.style.outline='3px solid #f29900';setTimeout(()=>alvo.style.outline=o,2000)}
+    if(alvo){scrollTo(0,Math.max(0,alvo.getBoundingClientRect().top+scrollY-220));const o=alvo.style.outline;alvo.style.outline='3px solid #f29900';setTimeout(()=>alvo.style.outline=o,2200)}
   });
   const pb=$('#btnProx');if(pb)pb.onclick=()=>{const l=[...folha.querySelectorAll('[data-u]')];const y=scrollY+120;const n=l.find(e=>e.getBoundingClientRect().top+scrollY>y)||l[0];n.scrollIntoView({behavior:'smooth',block:'center'})};
   const lb=$('#btnLimpaU');if(lb)lb.onclick=()=>{folha.querySelectorAll('[data-u]').forEach(e=>{e.removeAttribute('data-u');e.removeAttribute('data-old');e.removeAttribute('title')});marcar();mostrarAtu()};
@@ -372,7 +380,7 @@ function fundirAtualizacao(salvoHtml,novoHtml,rm){
 // =================== BIBLIOTECA ===================
 async function biblioteca(){
   $('#lista').hidden=false;document.title='Biblioteca · Cronograma TRT';
-  const docs=await (await fetch('leitor/docs/index.json')).json();
+  const docs=await (await fetch('leitor/docs/index.json',{cache:'no-cache'})).json();
   await carregarAtu();
   const mats={};docs.forEach(d=>(mats[d.materia]=mats[d.materia]||[]).push(d));
   const nomes=Object.keys(mats).sort((a,b)=>{const i=ORDEM.indexOf(a),j=ORDEM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||a.localeCompare(b)});
@@ -816,7 +824,7 @@ function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,
 function salvar(){try{localStorage.setItem('doc:'+slug,htmlLimpo());$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
 folha.addEventListener('input',marcar);
 folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
-async function original(){const r=await fetch('leitor/docs/'+slug+'.html');if(!r.ok)throw 0;return r.text()}
+async function original(){const r=await fetch('leitor/docs/'+slug+'.html',{cache:'no-cache'});if(!r.ok)throw 0;return r.text()}
 $('#mMais').querySelector('[data-a=restaurar]').onclick=async()=>{fechaMenus();if(!confirm('Voltar ao texto original e perder suas edições deste capítulo?'))return;
   folha.innerHTML=semMarcas(await original());localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';montarSumario();marcarLeiSeca();atualizarIncidencia()};
 $('#mMais').querySelector('[data-a=baixar]').onclick=()=>{fechaMenus();const a=document.createElement('a');
@@ -1241,7 +1249,7 @@ $('#mMais').querySelector('[data-a=pdf]').onclick=()=>{fechaMenus();setTimeout((
 async function editor(){
   const params=new URLSearchParams(location.search);
   $('#ed').hidden=false;
-  const docs=await (await fetch('leitor/docs/index.json')).json();
+  const docs=await (await fetch('leitor/docs/index.json',{cache:'no-cache'})).json();
   await carregarAtu();
   meta=docs.find(d=>d.slug===slug)||{titulo:slug,paginas:1};
   document.title=meta.titulo+' · Cronograma TRT';
@@ -1262,7 +1270,7 @@ async function editor(){
   try{ // texto salvo vazio/corrompido: volta ao original em vez de mostrar folha em branco
     if(folha.innerText.trim().length<30){const o=await original();if(o&&o.length>100){folha.innerHTML=semMarcas(o);try{localStorage.removeItem('doc:'+slug)}catch(e){}}}
   }catch(e){}
-  montarSumario();marcarLeiSeca();mostrarAtu();
+  montarSumario();marcarLeiSeca();mostrarAtu();{const bu=$('#btnUlt');if(ATU[slug]&&ATU[slug].length){bu.hidden=false;bu.onclick=()=>{mostrarAtu(true);scrollTo(0,Math.max(0,$('#updbar').getBoundingClientRect().top+scrollY-200))}}}
   atualizarIncidencia();prepararBotoes();
   const z=LS.get('zoom');if(z)setZoom(z);
   faixa(LS.get('ribOn')!==false);$('#btnInc').classList.toggle('on',LS.get('incOn')!==false);
