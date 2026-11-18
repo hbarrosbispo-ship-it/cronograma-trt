@@ -1093,29 +1093,40 @@ async function atualizarIncidencia(){
     ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
   }
   const leiBase=(LEISECA&&usaComp)?leiPadrao(inc):null;
-  if(leiBase){let atual=null;
+  // documento com várias leis em sequência (ex.: Legislação Extravagante de PCD): a lei de cada artigo vem do título da seção (LEI Nº .../ANO, DECRETO Nº .../ANO)
+  const MULTI=!!(LEISECA&&usaComp&&!leiBase&&[...folha.querySelectorAll('p.tit')].some(e=>/^(LEI|DECRETO)\s+N[º°o]/i.test(e.textContent.trim())));
+  const secLei=tx=>{const s=tx.replace(/\s+/g,' ').trim();
+    if(/^CONSTITUIÇÃO FEDERAL/i.test(s))return inc.slugs['cf-1988']?'cf-1988':null;
+    let q=/^(LEI|DECRETO)\s+N[º°o]\s*([\d.]+)\s*\/\s*(\d{4})/i.exec(s);
+    if(q){const pre=(q[1].toUpperCase()==='LEI'?'lei-':'dec-')+q[2].replace(/\./g,'')+'-';return Object.keys(inc.slugs).find(x=>x.startsWith(pre))||null}
+    q=/^RESOLUÇÃO\s+N[º°o]\s*(\d+)\s+DO\s+CSJT/i.exec(s);
+    if(q)return Object.keys(inc.slugs).find(x=>x.startsWith('res-csjt-'+q[1]+'-'))||null;
+    return undefined};
+  if(leiBase||MULTI){let atual=null,sec=leiBase;
     for(const el of [...folha.children]){
       const t=el.textContent.trim(),m=/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[º°o]?(?:\s*-\s*([A-Z]))?/.exec(t);
       const quebra=/^H[1-6]$/.test(el.tagName)||el.classList.contains('band')||el.classList.contains('tit');
-      if(m&&!el.classList.contains('call')){const num=m[1].replace(/\./g,'')+(m[2]?'-'+m[2].toLowerCase():''),reg=inc.m[leiBase+'|'+num];
-        atual={els:[el],n:reg?reg.n:0,url:reg?reg.url:'',art:m[1]+(m[2]||''),lei:inc.slugs[leiBase]};BARRAS.push(atual)}
+      if(MULTI&&el.classList.contains('tit')){const sl=secLei(t);if(sl!==undefined)sec=sl}
+      if(m&&!el.classList.contains('call')){const num=m[1].replace(/\./g,'')+(m[2]?'-'+m[2].toLowerCase():''),reg=sec?inc.m[sec+'|'+num]:null;
+        atual={els:[el],n:reg?reg.n:0,url:reg?reg.url:'',art:m[1]+(m[2]||''),lei:sec?inc.slugs[sec]:'',base:sec};BARRAS.push(atual)}
       else if(quebra)atual=null;else if(atual)atual.els.push(el);
     }}
   // artigo com o mesmo número aparecendo mais de uma vez no capítulo (ex.: dois "Art. 3º" na Res. 65): a incidência vale só para a ocorrência indicada em leitor/docs/incidencia-ocorrencia.json
-  if(leiBase){let OC={};try{OC=(await (await fetch('leitor/docs/incidencia-ocorrencia.json',{cache:'no-cache'})).json())[slug]||{}}catch(e){}
+  if(leiBase||MULTI){let OC={};try{OC=(await (await fetch('leitor/docs/incidencia-ocorrencia.json',{cache:'no-cache'})).json())[slug]||{}}catch(e){}
     const vistos={};BARRAS.forEach(g=>{const mm=/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[º°o]?(?:\s*-\s*([A-Z]))?/.exec(g.els[0].textContent.trim());if(!mm)return;
       const num=mm[1].replace(/\./g,'')+(mm[2]?'-'+mm[2].toLowerCase():'');vistos[num]=(vistos[num]||0)+1;
       if(OC[num]&&OC[num]!==vistos[num]){g.n=0;g.semItens=true}})}
   // selo "N×" no próprio artigo (total do artigo no compilado), nunca em artigos citados no texto
-  if(leiBase)BARRAS.forEach(g=>{if(!g.n)return;const el0=g.els[0],k='art-'+g.art+'|1';
+  if(leiBase||MULTI)BARRAS.forEach(g=>{if(!g.n)return;const el0=g.els[0],k='art-'+g.art+'|1';
     if((el0.dataset.semSelo||'').split(';').includes(k))return;
     const a=badge(g.n,`Art. ${g.art} · ${g.lei}\nCobrado em ${g.n} ${g.n===1?'questão':'questões'} dos filtros (total do artigo; clique para abrir no compilado)`,g.url,g.art);
     a.dataset.k=k;a._b=el0;el0.insertBefore(a,el0.firstChild);total++});
   // incidência por item (inciso, alínea, parágrafo), quando o compilado traz o detalhe da lei
   let porItem=false;
-  if(leiBase){const it=(await carregarItens())[leiBase];
-    if(it){const novo=[];
+  if(leiBase||MULTI){const ITN=await carregarItens();
+    {const novo=[];
       for(const g of BARRAS){
+        const it=g.base?ITN[g.base]:null;if(!it){novo.push(g);continue}
         const mm=/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[º°o]?(?:\s*-\s*([A-Z]))?/.exec(g.els[0].textContent.trim());
         const chaveArt=mm?mm[1].replace(/\./g,'')+(mm[2]?'-'+mm[2]:''):null;
         if(g.semItens){novo.push(g);continue}
@@ -1127,8 +1138,8 @@ async function atualizarIncidencia(){
           const n=Math.max(0,...todos.map(t=>it[chaveArt+'|'+t]||0));
           const fmt=t=>t.replace(/^PU/,'parágrafo único').replace(/§(\d+)/g,'§ $1º').replace(/\./g,', ');
           const nome=(!x.trecho||x.trecho==='caput')?'':', '+(x.extra?todos.map(t=>t.split('.').pop()).join(' e '):fmt(x.trecho)).replace(/^(?=[a-z](?: e [a-z])*$)/,fmt(x.trecho.slice(0,-2))+', ');
-          novo.push({els:[x.el],n,url:g.url,art:rotArt,lei:inc.slugs[leiBase],
-            rot:`${rotArt}${nome} · ${inc.slugs[leiBase]}\nCobrado em ${n} ${n===1?'questão':'questões'} dos filtros (clique para abrir no compilado)`})})}
+          novo.push({els:[x.el],n,url:g.url,art:rotArt,lei:inc.slugs[g.base],
+            rot:`${rotArt}${nome} · ${inc.slugs[g.base]}\nCobrado em ${n} ${n===1?'questão':'questões'} dos filtros (clique para abrir no compilado)`})})}
       BARRAS=novo}}
   // onde o compilado não tem incidência, mostra a legenda do TRTeiros (cores que já vinham no PDF)
   const cobertos=new Set();BARRAS.filter(b=>b.n).forEach(b=>b.els.forEach(e=>cobertos.add(e)));
@@ -1137,7 +1148,7 @@ async function atualizarIncidencia(){
   await carregarRec();REC=achaRecentes();
   const comBarra=BARRAS.filter(b=>b.n).length;
   const partes=[];if(total)partes.push(LEISECA?`${total} selos de artigo`:`${total} citações`);if(comBarra)partes.push(`${comBarra} ${porItem?'itens':'artigos'} pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);if(REC.length)partes.push(`${REC.length} alterações recentes`);
-  info.textContent=partes.length?partes.join(' · '):(LEISECA&&usaComp&&!leiBase?'lei ainda não está no compilado':'nenhuma incidência encontrada');
+  info.textContent=partes.length?partes.join(' · '):(LEISECA&&usaComp&&!leiBase&&!MULTI?'lei ainda não está no compilado':'nenhuma incidência encontrada');
   const nf=aplicarFiltroInc();if(nf!==null)info.textContent=(nf?nf+' trechos com incidência':'nenhum trecho com incidência')+' (filtro ligado)';
   posicionarMargem();
 }
