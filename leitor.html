@@ -1097,6 +1097,7 @@ async function atualizarIncidencia(){
   const MULTI=!!(LEISECA&&usaComp&&!leiBase&&[...folha.querySelectorAll('p.tit')].some(e=>/^(LEI|DECRETO)\s+N[º°o]/i.test(e.textContent.trim())));
   const secLei=tx=>{const s=tx.replace(/\s+/g,' ').trim();
     if(/^CONSTITUIÇÃO FEDERAL/i.test(s))return inc.slugs['cf-1988']?'cf-1988':null;
+    if(/^CONVENÇÃO SOBRE OS DIREITOS DAS PESSOAS COM DEFICIÊNCIA/i.test(s))return inc.slugs['cdpd-2009']?'cdpd-2009':null;
     let q=/^(LEI|DECRETO)\s+N[º°o]\s*([\d.]+)\s*\/\s*(\d{4})/i.exec(s);
     if(q){const pre=(q[1].toUpperCase()==='LEI'?'lei-':'dec-')+q[2].replace(/\./g,'')+'-';return Object.keys(inc.slugs).find(x=>x.startsWith(pre))||null}
     q=/^RESOLUÇÃO\s+N[º°o]\s*(\d+)\s+DO\s+CSJT/i.exec(s);
