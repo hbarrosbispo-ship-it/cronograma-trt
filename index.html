@@ -503,6 +503,7 @@ body > .wrap > .tab-bar{display:none}
   <div id="view-desempenho" style="display:none;">
     <div class="subtab-bar">
       <button class="subtab-btn" id="desSubDesempenho">Desempenho</button>
+      <button class="subtab-btn" id="desSubAcertos">Acertos e erros</button>
       <button class="subtab-btn" id="desSubEstatisticas">Estatísticas</button>
       <button class="subtab-btn" id="desSubHistorico">Histórico dos filtros e cadernos</button>
     </div>
@@ -513,6 +514,10 @@ body > .wrap > .tab-bar{display:none}
     <div id="historico-content" style="display:none;">
       <p class="note">Histórico de acertos por filtro e por caderno: a primeira vez que você resolveu cada filtro e as vezes em que o refez, com a variação entre as tentativas.</p>
       <div id="historicoBox"></div>
+    </div>
+    <div id="acertos-content" style="display:none;">
+      <p class="note">Questões feitas semana a semana (com certeza, com dúvida e erradas), a distribuição por matéria e, abaixo, onde e por que você mais erra. Os números da semana vêm dos acertos registrados em cada filtro ou caderno.</p>
+      <div id="acertosBox"></div>
     </div>
     <div id="estatisticas-content" style="display:none;">
       <p class="note">Horas efetivamente estudadas (campo "Tempo total" preenchido em cada atividade), por matéria, semana, mês e dia da semana. Só entram nas contas as atividades com tempo registrado.</p>
@@ -2906,7 +2911,6 @@ function renderEstatisticas(){
 
   const subjKeys = SUBJECTS.concat(STATS_EXTRA_KEYS);
   const allWeekKeys = weekNamesInOrder();
-  const allMonthKeys = monthsInOrder();
 
   statsAddCard(grid, 'chart-horasMateria', 'Horas Estudadas por Matéria', 'Total de horas registradas em cada matéria, mais Flashcards e Estudo de Caso separados');
   statsMakeChart('chart-horasMateria', {
@@ -2915,18 +2919,12 @@ function renderEstatisticas(){
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }
   });
 
-  statsAddCard(grid, 'chart-mesMateria', 'Distribuição por Mês e Matéria', 'Horas estudadas por mês, divididas por matéria');
-  statsMakeChart('chart-mesMateria', {
-    type:'bar',
-    data:{ labels: allMonthKeys.map(monthLabel), datasets: statsSubjDatasets(base.byMonthSubj, allMonthKeys) },
-    options:{ responsive:true, maintainAspectRatio:false, scales:{ x:{stacked:true}, y:{stacked:true} }, plugins:{legend:{position:'bottom', labels:{boxWidth:11, font:{size:10}}}} }
-  });
-
-  statsAddCard(grid, 'chart-semanaMateria', 'Distribuição por Semana e Matéria', 'Horas estudadas por semana, divididas por matéria');
+  const semComDados = allWeekKeys.filter(w=>base.byWeek[w]);
+  statsAddCard(grid, 'chart-semanaMateria', 'Horas por Semana e Matéria', 'Cada barra é uma semana (só as que têm tempo registrado), dividida por matéria');
   statsMakeChart('chart-semanaMateria', {
     type:'bar',
-    data:{ labels: allWeekKeys, datasets: statsSubjDatasets(base.byWeekSubj, allWeekKeys) },
-    options:{ responsive:true, maintainAspectRatio:false, scales:{ x:{stacked:true}, y:{stacked:true} }, plugins:{legend:{position:'bottom', labels:{boxWidth:11, font:{size:10}}}} }
+    data:{ labels: semComDados.map(w=>w.replace(/^Semana\s*/,'S')), datasets: statsSubjDatasets(base.byWeekSubj, semComDados) },
+    options:{ responsive:true, maintainAspectRatio:false, scales:{ x:{stacked:true, ticks:{autoSkip:false, maxRotation:0}}, y:{stacked:true, title:{display:true,text:'horas'}} }, plugins:{legend:{position:'bottom', labels:{boxWidth:11, font:{size:10}}}} }
   });
 
   statsAddCard(grid, 'chart-diaSemana', 'Horas por Dia da Semana', 'Soma de todas as horas estudadas que caíram em cada dia da semana, em todo o cronograma');
@@ -3068,6 +3066,119 @@ function ritmosHtml(){
   return `<div class="geral-sec"><h3>Ritmo real de estudo por matéria</h3>
     <table class="ed-tab"><thead><tr><th>Matéria</th><th>Leitura (min/pág)</th><th>Questões (min/questão)</th></tr></thead><tbody>${rows}</tbody></table>
     <div style="font-size:12px;color:var(--gray);margin-top:8px">Média das tarefas concluídas com tempo registrado, só o que você realmente fez.</div></div>`;
+}
+
+// ---------- Acertos e erros (semana a semana; motivos e onde mais erra) ----------
+let acCharts = {}, acSel = lsGet('acSel','*'), acErrosCache = null, acErrosLoading = false;
+const AC_COR = { certeza:'#2E9E5B', duvida:'#F0B429', erro:'#D64545' };
+const AC_MOTIVOS = ['Não sabia','Confundi os conceitos','Interpretei errado','Sem motivo registrado'];
+const AC_MOTIVO_COR = { 'Não sabia':'#D64545', 'Confundi os conceitos':'#E67E22', 'Interpretei errado':'#6C63FF', 'Sem motivo registrado':'#B8C0CC' };
+function acMotivoNorm(m){ m = (m||'').trim(); if(/^li errado$/i.test(m)) return 'Interpretei errado'; return AC_MOTIVOS.indexOf(m)>=0 && m!=='Sem motivo registrado' ? m : 'Sem motivo registrado'; }
+function acertosPorSemana(){
+  const out = {};
+  tasks.forEach(t=>{
+    if(t.type!=='Questões') return;
+    if(acertosTotalStr(t)==='') return;
+    const info = DAY_INFO[effectiveDate(t)]; if(!info) return;
+    const amt = effectiveAmount(t)||0, c = Number(acertosSeguros(t)||0), d = Number(acertosDuvida(t)||0);
+    const e = Math.max(0, amt - c - d);
+    const w = out[info.week] = out[info.week] || {};
+    const x = w[t.subj] = w[t.subj] || {c:0,d:0,e:0};
+    x.c += c; x.d += d; x.e += e;
+  });
+  return out;
+}
+function acCard(box, id, titulo, sub, alt){
+  const d = document.createElement('div'); d.className = 'chart-card'; d.style.marginTop = '14px';
+  d.innerHTML = `<h3>${titulo}</h3><div class="chart-sub">${sub}</div><div style="position:relative;height:${alt||340}px"><canvas id="${id}"></canvas></div>`;
+  box.appendChild(d); return d;
+}
+function acMake(id, cfg){ const el = document.getElementById(id); if(el) acCharts[id] = new Chart(el, cfg); }
+function acCarregarErros(){
+  if(acErrosCache!==null || acErrosLoading) return;
+  acErrosLoading = true;
+  const motivos = {};
+  const pCap = fetch(WEBAPP_URL + '?action=capturas&limite=5000&ak=' + encodeURIComponent(accessKey())).then(r=>r.json()).then(j=>{
+    (j && j.capturas || []).forEach(c=>{ if(c.motivo && c.codigo) motivos[c.codigo] = c.motivo; });
+  }).catch(()=>{});
+  const pDados = fetch('compilado/dados-erros.json', {cache:'no-cache'}).then(r=>r.ok?r.json():[]).catch(()=>[]);
+  Promise.all([pDados, pCap]).then(([lista])=>{
+    acErrosCache = lista.map(e=>({ ...e, mo: acMotivoNorm(motivos[e.c] || e.mo) }));
+    acErrosLoading = false;
+    try{ renderAcertos(); }catch(e){}
+  });
+}
+function renderAcertos(){
+  const box = document.getElementById('acertosBox'); if(!box) return;
+  Object.values(acCharts).forEach(c=>c.destroy()); acCharts = {};
+  box.innerHTML = '';
+  acCarregarErros();
+  const dados = acertosPorSemana();
+  const semanas = weekNamesInOrder().filter(w=>dados[w]);
+  if(!semanas.length){ box.innerHTML = '<div class="chart-empty">Ainda não há acertos registrados nos filtros e cadernos.</div>'; return; }
+  const subs = SUBJECTS.filter(sj=>semanas.some(w=>dados[w][sj]));
+  if(acSel!=='*' && subs.indexOf(acSel)<0) acSel = '*';
+  const soma = (w, f)=>{ let r={c:0,d:0,e:0}; Object.keys(dados[w]).forEach(sj=>{ if(f(sj)){ r.c += dados[w][sj].c; r.d += dados[w][sj].d; r.e += dados[w][sj].e; } }); return r; };
+  const serie = semanas.map(w=>soma(w, sj=>acSel==='*' || sj===acSel));
+  const tot = serie.reduce((a,x)=>({c:a.c+x.c,d:a.d+x.d,e:a.e+x.e}),{c:0,d:0,e:0});
+  const feitas = tot.c+tot.d+tot.e;
+  const pct = feitas ? (tot.c+tot.d)/feitas*100 : 0;
+  box.insertAdjacentHTML('beforeend', `<div class="week-summary">
+    <div class="week-card"><div class="w-title">Questões feitas</div><div class="w-time">${feitas}</div><div class="w-sub">${acSel==='*'?'todas as matérias':SUBJECT_NAMES[acSel]}</div></div>
+    <div class="week-card"><div class="w-title">Com certeza</div><div class="w-time" style="color:${AC_COR.certeza}">${tot.c}</div><div class="w-sub">${feitas?(tot.c/feitas*100).toFixed(0):0}% das questões</div></div>
+    <div class="week-card"><div class="w-title">Com dúvida</div><div class="w-time" style="color:#B7860B">${tot.d}</div><div class="w-sub">${feitas?(tot.d/feitas*100).toFixed(0):0}% das questões</div></div>
+    <div class="week-card"><div class="w-title">Erros</div><div class="w-time" style="color:${AC_COR.erro}">${tot.e}</div><div class="w-sub">acerto total ${pct.toFixed(0)}%</div></div></div>`);
+  box.insertAdjacentHTML('beforeend', `<div class="subtab-bar" style="margin-top:12px"><label style="font-size:13px;color:var(--gray)">Matéria:&nbsp;</label><select id="acSelect" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border)"><option value="*">Todas as matérias</option>${subs.map(sj=>`<option value="${sj}" ${sj===acSel?'selected':''}>${sj} · ${SUBJECT_NAMES[sj]}</option>`).join('')}</select></div>`);
+  document.getElementById('acSelect').addEventListener('change', e=>{ acSel = e.target.value; lsSet('acSel', acSel); renderAcertos(); });
+  const rot = semanas.map(w=>w.replace(/^Semana\s*/,'Sem. '));
+  acCard(box, 'ac-sem', 'Questões por semana', 'Cada barra é uma semana: verde = acertou com certeza, amarelo = acertou com dúvida, vermelho = errou. A linha é o % de acerto total.', 360);
+  acMake('ac-sem', { data:{ labels: rot, datasets:[
+    { type:'bar', label:'Certeza', data: serie.map(x=>x.c), backgroundColor:AC_COR.certeza, stack:'q', yAxisID:'y' },
+    { type:'bar', label:'Dúvida', data: serie.map(x=>x.d), backgroundColor:AC_COR.duvida, stack:'q', yAxisID:'y' },
+    { type:'bar', label:'Erro', data: serie.map(x=>x.e), backgroundColor:AC_COR.erro, stack:'q', yAxisID:'y' },
+    { type:'line', label:'% de acerto', data: serie.map(x=>{ const n=x.c+x.d+x.e; return n? +((x.c+x.d)/n*100).toFixed(1) : null; }), borderColor:'#305496', backgroundColor:'#305496', yAxisID:'y2', tension:.25, pointRadius:3 }
+  ]}, options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+    scales:{ x:{stacked:true}, y:{stacked:true, title:{display:true,text:'questões'}}, y2:{position:'right', min:0, max:100, grid:{drawOnChartArea:false}, ticks:{callback:v=>v+'%'}} },
+    plugins:{ legend:{position:'bottom'} } } });
+  // tabela semana x matéria
+  const cab = subs.map(sj=>`<th>${sj}</th>`).join('');
+  const linhas = semanas.map((w,i)=>{
+    const cel = subs.map(sj=>{ const x = dados[w][sj]; if(!x) return '<td style="color:#A0AEC0">-</td>'; const n = x.c+x.d+x.e;
+      return `<td><b>${n}</b> <span style="font-size:11px;color:var(--gray)"><span style="color:${AC_COR.certeza}">${x.c}</span>·<span style="color:#B7860B">${x.d}</span>·<span style="color:${AC_COR.erro}">${x.e}</span></span></td>`; }).join('');
+    const t = soma(w, ()=>true);
+    return `<tr><td><b>${rot[i]}</b></td>${cel}<td><b>${t.c+t.d+t.e}</b> <span style="font-size:11px;color:var(--gray)">${(t.c+t.d+t.e)?((t.c+t.d)/(t.c+t.d+t.e)*100).toFixed(0):0}%</span></td></tr>`; }).join('');
+  box.insertAdjacentHTML('beforeend', `<div class="chart-card" style="margin-top:14px;overflow-x:auto"><h3>Questões por semana e matéria</h3><div class="chart-sub">Total de questões; ao lado, <span style="color:${AC_COR.certeza}">certeza</span>·<span style="color:#B7860B">dúvida</span>·<span style="color:${AC_COR.erro}">erro</span></div>
+    <table class="ed-tab" style="margin-top:8px"><thead><tr><th>Semana</th>${cab}<th>Total</th></tr></thead><tbody>${linhas}</tbody></table></div>`);
+  // erros
+  box.insertAdjacentHTML('beforeend', '<h3 style="margin:26px 0 4px;color:var(--blue-dark)">Onde e por que você erra</h3><div class="note" style="margin-top:0">Baseado nos erros e dúvidas dos compilados de revisão; o motivo vem do que você marcou ao terminar cada caderno.</div><div id="acErrosBox"></div>');
+  renderAcErros(document.getElementById('acErrosBox'));
+}
+function renderAcErros(box){
+  if(acErrosCache===null){ box.innerHTML = '<div class="chart-empty">Carregando os erros dos compilados...</div>'; return; }
+  const erros = acErrosCache.filter(e=>e.r==='erro'), duv = acErrosCache.filter(e=>e.r==='duvida');
+  if(!acErrosCache.length){ box.innerHTML = '<div class="chart-empty">Ainda não há erros nos compilados.</div>'; return; }
+  const semMot = erros.filter(e=>e.mo==='Sem motivo registrado').length;
+  box.insertAdjacentHTML('beforeend', `<div class="week-summary">
+    <div class="week-card"><div class="w-title">Erros nos compilados</div><div class="w-time" style="color:${AC_COR.erro}">${erros.length}</div><div class="w-sub">${duv.length} acertos com dúvida</div></div>
+    <div class="week-card"><div class="w-title">Sem motivo registrado</div><div class="w-time">${semMot}</div><div class="w-sub">${semMot? 'diga o motivo ao fim de cada caderno para completar o gráfico' : 'todos os erros têm motivo'}</div></div></div>`);
+  // motivos (rosca)
+  const porMot = AC_MOTIVOS.map(m=>erros.filter(e=>e.mo===m).length);
+  acCard(box, 'ac-mot', 'Motivo dos erros', 'Por que você errou: não sabia, confundiu conceitos ou interpretou errado', 300);
+  acMake('ac-mot', { type:'doughnut', data:{ labels:AC_MOTIVOS, datasets:[{ data:porMot, backgroundColor:AC_MOTIVOS.map(m=>AC_MOTIVO_COR[m]) }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} } } });
+  // matéria x motivo
+  const mats = [...new Set(erros.map(e=>e.m))].sort((a,b)=>erros.filter(e=>e.m===b).length-erros.filter(e=>e.m===a).length);
+  acCard(box, 'ac-mat', 'Erros por matéria', 'Quantos erros em cada matéria, separados pelo motivo', Math.max(240, mats.length*34+90));
+  acMake('ac-mat', { type:'bar', data:{ labels:mats, datasets: AC_MOTIVOS.map(m=>({ label:m, backgroundColor:AC_MOTIVO_COR[m], data: mats.map(x=>erros.filter(e=>e.m===x && e.mo===m).length) })) },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, scales:{ x:{stacked:true, ticks:{precision:0}}, y:{stacked:true} }, plugins:{ legend:{position:'bottom'} } } });
+  // temas (lei › capítulo)
+  const cont = {};
+  acErrosCache.forEach(e=>{ (e.tm.length?e.tm:['Sem dispositivo (conceitual)']).forEach(t=>{ const c = cont[t] = cont[t] || {e:0,d:0}; if(e.r==='erro') c.e++; else c.d++; }); });
+  const top = Object.entries(cont).sort((a,b)=>(b[1].e*2+b[1].d)-(a[1].e*2+a[1].d)).slice(0,14);
+  acCard(box, 'ac-tema', 'Onde mais erra: lei e capítulo', 'Os 14 trechos (lei › capítulo) com mais erros e dúvidas', Math.max(300, top.length*30+90));
+  acMake('ac-tema', { type:'bar', data:{ labels: top.map(x=>x[0].length>58 ? x[0].slice(0,56)+'…' : x[0]), datasets:[
+      { label:'Erros', backgroundColor:AC_COR.erro, data: top.map(x=>x[1].e) }, { label:'Dúvidas', backgroundColor:AC_COR.duvida, data: top.map(x=>x[1].d) } ] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, scales:{ x:{stacked:true, ticks:{precision:0}}, y:{stacked:true} }, plugins:{ legend:{position:'bottom'} } } });
 }
 
 // ---------- Histórico dos filtros ----------
@@ -3333,10 +3444,10 @@ function renderEdital(){
 
 // ---------- Abas ----------
 function activateDesempenhoSub(sub){
-  if(['desempenho','historico','estatisticas'].indexOf(sub)<0) sub = 'desempenho';
+  if(['desempenho','historico','estatisticas','acertos'].indexOf(sub)<0) sub = 'desempenho';
   lsSet('desempenhoSub', sub);
-  const ids = {desempenho:'desempenho-content', historico:'historico-content', estatisticas:'estatisticas-content'};
-  const btn = {desempenho:'desSubDesempenho', historico:'desSubHistorico', estatisticas:'desSubEstatisticas'};
+  const ids = {desempenho:'desempenho-content', historico:'historico-content', estatisticas:'estatisticas-content', acertos:'acertos-content'};
+  const btn = {desempenho:'desSubDesempenho', historico:'desSubHistorico', estatisticas:'desSubEstatisticas', acertos:'desSubAcertos'};
   Object.keys(ids).forEach(k=>{
     document.getElementById(ids[k]).style.display = (k===sub) ? '' : 'none';
     document.getElementById(btn[k]).classList.toggle('active', k===sub);
@@ -3344,6 +3455,7 @@ function activateDesempenhoSub(sub){
   if(sub==='desempenho') renderDesempenho();
   if(sub==='historico') renderHistorico();
   if(sub==='estatisticas') renderEstatisticas();
+  if(sub==='acertos') renderAcertos();
 }
 function activateEditalSub(sub){
   if(['geral','itens'].indexOf(sub)<0) sub = 'geral';
@@ -3356,7 +3468,7 @@ function activateEditalSub(sub){
 }
 function activateTab(name){
   let sub = null, edSub = null;
-  if(name==='estatisticas' || name==='historico'){ sub = name; name = 'desempenho'; }
+  if(name==='estatisticas' || name==='historico' || name==='acertos'){ sub = name; name = 'desempenho'; }
   if(name==='geral'){ edSub = 'geral'; name = 'edital'; }
   const viewMap = { cronograma:'view-cronograma', desempenho:'view-desempenho', edital:'view-edital' };
   const btnMap = { cronograma:'tabBtnCronograma', desempenho:'tabBtnDesempenho', edital:'tabBtnEdital' };
@@ -3384,6 +3496,7 @@ document.getElementById('edSubItens').addEventListener('click', ()=>activateEdit
 document.getElementById('desSubDesempenho').addEventListener('click', ()=>activateDesempenhoSub('desempenho'));
 document.getElementById('desSubHistorico').addEventListener('click', ()=>activateDesempenhoSub('historico'));
 document.getElementById('desSubEstatisticas').addEventListener('click', ()=>activateDesempenhoSub('estatisticas'));
+document.getElementById('desSubAcertos').addEventListener('click', ()=>activateDesempenhoSub('acertos'));
 
 document.getElementById('saveIndicator').addEventListener('click', ()=>{
   if(saveFailedKeys.size === 0) return;
