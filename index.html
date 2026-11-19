@@ -3436,9 +3436,6 @@ function compiladoDaTarefa(t){
       document.getElementById('dupList').value = id;
       dupOnPick();
     });
-    const comp = compiladoDaTarefa(t);
-    if(comp) item('Abrir compilado ↗', ()=>{ window.open(new URL('compilado/'+comp.href, location.href).href,'_blank','noopener'); });
-    leisDaTarefa(t).forEach(([nome,url])=>item('Abrir '+nome+' ↗', ()=>{ window.open(url,'_blank','noopener'); }));
     const elegivel = t.type!=='Flashcards' && !/videoaula do curso Rezende/i.test(t.desc) && lsGet('status_'+t.id,'Pendente')!=='Concluído';
     if(elegivel) item('Selecionar no cronômetro', ()=>{
       timerTaskId = id;
@@ -3447,6 +3444,9 @@ function compiladoDaTarefa(t){
       updateSwDisplay();
       renderAll();
     });
+    const comp = compiladoDaTarefa(t);
+    if(comp) item('Abrir compilado ↗', ()=>{ window.open(new URL('compilado/'+comp.href, location.href).href,'_blank','noopener'); });
+    leisDaTarefa(t).forEach(([nome,url])=>item('Abrir '+nome+' ↗', ()=>{ window.open(url,'_blank','noopener'); }));
     if(!menu.children.length) return;
     menu.style.display='block';
     const w = menu.offsetWidth, h = menu.offsetHeight;
