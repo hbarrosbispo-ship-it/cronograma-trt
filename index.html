@@ -3382,6 +3382,42 @@ function leisDaTarefa(t){
   for(const [re,ks] of LEI_POR_DESC){ if(re.test(t.desc)) return ks.map(k=>LEI_URL[k]); }
   return (LEI_POR_MATERIA[t.subj]||[]).map(k=>LEI_URL[k]);
 }
+
+// ---------- Compilado da tarefa (botão direito): casa pela matéria + nome, só se já existir ----------
+let COMP_IDX = [];
+const COMP_PASTA_SUBJ = {'Administracao Publica':['DA'],'Direito Administrativo':['DA'],'Direito Civil':['DCI'],'Direito Processual Civil':['DPC'],
+  'Direito Processual do Trabalho':['DPT'],'Direito do Trabalho':['DT','DCT'],'Direitos Humanos':['DH'],'Informatica':['INF'],
+  'Nocoes de Legislacao':['LEG'],'Pessoas com Deficiencia':['PCD'],'Portugues':['PORT'],'Direito Constitucional':['DCO']};
+const COMP_STOP = new Set(['a','o','as','os','de','do','da','dos','das','e','em','no','na','nos','nas','com','para','por','ao','aos']);
+function compTokens(txt){
+  return new Set(String(txt||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/\(.*?\)/g,' ').replace(/refazer|continuacao:?|filtro|\bparte\b|\d+\/\d+/g,' ')
+    .replace(/[^a-z0-9]+/g,' ').split(' ').filter(w=>w && !COMP_STOP.has(w)));
+}
+function compJaccard(a,b){ if(!a.size||!b.size) return 0; let i=0; a.forEach(x=>{ if(b.has(x)) i++; }); return i/(a.size+b.size-i); }
+fetch('compilado/index.html').then(r=>r.ok?r.text():'').then(h=>{
+  if(!h) return;
+  const doc = new DOMParser().parseFromString(h,'text/html');
+  doc.querySelectorAll('tr').forEach(tr=>{
+    const a = tr.querySelector('a[href$=".html"]'); if(!a) return;
+    const href = a.getAttribute('href'); const pasta = decodeURIComponent(href.split('/')[0]);
+    if(!COMP_PASTA_SUBJ[pasta]) return;
+    const tds = tr.querySelectorAll('td');
+    const titulo = a.textContent.replace(/\s+-\s+[A-Z]{2,4}\s*$/,'');
+    COMP_IDX.push({href, subjs:COMP_PASTA_SUBJ[pasta], t1:compTokens(titulo), t2:compTokens(tds[1]?tds[1].textContent:'')});
+  });
+}).catch(()=>{});
+function compiladoDaTarefa(t){
+  if(t.type==='Flashcards' || /^Jurisprud/i.test(t.desc) || /refazer s[oó] as erradas|tud[aã]o|estudo de caso|simulado/i.test(t.desc)) return null;
+  const tk = compTokens(t.desc); let best=null, bs=0;
+  COMP_IDX.forEach(c=>{
+    if(!c.subjs.includes(t.subj)) return;
+    let sc = Math.max(compJaccard(tk,c.t1), compJaccard(tk,c.t2)*0.9);
+    if(/compl/i.test(c.href) && !/compl/i.test(t.desc)) sc *= 0.95;
+    if(sc>bs){ bs=sc; best=c; }
+  });
+  return bs>=0.7 ? best : null;
+}
 // ---------- Botão direito numa tarefa: duplicar (e editar o nome, se for no nome) ----------
 (function(){
   const menu = document.createElement('div');
@@ -3412,6 +3448,8 @@ function leisDaTarefa(t){
       document.getElementById('dupList').value = id;
       dupOnPick();
     });
+    const comp = compiladoDaTarefa(t);
+    if(comp) item('Abrir compilado ↗', ()=>{ window.open(new URL('compilado/'+comp.href, location.href).href,'_blank','noopener'); });
     leisDaTarefa(t).forEach(([nome,url])=>item('Abrir '+nome+' ↗', ()=>{ window.open(url,'_blank','noopener'); }));
     const elegivel = t.type!=='Flashcards' && !/videoaula do curso Rezende/i.test(t.desc) && lsGet('status_'+t.id,'Pendente')!=='Concluído';
     if(elegivel) item('Selecionar no cronômetro', ()=>{
