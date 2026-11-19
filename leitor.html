@@ -123,10 +123,10 @@ body.tool-on #folha{cursor:cell}
 .inc-anc{display:inline-block;width:0;height:1em;overflow:hidden;vertical-align:top}
 #margem .inc-badge{position:absolute;left:6px;display:inline-block;font:700 8.5pt Arial,sans-serif;line-height:1.25;padding:0 5px;border-radius:9px;cursor:pointer;user-select:none;border:1px solid transparent;white-space:nowrap}
 .inc-badge.f0{background:#eceff3;color:#6b7280;border-color:#d5d9e0}
-.inc-badge.f1{background:#FFF3CC;color:#7a5b00;border-color:#FFD966}
-.inc-badge.f2{background:#E3F6DA;color:#2a6b12;border-color:#7ED957}
-.inc-badge.f3{background:#DDE3FF;color:#2a3fb0;border-color:#5271FF}
-.inc-badge.f4{background:#FDDCE8;color:#9c1a4a;border-color:#F45B8F}
+.inc-badge.f1{background:#E3F6DA;color:#2a6b12;border-color:#7ED957}
+.inc-badge.f2{background:#DDE3FF;color:#2a3fb0;border-color:#5271FF}
+.inc-badge.f3{background:#FFF3CC;color:#7a5b00;border-color:#FFD966}
+.inc-badge.f4{background:#FFE6CC;color:#9a4a00;border-color:#FF9F43}
 .inc-badge.f5{background:#FFD9D9;color:#a30f0f;border-color:#FF3131}
 #margem .rec-barra{position:absolute;left:52px;width:4px;border-radius:2px;background:#A855F7;cursor:help}
 #margem .rec-badge{position:absolute;left:6px;display:inline-block;font:700 7pt Arial,sans-serif;line-height:1.05;text-align:center;padding:1px 4px;border-radius:6px;background:#F3E8FF;color:#6b21a8;border:1px solid #A855F7;cursor:help;user-select:none;white-space:nowrap}
@@ -134,7 +134,7 @@ body.tool-on #folha{cursor:cell}
 #margem .inc-badge:hover{filter:brightness(.95);box-shadow:0 0 0 2px rgba(48,84,150,.3)}
 .leg{font-size:11px;color:var(--mute);display:inline-flex;align-items:center;gap:3px;padding:0 4px}
 .leg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:5px}
-.leg i.f0{background:#c8ccd4}.leg i.f1{background:#FFD966}.leg i.f2{background:#7ED957}.leg i.f3{background:#5271FF}.leg i.f4{background:#F45B8F}.leg i.f5{background:#FF3131}
+.leg i.f0{background:#c8ccd4}.leg i.f1{background:#7ED957}.leg i.f2{background:#5271FF}.leg i.f3{background:#FFD966}.leg i.f4{background:#FF9F43}.leg i.f5{background:#FF3131}
 
 @media print{
  .sitenav,.fixo,#sumario,#margem,.menu,#lista{display:none!important}
@@ -165,7 +165,7 @@ body.pincel-on #folha{cursor:copy}
 #margem .barra.tr{cursor:help}
 #margem .barra:hover{box-shadow:0 0 0 2px rgba(48,84,150,.35)}
 #margem .barra.tr.man{cursor:context-menu}
-.barra.f1{background:#FFD966}.barra.f2{background:#7ED957}.barra.f3{background:#5271FF}.barra.f4{background:#F45B8F}.barra.f5{background:#FF3131}
+.barra.f1{background:#7ED957}.barra.f2{background:#5271FF}.barra.f3{background:#FFD966}.barra.f4{background:#FF9F43}.barra.f5{background:#FF3131}
 @media(max-width:700px){#margem .barra{left:34px}}
 @media(max-width:1100px){.grp .gl{display:none}.grp{padding:0 5px}.rib button,.rib select{min-width:26px;padding:0 4px}.rib input[type=range]{width:80px}}
 .upd{background:#e8f4ff;border-bottom:2px solid #1a73e8;cursor:help}
@@ -262,7 +262,7 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 
       <div class="grp"><div class="rows">
         <div class="r"><button id="btnInc" title="Liga ou desliga a incidência ao lado dos artigos">📊 Incidência</button><button id="btnSo" title="Mostra só os artigos, incisos e parágrafos que têm incidência (compilado ou legenda do TRTeiros) ou alteração legislativa recente, com os quadros de Caiu em prova, anotações e observações deles">🔎 Só incidência</button><button data-menu="mVer" id="btnVer" title="Escolher qual incidência aparece: compilado, TRTeiros ou as duas">Ver: tudo ▾</button></div>
-        <div class="r"><button data-menu="mTR" title="Põe ao lado esquerdo do artigo a linha colorida de incidência do TRTeiros (1 a 5 vezes)">&#9612; Linha TRTeiros &#9662;</button></div>
+        <div class="r"><button data-menu="mTR" title="Põe ao lado esquerdo do artigo a linha colorida de incidência (1 a 5 vezes)">&#9612; Linha de incidência &#9662;</button></div>
         <div class="r"><span class="leg"><i class="f1"></i>1× <i class="f2"></i>2× <i class="f3"></i>3× <i class="f4"></i>4× <i class="f5"></i>5+ <i class="f0"></i>0×</span></div>
       </div><div class="gl" id="incInfo">incidência</div></div>
 
@@ -283,7 +283,7 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 <div class="menu" id="mMk"></div>
 <div class="menu" id="mCtx"></div>
 <div class="menu" id="mVer"><button data-ver="ambas"><span class="sw">&#9680;</span>Compilado + TRTeiros<small>padrão</small></button><button data-ver="comp"><span class="sw">&#9632;</span>Só o compilado</button><button data-ver="trt"><span class="sw">&#9612;</span>Só o TRTeiros</button><hr><button disabled style="cursor:default;font-size:12px;color:#6b7280;white-space:normal">Na opção padrão, o compilado vale onde tem dado e a legenda do TRTeiros aparece onde ele ainda não tem.</button></div>
-<div class="menu" id="mTR"><button data-tr="1"><span class="sw" style="background:#FFD966"></span>1 vez (amarelo)</button><button data-tr="2"><span class="sw" style="background:#7ED957"></span>2 vezes (verde)</button><button data-tr="3"><span class="sw" style="background:#5271FF"></span>3 vezes (azul)</button><button data-tr="4"><span class="sw" style="background:#F45B8F"></span>4 vezes (rosa)</button><button data-tr="5"><span class="sw" style="background:#FF3131"></span>5 ou mais (vermelho)</button><button data-tr="0"><span class="sw">&#10005;</span>Remover a linha</button></div>
+<div class="menu" id="mTR"><button data-tr="1"><span class="sw" style="background:#7ED957"></span>1 vez (verde)</button><button data-tr="2"><span class="sw" style="background:#5271FF"></span>2 vezes (azul)</button><button data-tr="3"><span class="sw" style="background:#FFD966"></span>3 vezes (amarelo)</button><button data-tr="4"><span class="sw" style="background:#FF9F43"></span>4 vezes (laranja)</button><button data-tr="5"><span class="sw" style="background:#FF3131"></span>5 ou mais (vermelho)</button><button data-tr="0"><span class="sw">&#10005;</span>Remover a linha</button></div>
 <div class="menu" id="mCase">
   <button data-case="up">MAIÚSCULAS</button><button data-case="low">minúsculas</button><button data-case="cap">Primeira Letra De Cada Palavra</button>
 </div>
@@ -558,7 +558,7 @@ $('#mCtx').innerHTML=`<div class="mini">
   <button data-x="limpa" title="Limpar o grifo e o sublinhado do trecho"><span class="aa-hl">Aa</span>⌫</button>
   <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
   <button data-x="ul" title="Lista com marcadores">•≡</button><button data-x="ol" title="Lista numerada">1≡</button></div></div><hr>`
- +itensCtx()+'<hr><button data-x="quadro" title="Transforma o parágrafo em quadro de destaque (ou desfaz)"><span class="sw">▭</span>Quadro</button><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência do TRTeiros ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#FFD966,#7ED957,#5271FF,#F45B8F,#FF3131)"></span>Barra de incidência ▸</button><hr id="cxTabHr" hidden><button data-x="deltab" id="cxDelTab" hidden title="Apaga a tabela inteira clicada"><span class="sw">🗑</span>Excluir tabela</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
+ +itensCtx()+'<hr><button data-x="quadro" title="Transforma o parágrafo em quadro de destaque (ou desfaz)"><span class="sw">▭</span>Quadro</button><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#7ED957,#5271FF,#FFD966,#FF9F43,#FF3131)"></span>Barra de incidência ▸</button><hr id="cxTabHr" hidden><button data-x="deltab" id="cxDelTab" hidden title="Apaga a tabela inteira clicada"><span class="sw">🗑</span>Excluir tabela</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
 $('#mCtx').insertAdjacentHTML('afterend',`<div class="menu" id="mFonte">${FONTES.map(f=>`<button data-f="${f}" style="font-family:'${f}'">${f}</button>`).join('')}</div><div class="menu" id="mTam">${[8,9,10,11,12,14,16,18,20,24,28,32,36,48].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div><div class="menu" id="mHl3">${[ATALHO['1'],ATALHO['2'],ATALHO['5']].map(t=>itemFerr(t,t.n,'')).join('')}</div>`);
 ['mFonte','mTam','mHl3'].forEach(id=>$('#'+id).onmousedown=e=>e.preventDefault());
 ligaBotoes($('#mHl3'));
@@ -594,7 +594,7 @@ $('#mCtx').querySelector('[data-x=off]').onclick=()=>{if(tool)ligar(tool,false);
 $('#mCtx').querySelector('[data-x=copy]').onclick=()=>{document.execCommand('copy');fechaMenus()};
 $('#mCtx').querySelector('[data-x=cut]').onclick=()=>{document.execCommand('cut');fechaMenus();marcar()};
 folha.addEventListener('contextmenu',e=>{e.preventDefault();ctxBloco=blocoDe(e.target);ctxTab=(e.target.closest&&e.target.closest('table'))||null;if(ctxTab&&!folha.contains(ctxTab))ctxTab=null;$('#cxDelTab').hidden=$('#cxTabHr').hidden=!ctxTab;$('#cxFonte').textContent=fonteAtual()+' ▾';$('#cxTam').textContent=tamanhoAtual()+' ▾';$('#cxBarTxt').style.background=corTx;menuEm('mCtx',e.clientX,e.clientY)});
-// ---- linha de incidência do TRTeiros posta à mão (ao lado esquerdo do artigo) ----
+// ---- linha de incidência posta à mão (conta como incidência do compilado) (ao lado esquerdo do artigo) ----
 let ctxBloco=null;let ctxTab=null;
 $('#cxDelTab').onclick=()=>{const t=ctxTab;ctxTab=null;fechaMenus();if(!t)return;t.remove();marcar()};
 const blocoDe=n=>{while(n&&n.parentNode!==folha)n=n.parentNode;return n&&n.parentNode===folha?n:null};
@@ -1023,7 +1023,7 @@ function posicionarMargem(){
   BARRAS_TR.forEach(g=>{
     if(!g.el.isConnected||g.el.closest('[data-fo]'))return;const r=g.el.getBoundingClientRect();
     const d=document.createElement('div');d.className='barra tr f'+g.n+(g.man?' man':'');
-    d.title=g.man?'Linha de incidência do TRTeiros posta por você ('+(g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes'))+')':`Legenda do TRTeiros: ${g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes')} cobrado em prova\n(o compilado de revisão ainda não tem incidência para este trecho)`;
+    d.title=g.man?'Linha de incidência posta por você ('+(g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes'))+')':`Legenda do TRTeiros: ${g.n>=5?'5 ou mais vezes':g.n+(g.n===1?' vez':' vezes')} cobrado em prova\n(o compilado de revisão ainda não tem incidência para este trecho)`;
     d._els=(g.man||g.el.classList.contains('trs'))?(g.el.classList.contains('trs')?[g.el]:alvosTR(g.el,true)):[g.el];d.style.top=((r.top-pr.top)/z)+'px';d.style.height=Math.max(6,r.height/z)+'px';mg.appendChild(d)});
   BARRAS.forEach(g=>{
     if(!g.n)return;const els=g.els.filter(e=>e.isConnected&&!e.hasAttribute('data-fo'));if(!els.length)return;if(els.some(e=>e.dataset&&e.dataset.trm))return;
@@ -1158,7 +1158,7 @@ async function atualizarIncidencia(){
   if(leiBase||MULTI)BARRAS.forEach(g=>{if(!g.n)return;const el0=g.els[0],k='art-'+g.art+'|1';
     if((el0.dataset.semSelo||'').split(';').includes(k))return;
     const a=badge(g.n,`Art. ${g.art} · ${g.lei}\nCobrado em ${g.n} ${g.n===1?'questão':'questões'} dos filtros (total do artigo; clique para abrir no compilado)`,g.url,g.art);
-    a.dataset.k=k;a._b=el0;el0.insertBefore(a,el0.firstChild);total++});
+    a.dataset.k=k;a._b=el0;el0.insertBefore(a,el0.firstChild);g.selo=a;total++});
   // incidência por item (inciso, alínea, parágrafo), quando o compilado traz o detalhe da lei
   let porItem=false;
   if(leiBase||MULTI){const ITN=await carregarItens();
@@ -1169,7 +1169,7 @@ async function atualizarIncidencia(){
         const chaveArt=mm?mm[1].replace(/\./g,'')+(mm[2]?'-'+mm[2]:''):null;
         if(g.semItens){novo.push(g);continue}
         if(!chaveArt||!Object.keys(it).some(k=>k.startsWith(chaveArt+'|'))){novo.push(g);continue}
-        porItem=true;
+        porItem=true;const ini=novo.length;
         const rotArt='Art. '+mm[1]+(mm[2]?'-'+mm[2]:'');
         itensDoArtigo(g.els).forEach(x=>{
           const todos=x.trecho?[x.trecho,...(x.extra||[])]:[];
@@ -1177,15 +1177,18 @@ async function atualizarIncidencia(){
           const fmt=t=>t.replace(/^PU/,'parágrafo único').replace(/§(\d+)/g,'§ $1º').replace(/\./g,', ');
           const nome=(!x.trecho||x.trecho==='caput')?'':', '+(x.extra?todos.map(t=>t.split('.').pop()).join(' e '):fmt(x.trecho)).replace(/^(?=[a-z](?: e [a-z])*$)/,fmt(x.trecho.slice(0,-2))+', ');
           novo.push({els:[x.el],n,url:g.url,art:rotArt,lei:inc.slugs[g.base],
-            rot:`${rotArt}${nome} · ${inc.slugs[g.base]}\nCobrado em ${n} ${n===1?'questão':'questões'} dos filtros (clique para abrir no compilado)`})})}
+            rot:`${rotArt}${nome} · ${inc.slugs[g.base]}\nCobrado em ${n} ${n===1?'questão':'questões'} dos filtros (clique para abrir no compilado)`})});
+        // o selo "N×" do artigo ficava no caput mesmo quando só um inciso/§ foi cobrado: passa para o primeiro item cobrado
+        if(g.selo&&g.selo.isConnected){const cap=novo[ini];if(cap&&!cap.n){const alvo=novo.slice(ini).find(x=>x.n);
+          if(alvo){const h=alvo.els[0];if((h.dataset.semSelo||'').split(';').includes(g.selo.dataset.k)){g.selo.remove();total--}else{h.insertBefore(g.selo,h.firstChild);g.selo._b=h}}}}}
       BARRAS=novo}}
   // onde o compilado não tem incidência, mostra a legenda do TRTeiros (cores que já vinham no PDF)
   const cobertos=new Set();BARRAS.filter(b=>b.n).forEach(b=>b.els.forEach(e=>cobertos.add(e)));
-  if(usaTR)[...folha.children].forEach(el=>{const man=!!(el.dataset&&el.dataset.trm);if(cobertos.has(el)&&!man)return;const t=+(el.dataset&&el.dataset.tr||0);if(t)BARRAS_TR.push({el,n:t,man});
-    el.querySelectorAll('.trs[data-tr]').forEach(sp=>{const q=+sp.dataset.tr;if(q)BARRAS_TR.push({el:sp,n:q,man:!!sp.dataset.trm})})});
+  [...folha.children].forEach(el=>{const man=!!(el.dataset&&el.dataset.trm);if(man?!usaComp:!usaTR)return;if(cobertos.has(el)&&!man)return;const t=+(el.dataset&&el.dataset.tr||0);if(t)BARRAS_TR.push({el,n:t,man});
+    el.querySelectorAll('.trs[data-tr]').forEach(sp=>{const q=+sp.dataset.tr;if(!!sp.dataset.trm?!usaComp:!usaTR)return;if(q)BARRAS_TR.push({el:sp,n:q,man:!!sp.dataset.trm})})});
   await carregarRec();REC=achaRecentes();
   const comBarra=BARRAS.filter(b=>b.n).length;
-  const partes=[];if(total)partes.push(LEISECA?`${total} selos de artigo`:`${total} citações`);if(comBarra)partes.push(`${comBarra} ${porItem?'itens':'artigos'} pelo compilado`);if(BARRAS_TR.length)partes.push(`${BARRAS_TR.length} trechos pela legenda TRTeiros`);if(REC.length)partes.push(`${REC.length} alterações recentes`);
+  const partes=[];if(total)partes.push(LEISECA?`${total} selos de artigo`:`${total} citações`);if(comBarra)partes.push(`${comBarra} ${porItem?'itens':'artigos'} pelo compilado`);{const nm=BARRAS_TR.filter(x=>x.man).length,nt=BARRAS_TR.length-nm;if(nm)partes.push(`${nm} linhas postas por você`);if(nt)partes.push(`${nt} trechos pela legenda TRTeiros`)}if(REC.length)partes.push(`${REC.length} alterações recentes`);
   info.textContent=partes.length?partes.join(' · '):(LEISECA&&usaComp&&!leiBase&&!MULTI?'lei ainda não está no compilado':'nenhuma incidência encontrada');
   const nf=aplicarFiltroInc();if(nf!==null)info.textContent=(nf?nf+' trechos com incidência':'nenhum trecho com incidência')+' (filtro ligado)';
   posicionarMargem();
