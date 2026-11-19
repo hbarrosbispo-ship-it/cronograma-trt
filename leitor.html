@@ -39,6 +39,9 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 .linha .tag{background:#e8f0fe;color:var(--g);border-radius:10px;padding:2px 9px;font-size:11.5px;font-weight:bold}
 .linha a.ini{padding:10px 14px;color:var(--mute);text-decoration:none;font-size:12px}
 .linha a.ini:hover{color:var(--g)}
+.linha .num{flex:none;min-width:30px;text-align:center;background:#eef1f7;color:var(--gd);border-radius:6px;padding:2px 6px;font-size:12px;font-weight:bold}
+details.mat>summary a.uni{margin-left:12px;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:999px;font-size:12px;font-weight:bold;padding:3px 12px;text-decoration:none}
+details.mat>summary a.uni:hover{background:rgba(255,255,255,.32)}
 .allbody{padding:4px 16px 14px;column-width:430px;column-gap:30px}
 .linha button.top{border:1px solid var(--line);background:#fff;color:var(--mute);border-radius:999px;font-size:12px;padding:3px 11px;margin-right:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .linha button.top:hover{border-color:var(--g);color:var(--g)}
@@ -388,12 +391,23 @@ function fundirAtualizacao(salvoHtml,novoHtml,rm){
   const d=document.createElement('div');res.forEach(e=>d.appendChild(e));return d.innerHTML;
 }
 // =================== BIBLIOTECA ===================
+// Número do capítulo: o do próprio título (Capítulo 05.1, Pt. 3); o que não tem número recebe o próximo da sequência do grupo.
+function numerar(lista){
+  const re=/cap[ií]tulo\s*(\d+)(?:\.(\d+))?|cap\.\s*(\d+)(?:\.(\d+))?|\bpt\.?\s*(\d+)/i;
+  let max=0;
+  lista.forEach(d=>{const m=re.exec(d.titulo||'');
+    if(m){const a=+(m[1]||m[3]||m[5]),b=m[2]||m[4];d._n=a+(b?(+b)/100:0);d._ns=b?a+'.'+b:String(a);if(a>max)max=a}else{d._n=null}});
+  lista.filter(d=>d._n===null).sort((x,y)=>x.titulo.localeCompare(y.titulo,'pt',{numeric:true,sensitivity:'base'})).forEach(d=>{max++;d._n=max;d._ns=String(max)});
+}
 async function biblioteca(){
   $('#lista').hidden=false;document.title='Biblioteca · Cronograma TRT';
   const docs=await (await fetch('leitor/docs/index.json',{cache:'no-cache'})).json();
   await carregarAtu();
   docs.forEach(d=>{const m=/[\\/]TRT[\\/]([^\\/]+)[\\/](?:(.*)[\\/])?[^\\/]+$/.exec(d.arquivo||'');if(m){d.materia=m[1];d.grupo=(m[2]||'').split(/[\\/]/).filter(Boolean).join(' / ')}});
+  let UNI={};try{UNI=await (await fetch('compilado/unificados.json',{cache:'no-cache'})).json()}catch(e){}
+  const chave=x=>semAcento((x||'').replace(/\s*\(.*?\)\s*/g,' ')).trim();
   const mats={};docs.forEach(d=>(mats[d.materia]=mats[d.materia]||[]).push(d));
+  Object.values(mats).forEach(l=>{const g={};l.forEach(d=>(g[d.grupo]=g[d.grupo]||[]).push(d));Object.values(g).forEach(numerar)});
   const nomes=Object.keys(mats).sort((a,b)=>{const i=ORDEM.indexOf(a),j=ORDEM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||a.localeCompare(b)});
   const alvo=d=>semAcento(d.titulo+' '+d.codigo+' '+d.sumario.map(s=>s.t).join(' '));
   const abertos=new Set();
@@ -402,15 +416,17 @@ async function biblioteca(){
     nomes.forEach(m=>{
       const lista=mats[m].filter(d=>!t||alvo(d).includes(t));if(!lista.length)return;
       const grupos={};lista.forEach(d=>(grupos[d.grupo]=grupos[d.grupo]||[]).push(d));
-      h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s)</span></summary>`;
-      Object.keys(grupos).sort((x,y)=>x.localeCompare(y,'pt',{numeric:true})).forEach(g=>{
+      const uni=UNI[chave(m)];
+      h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s)</span>${uni?`<a class="uni" href="compilado/${encodeURI(uni)}" title="Todos os compilados desta matéria somados em um só">Unificar compilados</a>`:''}</summary>`;
+      const resol=g=>/resolu/i.test(g)?1:0;
+      Object.keys(grupos).sort((x,y)=>resol(x)-resol(y)||x.localeCompare(y,'pt',{numeric:true})).forEach(g=>{
         if(g)h+=`<div class="grupo">${esc(g.split(' / ').join(' › '))}</div>`;
-        grupos[g].sort((x,y)=>x.titulo.localeCompare(y.titulo,'pt',{numeric:true,sensitivity:'base'})).forEach(d=>{
-          const andando=!!LS.get('pos:'+d.slug);
+        grupos[g].sort((x,y)=>x._n-y._n||x.titulo.localeCompare(y.titulo,'pt',{numeric:true,sensitivity:'base'})).forEach(d=>{
+          const andando=false;
           const tituloBate=!t||semAcento(d.titulo+' '+d.codigo).includes(t);
           const tops=d.sumario.map((x,i)=>({x,i})).filter(o=>tituloBate||semAcento(o.x.t).includes(t));
           const aberto=!!t&&!tituloBate||abertos.has(d.slug);
-          h+=`<div class="item${aberto?' open':''}" data-s="${d.slug}"><div class="linha"><a class="cap" href="?doc=${d.slug}"><span class="t">${esc(d.titulo)}</span>${andando?'<span class="tag">em andamento</span>':''}${ATU[d.slug]?`<span class="tag atu${atuNovo(d.slug)?' novo':''}" title="Atualizado pelo TRTeiros em ${dtbr(ultAtu(d.slug))}">${atuNovo(d.slug)?'atualizado · novo':'atualizado'}</span>`:''}<span class="meta">${d.paginas} pág.</span></a>${andando?`<a class="ini" href="?doc=${d.slug}&inicio=1" title="Abrir do início">↺ início</a>`:''}${d.sumario.length?`<button class="top" type="button" data-top="${d.slug}">${d.sumario.length} tópicos ▾</button>`:''}</div>`+
+          h+=`<div class="item${aberto?' open':''}" data-s="${d.slug}"><div class="linha"><a class="cap" href="?doc=${d.slug}"><span class="num">${esc(d._ns)}</span><span class="t">${esc(d.titulo)}</span><span class="meta">${d.paginas} pág.</span></a>${d.sumario.length?`<button class="top" type="button" data-top="${d.slug}">${d.sumario.length} tópicos ▾</button>`:''}</div>`+
             (d.sumario.length?`<ul class="sum">${tops.map(o=>`<li class="${o.x.n}"><a href="?doc=${d.slug}&h=${o.i}">${esc(o.x.t)}</a> <small>pág. ${o.x.pg}</small></li>`).join('')}</ul>`:'')+`</div>`;
         });
       });

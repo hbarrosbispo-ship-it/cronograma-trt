@@ -325,15 +325,15 @@
   .ritmo-real{color:var(--blue-dark);font-weight:bold;}
   .hist-top{display:flex;gap:14px;flex-wrap:wrap;align-items:stretch;margin-bottom:14px;}
   .hist-resumo{display:flex;gap:10px;flex-wrap:wrap;flex:1;min-width:280px;}
-  .hist-resumo>div{background:linear-gradient(135deg,#f3f6ff,#fff);border:1px solid #dde5f7;border-radius:12px;padding:10px 18px;min-width:120px;flex:1;}
+  .hist-resumo>div{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.08);border-radius:10px;padding:10px 18px;min-width:120px;flex:1;}
   .hist-resumo b{display:block;font-size:24px;color:var(--blue-dark);line-height:1.1;}
   .hist-resumo b small{font-size:14px;color:var(--gray);font-weight:normal;}
   .hist-resumo span{font-size:11.5px;color:var(--gray);}
   .hist-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-  .hist-tools input[type=search]{padding:9px 16px;border:1px solid var(--border);border-radius:999px;min-width:240px;font-family:inherit;font-size:13px;}
+  .hist-tools input[type=search]{padding:9px 16px;border:1px solid var(--border);border-radius:8px;min-width:240px;font-family:inherit;font-size:13px;}
   .hist-chk{font-size:13px;color:var(--gray);display:flex;gap:5px;align-items:center;cursor:pointer;}
   .hist-sum{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:14px;}
-  .hist-card{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:14px 16px;border-top:5px solid var(--hc,#305496);}
+  .hist-card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:14px 16px;border-top:5px solid var(--hc,#305496);}
   .hist-card h4{margin:0 0 6px;font-size:13.5px;color:var(--hc,#305496);}
   .hist-card .big{font-size:30px;font-weight:800;line-height:1.1;}
   .hist-card .big .lbl{font-size:11.5px;font-weight:normal;color:var(--gray);margin-left:8px;}
@@ -344,23 +344,23 @@
   .up{color:#1E8A4C;}.down{color:#C0392B;}
   .dl{font-weight:bold;font-size:11.5px;border-radius:999px;padding:2px 9px;background:#eef1f7;white-space:nowrap;}
   .dl.up{background:#e3f6ea;}.dl.down{background:#fde8e6;}
-  details.hist-det{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin:10px 0;overflow:hidden;border-left:6px solid var(--hc,#305496);}
-  details.hist-det summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;background:linear-gradient(90deg,color-mix(in srgb,var(--hc) 10%,#fff),#fff 70%);}
+  details.hist-det{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin:10px 0;overflow:hidden;border-left:6px solid var(--hc,#305496);}
+  details.hist-det summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:11px 16px;background:var(--blue-dark);}
   details.hist-det summary::-webkit-details-marker{display:none;}
-  .hs-n{font-weight:bold;color:var(--hc,#305496);font-size:14.5px;}
+  .hs-n{font-weight:bold;color:#fff;font-size:14.5px;}
   .hs-n::before{content:"▸ ";display:inline-block;transition:transform .15s;}
   details.hist-det[open] .hs-n::before{content:"▾ ";}
   .hs-m{display:flex;gap:6px;flex-wrap:wrap;}
-  .hs-m .chip{font-size:11.5px;font-weight:600;background:#f3f5fb;border:1px solid #e1e6f2;border-radius:999px;padding:2px 10px;}
-  .hs-m .chip.alto{background:#e3f6ea;border-color:#bfe6cc;}.hs-m .chip.medio{background:#fff3cc;border-color:#ecd9a0;}.hs-m .chip.baixo{background:#fde8e6;border-color:#f3b9b3;}
-  .hr{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;padding:10px 16px;border-top:1px solid #eef1f6;}
-  .hr:hover{background:#fafbfe;}
+  .hs-m .chip{font-size:11.5px;font-weight:bold;background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:12px;padding:2px 10px;}
+  .hs-m .chip.alto{background:#e3f6ea;}.hs-m .chip.medio{background:#fff3cc;}.hs-m .chip.baixo{background:#fde8e6;}
+  .hr{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--border);}
+  .hr:hover{background:#f7f9fc;}
   .hr-t{flex:1 1 230px;min-width:200px;}
   .hr-t b{display:block;font-size:13.5px;color:#222;}
   .hr-t span{font-size:12px;color:var(--gray);}
   .hr-a{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
   .seta{color:#aab3c5;font-size:18px;}
-  .tent{display:flex;flex-direction:column;align-items:center;min-width:74px;border-radius:10px;padding:4px 10px;background:#f3f5fb;border:1px solid #e1e6f2;}
+  .tent{display:flex;flex-direction:column;align-items:center;min-width:74px;border-radius:8px;padding:4px 10px;background:#eef1f7;border:1px solid var(--border);}
   .tent small{font-size:10px;color:var(--gray);}
   .tent b{font-size:15px;line-height:1.2;}
   .tent em{font-size:10.5px;font-style:normal;color:var(--gray);}
@@ -558,8 +558,8 @@ body > .wrap > .tab-bar{display:none}
     <div id="estatisticas-content" style="display:none;">
       <p class="note">Horas efetivamente estudadas (campo "Tempo total" preenchido em cada atividade), por matéria, semana, mês e dia da semana. Só entram nas contas as atividades com tempo registrado.</p>
     <div class="week-summary" id="statsSummaryCards"></div>
-    <div id="ritmoBox"></div>
     <div class="charts-grid" id="statsChartsGrid"></div>
+    <div id="ritmoBox"></div>
     </div>
   </div>
 
@@ -570,7 +570,7 @@ body > .wrap > .tab-bar{display:none}
     </div>
     <div id="edital-geral-content" style="display:none;"><div id="geralBox"></div></div>
     <div id="edital-itens-content" style="display:none;">
-      <p class="note">Conteúdo programático do edital (cargo 01, Analista Judiciário, Área Judiciária) item por item. Os itens se atualizam sozinhos: cada um é casado com as leituras do cronograma e com os títulos e sumários dos capítulos da biblioteca (📖 abre o trecho). Conta como estudado quando todas as leituras que o cobrem estão concluídas; só o que foi feito de fato entra na conta. Clique em um item ou em uma matéria para guardar anotações.</p>
+      <p class="note">Conteúdo programático do edital (cargo 01, Analista Judiciário, Área Judiciária) item por item. Os itens se atualizam sozinhos: cada um é casado com as leituras do cronograma e com os títulos e sumários dos capítulos da biblioteca (📖 abre o trecho). Conta como estudado quando todas as leituras que o cobrem estão concluídas ou quando você já fez questões sobre o tema (filtro ou caderno concluído); só o que foi feito de fato entra na conta. Clique em um item ou em uma matéria para guardar anotações.</p>
     <div id="editalResumo"></div>
     <div id="editalDetalhe"></div>
     </div>
@@ -2297,7 +2297,7 @@ function rowHtml(t, firstCol, draggableRow){
   const fileHtml0 = !t.file ? bibHtml : bibHtml + ` <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>`;
   const leiP = (LEI_POR_MATERIA[t.subj]||[]).filter(()=>t.type!=='Flashcards').map(k=>LEI_URL[k]);
   const leiHtml = leiP.map(([nome,url])=>` <a href="${url}" target="_blank" rel="noopener" class="lei-link" title="Abrir ${nome} (legislação principal da matéria)">${nome} ↗</a>`).join('');
-  const fileHtml = fileHtml0 + leiHtml;
+  const fileHtml = fileHtml0;
   const topicsHtml = isQ ? `<textarea class="topicsedit" data-id="${t.id}" rows="1" placeholder="Assuntos abordados pelo filtro">${escapeHtml(effectiveTopics(t))}</textarea>` : '';
   const descHtml = `<span class="descedit" data-id="${t.id}" title="Clique duas vezes para editar o nome (botão direito: mais opções)">${escapeHtml(effectiveDesc(t))}</span>${linkHtml}${offHtml}${fileHtml}${topicsHtml}`;
   const amt = effectiveAmount(t);
@@ -3191,27 +3191,31 @@ function renderAcertos(){
 }
 function renderAcErros(box){
   if(acErrosCache===null){ box.innerHTML = '<div class="chart-empty">Carregando os erros dos compilados...</div>'; return; }
-  const erros = acErrosCache.filter(e=>e.r==='erro'), duv = acErrosCache.filter(e=>e.r==='duvida');
+  const SEM = 'Sem motivo registrado';
+  const motivos = AC_MOTIVOS.filter(m=>m!==SEM);
+  const todos = acErrosCache.filter(e=>e.r==='erro'), duv = acErrosCache.filter(e=>e.r==='duvida');
+  const erros = todos.filter(e=>motivos.includes(e.mo));   // erros sem motivo registrado não entram nas contas de motivo
   if(!acErrosCache.length){ box.innerHTML = '<div class="chart-empty">Ainda não há erros nos compilados.</div>'; return; }
-  const semMot = erros.filter(e=>e.mo==='Sem motivo registrado').length;
+  if(!erros.length){ box.insertAdjacentHTML('beforeend','<div class="chart-empty">Nenhum erro com motivo registrado ainda. Diga o motivo de cada erro ao fim do caderno para preencher os gráficos de motivo.</div>'); }
+  else{
   box.insertAdjacentHTML('beforeend', `<div class="week-summary">
-    <div class="week-card"><div class="w-title">Erros nos compilados</div><div class="w-time" style="color:${AC_COR.erro}">${erros.length}</div><div class="w-sub">${duv.length} acertos com dúvida</div></div>
-    <div class="week-card"><div class="w-title">Sem motivo registrado</div><div class="w-time">${semMot}</div><div class="w-sub">${semMot? 'diga o motivo ao fim de cada caderno para completar o gráfico' : 'todos os erros têm motivo'}</div></div></div>`);
+    <div class="week-card"><div class="w-title">Erros com motivo</div><div class="w-time" style="color:${AC_COR.erro}">${erros.length}</div><div class="w-sub">${duv.length} acertos com dúvida nos compilados</div></div></div>`);
   // motivos (rosca)
-  const porMot = AC_MOTIVOS.map(m=>erros.filter(e=>e.mo===m).length);
-  acCard(box, 'ac-mot', 'Motivo dos erros', 'Por que você errou: não sabia, confundiu conceitos ou interpretou errado', 300);
-  acMake('ac-mot', { type:'doughnut', data:{ labels:AC_MOTIVOS, datasets:[{ data:porMot, backgroundColor:AC_MOTIVOS.map(m=>AC_MOTIVO_COR[m]) }] },
+  const porMot = motivos.map(m=>erros.filter(e=>e.mo===m).length);
+  acCard(box, 'ac-mot', 'Motivo dos erros', 'Por que você errou (só os erros com motivo registrado)', 300);
+  acMake('ac-mot', { type:'doughnut', data:{ labels:motivos, datasets:[{ data:porMot, backgroundColor:motivos.map(m=>AC_MOTIVO_COR[m]) }] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} } } });
   // matéria x motivo
   const mats = [...new Set(erros.map(e=>e.m))].sort((a,b)=>erros.filter(e=>e.m===b).length-erros.filter(e=>e.m===a).length);
   acCard(box, 'ac-mat', 'Erros por matéria', 'Quantos erros em cada matéria, separados pelo motivo', Math.max(240, mats.length*34+90));
-  acMake('ac-mat', { type:'bar', data:{ labels:mats, datasets: AC_MOTIVOS.map(m=>({ label:m, backgroundColor:AC_MOTIVO_COR[m], data: mats.map(x=>erros.filter(e=>e.m===x && e.mo===m).length) })) },
+  acMake('ac-mat', { type:'bar', data:{ labels:mats, datasets: motivos.map(m=>({ label:m, backgroundColor:AC_MOTIVO_COR[m], data: mats.map(x=>erros.filter(e=>e.m===x && e.mo===m).length) })) },
     options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, scales:{ x:{stacked:true, ticks:{precision:0}}, y:{stacked:true} }, plugins:{ legend:{position:'bottom'} } } });
+  }
   // temas (lei › capítulo)
   const cont = {};
-  acErrosCache.forEach(e=>{ (e.tm.length?e.tm:['Sem dispositivo (conceitual)']).forEach(t=>{ const c = cont[t] = cont[t] || {e:0,d:0}; if(e.r==='erro') c.e++; else c.d++; }); });
+  acErrosCache.filter(e=>e.r==='duvida' || motivos.includes(e.mo)).forEach(e=>{ (e.tm.length?e.tm:['Sem dispositivo (conceitual)']).forEach(t=>{ const c = cont[t] = cont[t] || {e:0,d:0}; if(e.r==='erro') c.e++; else c.d++; }); });
   const top = Object.entries(cont).sort((a,b)=>(b[1].e*2+b[1].d)-(a[1].e*2+a[1].d)).slice(0,14);
-  acCard(box, 'ac-tema', 'Onde mais erra: lei e capítulo', 'Os 14 trechos (lei › capítulo) com mais erros e dúvidas', Math.max(300, top.length*30+90));
+  acCard(box, 'ac-tema', 'Onde mais erra: lei e capítulo', 'Os 14 trechos (lei › capítulo) com mais erros (com motivo registrado) e dúvidas', Math.max(300, top.length*30+90));
   acMake('ac-tema', { type:'bar', data:{ labels: top.map(x=>x[0].length>58 ? x[0].slice(0,56)+'…' : x[0]), datasets:[
       { label:'Erros', backgroundColor:AC_COR.erro, data: top.map(x=>x[1].e) }, { label:'Dúvidas', backgroundColor:AC_COR.duvida, data: top.map(x=>x[1].d) } ] },
     options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, scales:{ x:{stacked:true, ticks:{precision:0}}, y:{stacked:true} }, plugins:{ legend:{position:'bottom'} } } });
@@ -3392,7 +3396,29 @@ function editalTasksFor(key){
   const p = key.indexOf('|'); const sj = key.slice(0,p), pref = key.slice(p+1);
   return tasks.filter(t=>t.subj===sj && (t.type==='Leitura' || sj==='RLM' || (t.type==='Questões' && /^(Direito de Empresa|Igualdade salarial|Meio ambiente do trabalho|Trabalho escravo)/.test(pref))) && normDescEd(t.desc).indexOf(pref)===0);
 }
+// Questões já feitas sobre o tema também contam como estudado (filtro/caderno concluído cujos assuntos casam com o item).
+function edQuestoesFeitas(it, m){
+  if(!m) return [];
+  const I = edToks(it.t).filter(w=>!ED_GEN.has(w)); if(!I.length) return [];
+  const need = Math.min(2, I.length);
+  return tasks.filter(t=>t.type==='Questões' && t.subj===m.id && lsGet('status_'+t.id,'Pendente')==='Concluído').filter(t=>{
+    const tk = new Set(edToks(effectiveTopics(t)));
+    if(!tk.size) return false;
+    const n = I.filter(w=>tk.has(w)).length;
+    return n>=need && n/I.length>=0.6;
+  });
+}
 function editalItemState(it, m){
+  const r = editalItemState0(it, m);
+  if(r.st==='estudado') return r;
+  const qs = edQuestoesFeitas(it, m);
+  if(qs.length){
+    r.st = 'estudado';
+    r.mats = (r.mats||[]).concat(qs.slice(0,2).map(t=>({ label:'Questões: '+normDescEd(effectiveDesc(t)).slice(0,40)+' (auto)', ok:true, reserva:false })));
+  }
+  return r;
+}
+function editalItemState0(it, m){
   const base = editalItemStateBase(it);
   const docs = m ? edDocsFor(m, it) : [];
   base.docs = docs;
