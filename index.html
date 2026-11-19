@@ -3411,6 +3411,8 @@ fetch('compilado/index.html').then(r=>r.ok?r.text():'').then(h=>{
 }).catch(()=>{});
 function compiladoDaTarefa(t){
   if(t.type==='Flashcards' || /^Jurisprud/i.test(t.desc) || /refazer s[oó] as erradas|tud[aã]o|estudo de caso|simulado/i.test(t.desc)) return null;
+  const EXCECOES = [[/^Processo Administrativo no [AÂ]mbito Federal/i,'DA','2026-10-05_16a.html']];
+  for(const [re,subj,arq] of EXCECOES){ if(t.subj===subj && re.test(t.desc)){ const c=COMP_IDX.find(x=>x.href.endsWith(arq)); if(c) return c; } }
   const tk = compTokens(t.desc); let best=null, bs=0;
   COMP_IDX.forEach(c=>{
     if(!c.subjs.includes(t.subj)) return;
