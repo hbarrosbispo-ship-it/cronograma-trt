@@ -340,6 +340,22 @@
   .week-card .w-time{font-size:20px;font-weight:bold;color:var(--blue-dark);}
   .week-card .w-sub{font-size:11.5px;color:var(--gray);margin-top:2px;}
 
+  /* Tela estreita (janela dividida): tabela compacta para o X de excluir não ficar fora da tela. Em tela cheia nada muda. */
+  @media(min-width:641px) and (max-width:1000px){
+    .day-card{overflow-x:auto;}
+    table{font-size:11.5px;}
+    thead th{padding:6px 3px;font-size:9px;letter-spacing:0;white-space:normal;line-height:1.15;}
+    tbody td{padding:6px 3px;}
+    .desc-cell{max-width:150px;}
+    input[type=number].qtdedit,input[type=number].flashqtd{width:40px;padding:4px 2px;font-size:12px;}
+    input[type=number].acertos{width:40px;padding:4px 2px;}
+    input[type=number].acertosSeguros,input[type=number].acertosDuvida{width:36px;padding:4px 2px;font-size:11.5px;}
+    input[type=number].studymin{width:46px;padding:4px 2px;font-size:12px;}
+    select.status{padding:4px 2px;font-size:11px;}
+    select.moveto{max-width:68px;font-size:10px;padding:3px 1px;}
+    .btn-del{padding:3px 4px;}
+    .badge-subj,.badge-type{font-size:10px;padding:2px 4px;}
+  }
   @media(max-width:640px){
     thead{display:none;}
     table, tbody, tr, td{display:block;width:100%;}
@@ -1515,6 +1531,13 @@ function shortLabel(date){ const info=DAY_INFO[date]; return date.slice(0,5)+' �
 // inferior esquerdo) que mostra "Salvando…" / "Salvo" / "Erro ao salvar - clique pra
 // tentar de novo" em vez de falhar sem avisar.
 const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwrbaghAE1EsQzcvOCsTLn-B6lYzT29bXtrA_hPVM5A0qMlxBl_dfJ4P-zFi6VjdXuVqA/exec';
+// Chave de acesso ao backend (pedida uma vez por navegador e guardada aqui).
+function accessKey(){ try{ return localStorage.getItem('cronoKey')||''; }catch(e){ return ''; } }
+function askKey(){
+  const k = prompt('Chave de acesso ao cronograma:');
+  if(k){ try{ localStorage.setItem('cronoKey', k.trim()); }catch(e){} location.reload(); }
+  else { const o=document.getElementById('bootOverlay'); if(o){ o.style.display='flex'; o.innerHTML='Acesso protegido. <a href="" style="margin-left:8px">Informar a chave</a>'; } }
+}
 let STORE = {};
 function lsGet(key, fallback){ const v = STORE[key]; return (v===undefined) ? fallback : v; }
 
@@ -1545,11 +1568,12 @@ function postToServer(body){
   return fetch(WEBAPP_URL, {
     method: 'POST',
     headers: {'Content-Type': 'text/plain;charset=utf-8'}, // evita preflight CORS
-    body: JSON.stringify(body)
+    body: JSON.stringify(Object.assign({ak: accessKey()}, body))
   }).then(r=>{
     if(!r.ok) throw new Error('HTTP '+r.status);
     return r.json();
   }).then(json=>{
+    if(json && json.erro==='nao_autorizado'){ try{ localStorage.removeItem('cronoKey'); }catch(e){} askKey(); throw new Error('nao autorizado'); }
     if(!json || json.ok!==true) throw new Error('Resposta inesperada do servidor');
   });
 }
@@ -1610,7 +1634,7 @@ window.addEventListener('beforeunload', ()=>{
 window.addEventListener('pagehide', ()=>{
   writeStoreCache(); persistPending();
   Array.from(new Set([...saveDirtyKeys, ...saveFailedKeys])).forEach(k=>{
-    try{ fetch(WEBAPP_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({key:k, value:STORE[k]}), keepalive:true}).catch(()=>{}); }catch(e){}
+    try{ fetch(WEBAPP_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ak:accessKey(), key:k, value:STORE[k]}), keepalive:true}).catch(()=>{}); }catch(e){}
   });
 });
 
@@ -1658,7 +1682,8 @@ async function forceSync(){
       msg.textContent = 'Não consegui enviar '+saveFailedKeys.size+' alteração(ões). Verifique a conexão e tente de novo.';
       return;
     }
-    const data = await fetch(WEBAPP_URL + '?action=data').then(r=>r.json());
+    const data = await fetch(WEBAPP_URL + '?action=data&ak='+encodeURIComponent(accessKey())).then(r=>r.json());
+    if(data && data.erro==='nao_autorizado'){ try{ localStorage.removeItem('cronoKey'); }catch(e){} askKey(); return; }
     const faltou = enviadas.filter(k=>String(data[k])!==String(STORE[k]));
     if(faltou.length){
       faltou.forEach(k=>saveDirtyKeys.add(k)); persistPending(); processSaveQueue();
@@ -1684,6 +1709,7 @@ function seedTasksRemote(){
   // Só reenvia quando a lista efetiva mudou (antes mandava as ~240 tarefas a cada carga).
   const payload = JSON.stringify({
     action: 'seedTasks',
+    ak: accessKey(),
     tasks: tasks.map(t=>({id:t.id, date:effectiveDate(t), subj:t.subj, type:t.type, desc:t.desc, amount:effectiveAmount(t), unit:t.unit, topics:effectiveTopics(t)}))
   });
   let h = 0;
@@ -1735,9 +1761,10 @@ function boot(){
     booted = true;
     if(saveDirtyKeys.size>0) processSaveQueue();
   }
-  fetch(WEBAPP_URL + '?action=data')
+  fetch(WEBAPP_URL + '?action=data&ak='+encodeURIComponent(accessKey()))
     .then(r=>r.json())
     .then(data=>{
+      if(data && data.erro==='nao_autorizado'){ try{ localStorage.removeItem('cronoKey'); }catch(e){} askKey(); return; }
       // não atropela o que o usuário editou enquanto a resposta vinha
       saveDirtyKeys.forEach(k=>{ data[k] = STORE[k]; });
       const fresh = JSON.stringify(data);
@@ -3293,6 +3320,68 @@ document.getElementById('dupSubmit').addEventListener('click', ()=>{
   duplicateTask(id, pages, document.getElementById('dupDate').value);
   closeDupForm();
 });
+
+// ---------- Links das leis (Planalto) no botão direito ----------
+const LEI_URL = {
+  CF:['Constituição Federal','https://www.planalto.gov.br/ccivil_03/constituicao/constituicaocompilado.htm'],
+  CLT:['CLT','https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452compilado.htm'],
+  CC:['Código Civil','https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm'],
+  CPC:['CPC','https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13105.htm'],
+  LINDB:['LINDB','https://www.planalto.gov.br/ccivil_03/decreto-lei/del4657compilado.htm'],
+  L8009:['Lei 8.009 (Bem de família)','https://www.planalto.gov.br/ccivil_03/leis/l8009.htm'],
+  L9099:['Lei 9.099 (JEC)','https://www.planalto.gov.br/ccivil_03/leis/l9099.htm'],
+  ACP:['Lei 7.347 (ACP)','https://www.planalto.gov.br/ccivil_03/leis/l7347orig.htm'],
+  MS:['Lei 12.016 (MS)','https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2009/lei/l12016.htm'],
+  L11419:['Lei 11.419 (Processo eletrônico)','https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2006/lei/l11419.htm'],
+  LC75:['LC 75/93','https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp75.htm'],
+  FGTS:['Lei 8.036 (FGTS)','https://www.planalto.gov.br/ccivil_03/leis/l8036consol.htm'],
+  GREVE:['Lei 7.783 (Greve)','https://www.planalto.gov.br/ccivil_03/leis/l7783.htm'],
+  AVULSO:['Lei 12.023 (Trabalho avulso)','https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2009/lei/l12023.htm'],
+  EMPREGAMAIS:['Lei 14.457 (Emprega + Mulheres)','https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2022/lei/L14457.htm'],
+  IGUALSAL:['Lei 14.611 (Igualdade salarial)','https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/L14611.htm'],
+  LBI:['Lei 13.146 (Estatuto da PcD)','https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13146.htm'],
+  L8112:['Lei 8.112','https://www.planalto.gov.br/ccivil_03/leis/l8112cons.htm'],
+  L14133:['Lei 14.133 (Licitações)','https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm'],
+  L9784:['Lei 9.784 (Processo administrativo)','https://www.planalto.gov.br/ccivil_03/leis/l9784.htm'],
+  L8429:['Lei 8.429 (Improbidade)','https://www.planalto.gov.br/ccivil_03/leis/l8429.htm'],
+  L13869:['Lei 13.869 (Abuso de autoridade)','https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2019/lei/l13869.htm'],
+  LAI:['LAI (Lei 12.527)','https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12527.htm'],
+  LGPD:['LGPD (Lei 13.709)','https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm'],
+  L13460:['Lei 13.460 (Usuários de serviços públicos)','https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2017/lei/l13460.htm'],
+  L13019:['Lei 13.019 (OSCs)','https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l13019.htm']
+};
+// Regras pela descrição (valem primeiro); se nenhuma casar, usa a matéria (LEI_POR_MATERIA).
+const LEI_POR_DESC = [
+  [/Lei 9\.?099|JEC/i,['L9099']],
+  [/ACP|7\.347/i,['ACP']],
+  [/Mandado de Seguran/i,['MS','CPC']],
+  [/11\.419|Processo eletr/i,['L11419']],
+  [/LC 75/i,['LC75']],
+  [/FGTS/i,['FGTS']],
+  [/Greve/i,['GREVE']],
+  [/12\.023|Trabalho Avulso/i,['AVULSO']],
+  [/Emprega \+ Mulheres|14\.457/i,['EMPREGAMAIS']],
+  [/Igualdade salarial|14\.611/i,['IGUALSAL']],
+  [/13\.146|Pessoa com Defici/i,['LBI']],
+  [/Bem de fam/i,['L8009']],
+  [/LINDB/i,['LINDB']],
+  [/Abuso de autoridade|13\.869/i,['L13869']],
+  [/LGPD|13\.709/i,['LGPD']],
+  [/LAI|12\.527/i,['LAI']],
+  [/usu[aá]rios dos servi/i,['L13460']],
+  [/Terceiro setor|13\.019/i,['L13019']],
+  [/Improbidade/i,['L8429']],
+  [/Estatuto dos servidores/i,['L8112']],
+  [/Licita|Contratos Administrativos/i,['L14133']],
+  [/Processo Administrativo/i,['L9784']],
+  [/Conven[cç][aã]o 87|Instru[cç][aã]o Normativa|^IN \d|Seguro Garantia/i,[]]
+];
+const LEI_POR_MATERIA = {DCO:['CF'],DCI:['CC'],DPC:['CPC'],DPT:['CLT'],DT:['CLT'],DCT:['CLT'],PCD:['LBI']};
+function leisDaTarefa(t){
+  if(t.type==='Flashcards' || /^Jurisprud/i.test(t.desc)) return [];
+  for(const [re,ks] of LEI_POR_DESC){ if(re.test(t.desc)) return ks.map(k=>LEI_URL[k]); }
+  return (LEI_POR_MATERIA[t.subj]||[]).map(k=>LEI_URL[k]);
+}
 // ---------- Botão direito numa tarefa: duplicar (e editar o nome, se for no nome) ----------
 (function(){
   const menu = document.createElement('div');
@@ -3323,6 +3412,7 @@ document.getElementById('dupSubmit').addEventListener('click', ()=>{
       document.getElementById('dupList').value = id;
       dupOnPick();
     });
+    leisDaTarefa(t).forEach(([nome,url])=>item('Abrir '+nome+' ↗', ()=>{ window.open(url,'_blank','noopener'); }));
     const elegivel = t.type!=='Flashcards' && !/videoaula do curso Rezende/i.test(t.desc) && lsGet('status_'+t.id,'Pendente')!=='Concluído';
     if(elegivel) item('Selecionar no cronômetro', ()=>{
       timerTaskId = id;

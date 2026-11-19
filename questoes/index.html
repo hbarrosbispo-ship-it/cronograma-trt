@@ -137,8 +137,8 @@ function enqueue(q,noflush){const s=S[q.key]||{};if(s.res!=='ok'&&s.res!=='er')r
  SQ=SQ.filter(x=>!(x.item.id===id&&x.item.sessao===SESSAO));SQ.push({item,com});saveQ();showSync();if(!noflush)flush()}
 async function flush(){if(fl||!SQ.length||!navigator.onLine){showSync();return}fl=true;
  try{const lote=SQ.slice(0,10);
-  const r=await fetch(SYNC_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'capture',items:lote.map(x=>x.item),comentarios:lote.map(x=>x.com)})});
-  const j=await r.json();if(!j.ok)throw new Error(j.erro||'resposta inválida');
+  const r=await fetch(SYNC_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({ak:(function(){try{return localStorage.getItem('cronoKey')||''}catch(e){return ''}})(),action:'capture',items:lote.map(x=>x.item),comentarios:lote.map(x=>x.com)})});
+  const j=await r.json();if(j.erro==='nao_autorizado'){const k=prompt('Chave de acesso ao cronograma:');if(k){try{localStorage.setItem('cronoKey',k.trim())}catch(e){}}throw new Error('nao autorizado')}if(!j.ok)throw new Error(j.erro||'resposta inválida');
   const sent=new Set(lote);lote.forEach(x=>SYN.add(x.item.id));saveSyn();SQ=SQ.filter(x=>!sent.has(x));saveQ();SYNCERR='';fl=false;showSync();if(SQ.length)return flush();return}
  catch(e){SYNCERR=String(e)}
  fl=false;showSync()}
