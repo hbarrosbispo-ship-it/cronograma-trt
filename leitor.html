@@ -1069,6 +1069,8 @@ async function atualizarIncidencia(){
     const contSelo={};const novoSelo=(num,pos,el)=>{const c=contSelo[num]=(contSelo[num]||0)+1;const k=num+'|'+c;if((bloco.dataset.semSelo||'').split(';').includes(k))return;el.dataset.k=k;el._b=bloco;ins.push({pos,el,mi:curMi});total++};
     let curMi=0,primeiro=Infinity;
     RE_ART.lastIndex=0;let m;
+    // OJ, precedente, tema etc. também podem ser a citação principal do bloco (mesmo sem selo): os artigos citados depois não ganham selo
+    {const rp=/(?:OJT?(?:-[A-Z0-9]+)?|OJ\s+da\s+[A-Z0-9-]+|Orientação\s+Jurisprudencial(?:\s+Transitória)?|Precedente\s+Normativo|Súmula\s+Vinculante|Tema|Tese)[^.\d]{0,40}\d+/g;let q;while((q=rp.exec(full)))primeiro=Math.min(primeiro,q.index)}
     const ini0=full.search(/\S/);
     while((m=RE_ART.exec(full))){
       if(LEISECA&&m.index<=ini0+1)continue;
