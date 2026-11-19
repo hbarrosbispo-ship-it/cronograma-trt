@@ -340,22 +340,6 @@
   .week-card .w-time{font-size:20px;font-weight:bold;color:var(--blue-dark);}
   .week-card .w-sub{font-size:11.5px;color:var(--gray);margin-top:2px;}
 
-  /* Tela estreita (janela dividida): tabela compacta para o X de excluir não ficar fora da tela. Em tela cheia nada muda. */
-  @media(min-width:641px) and (max-width:1000px){
-    .day-card{overflow-x:auto;}
-    table{font-size:11.5px;}
-    thead th{padding:6px 3px;font-size:9px;letter-spacing:0;white-space:normal;line-height:1.15;}
-    tbody td{padding:6px 3px;}
-    .desc-cell{max-width:150px;}
-    input[type=number].qtdedit,input[type=number].flashqtd{width:40px;padding:4px 2px;font-size:12px;}
-    input[type=number].acertos{width:40px;padding:4px 2px;}
-    input[type=number].acertosSeguros,input[type=number].acertosDuvida{width:36px;padding:4px 2px;font-size:11.5px;}
-    input[type=number].studymin{width:46px;padding:4px 2px;font-size:12px;}
-    select.status{padding:4px 2px;font-size:11px;}
-    select.moveto{max-width:68px;font-size:10px;padding:3px 1px;}
-    .btn-del{padding:3px 4px;}
-    .badge-subj,.badge-type{font-size:10px;padding:2px 4px;}
-  }
   @media(max-width:640px){
     thead{display:none;}
     table, tbody, tr, td{display:block;width:100%;}
