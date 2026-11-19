@@ -548,7 +548,7 @@ document.addEventListener('keydown',e=>{
 
 // ---- botão direito: escolher a ferramenta (Alt+1, Alt+2...) ----
 const FONTES=['Arial','Calibri','Times New Roman','Georgia','Verdana','Courier New'];
-const itensCtx=()=>[ATALHO['1'],ATALHO['2'],ATALHO['5']].map((t,i)=>itemFerr(t,t.n,'Alt+'+['1','2','5'][i])).join('')+itemFerr({k:'st'},'Tachado','')+itemFerr({k:'er'},'Borracha','Alt+E');
+const itensCtx=()=>[ATALHO['1'],ATALHO['2'],ATALHO['5']].map((t,i)=>itemFerr(t,t.n,'Alt+'+['1','2','5'][i])).join('')+itemFerr({k:'er'},'Borracha','Alt+E');
 $('#mCtx').innerHTML=`<div class="mini">
  <div class="mrow"><button data-x="fonte" id="cxFonte" title="Fonte">Arial ▾</button><button data-x="tam" id="cxTam" title="Tamanho da fonte">11 ▾</button><button data-x="mais" title="Aumentar a fonte">A<sup>▲</sup></button><button data-x="menos" title="Diminuir a fonte">A<sub>▼</sub></button><button data-x="pincel" title="Pincel de formatação: copia o formato do trecho e aplica no próximo que você selecionar">🖌</button></div>
  <div class="mrow"><button data-x="n" title="Negrito"><b>N</b></button><button data-x="i" title="Itálico"><i>I</i></button><button data-x="s" title="Sublinhado"><u>S</u></button>
@@ -556,7 +556,7 @@ $('#mCtx').innerHTML=`<div class="mini">
   <button data-x="limpa" title="Limpar o grifo e o sublinhado do trecho"><span class="aa-hl">Aa</span>⌫</button>
   <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
   <button data-x="ul" title="Lista com marcadores">•≡</button><button data-x="ol" title="Lista numerada">1≡</button></div></div><hr>`
- +itensCtx()+'<hr><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência do TRTeiros ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#FFD966,#7ED957,#5271FF,#F45B8F,#FF3131)"></span>Barra de incidência ▸</button><hr id="cxTabHr" hidden><button data-x="deltab" id="cxDelTab" hidden title="Apaga a tabela inteira clicada"><span class="sw">🗑</span>Excluir tabela</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
+ +itensCtx()+'<hr><button data-x="quadro" title="Transforma o parágrafo em quadro de destaque (ou desfaz)"><span class="sw">▭</span>Quadro</button><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência do TRTeiros ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#FFD966,#7ED957,#5271FF,#F45B8F,#FF3131)"></span>Barra de incidência ▸</button><hr id="cxTabHr" hidden><button data-x="deltab" id="cxDelTab" hidden title="Apaga a tabela inteira clicada"><span class="sw">🗑</span>Excluir tabela</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
 $('#mCtx').insertAdjacentHTML('afterend',`<div class="menu" id="mFonte">${FONTES.map(f=>`<button data-f="${f}" style="font-family:'${f}'">${f}</button>`).join('')}</div><div class="menu" id="mTam">${[8,9,10,11,12,14,16,18,20,24,28,32,36,48].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div><div class="menu" id="mHl3">${[ATALHO['1'],ATALHO['2'],ATALHO['5']].map(t=>itemFerr(t,t.n,'')).join('')}</div>`);
 ['mFonte','mTam','mHl3'].forEach(id=>$('#'+id).onmousedown=e=>e.preventDefault());
 ligaBotoes($('#mHl3'));
@@ -587,6 +587,7 @@ $('#mCtx').querySelectorAll('.mini [data-x]').forEach(b=>{b.onclick=()=>acaoCtx[
 ligaBotoes($('#mCtx'));
 $('#mCtx').querySelector('[data-x=novidade]').onclick=()=>{const sel=getSelection();const bl=ctxBloco||(sel.anchorNode&&blocoDe(sel.anchorNode));fechaMenus();ctxBloco=null;if(!bl)return;bl.dataset.nov='1';bl.removeAttribute('data-sem-nov');atualizarIncidencia();marcar()};
 $('#mCtx').querySelector('[data-x=trmenu]').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();const bl=ctxBloco;fechaMenus();ctxBloco=bl;menuEm('mTR',r.right+2,r.top)};
+$('#mCtx').querySelector('[data-x=quadro]').onclick=()=>{fechaMenus();$('#caixa').click()};
 $('#mCtx').querySelector('[data-x=off]').onclick=()=>{if(tool)ligar(tool,false);fechaMenus()};
 $('#mCtx').querySelector('[data-x=copy]').onclick=()=>{document.execCommand('copy');fechaMenus()};
 $('#mCtx').querySelector('[data-x=cut]').onclick=()=>{document.execCommand('cut');fechaMenus();marcar()};
@@ -1065,12 +1066,13 @@ async function atualizarIncidencia(){
     while((n=tw.nextNode())){mapa.push({node:n,ini:full.length});full+=n.data}
     if(!/Art|art|Súmula|SÚMULA/.test(full))continue;
     const ins=[]; // {pos, el}
-    const contSelo={};const novoSelo=(num,pos,el)=>{const c=contSelo[num]=(contSelo[num]||0)+1;const k=num+'|'+c;if((bloco.dataset.semSelo||'').split(';').includes(k))return;el.dataset.k=k;el._b=bloco;ins.push({pos,el});total++};
+    const contSelo={};const novoSelo=(num,pos,el)=>{const c=contSelo[num]=(contSelo[num]||0)+1;const k=num+'|'+c;if((bloco.dataset.semSelo||'').split(';').includes(k))return;el.dataset.k=k;el._b=bloco;ins.push({pos,el,mi:curMi});total++};
+    let curMi=0,primeiro=Infinity;
     RE_ART.lastIndex=0;let m;
     const ini0=full.search(/\S/);
     while((m=RE_ART.exec(full))){
       if(LEISECA&&m.index<=ini0+1)continue;
-      const fim=m.index+m[0].length;
+      const fim=m.index+m[0].length;curMi=m.index;primeiro=Math.min(primeiro,m.index);
       let jan=full.slice(fim,fim+110);const corte=jan.search(/;|\.\s+[A-ZÀ-Ú]|\n/);if(corte>=0)jan=jan.slice(0,corte);
       let slug=resolverLei(jan,inc);if(slug===undefined)slug=padrao&&inc.slugs[padrao]?padrao:null;
       if(!slug)continue;
@@ -1085,12 +1087,15 @@ async function atualizarIncidencia(){
     }
     RE_SUM.lastIndex=0;
     while((m=RE_SUM.exec(full))){
+      curMi=m.index;primeiro=Math.min(primeiro,m.index);
       const tr=m[2].toLowerCase(),chave=`${tr}-sumula-${m[1]}`,reg=inc.m[chave];
       if(!inc.slugs['jurisprudencia-'+tr])continue;
       const qtd=reg?reg.n:0;
       if(!qtd)continue;
       novoSelo('Súm. '+m[1]+' '+tr,m.index,badge(qtd,`Súmula ${m[1]} do ${m[2].toUpperCase()}\n`+(qtd?`Cobrada ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrada nos filtros já resolvidos'),reg?reg.url:'compilado/leis/jurisprudencia-'+tr+'.html','Súm. '+m[1]));
     }
+    // o selo mostra só a incidência da citação principal do bloco (a primeira); as demais citadas no texto são acessórias
+    for(let i=ins.length-1;i>=0;i--)if(ins[i].mi!==primeiro){ins.splice(i,1);total--}
     ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
   }
   const leiBase=(LEISECA&&usaComp)?leiPadrao(inc):null;
