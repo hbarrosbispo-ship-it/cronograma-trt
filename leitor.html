@@ -1072,9 +1072,12 @@ async function atualizarIncidencia(){
     // OJ, precedente, tema etc. também podem ser a citação principal do bloco (mesmo sem selo): os artigos citados depois não ganham selo
     {const rp=/\b(?:OJT?(?:-[A-Z0-9]+)?|OJ\s+da\s+[A-Z0-9-]+|Orientação\s+Jurisprudencial(?:\s+Transitória)?|Precedente\s+Normativo|Súmula\s+Vinculante|Tema|Tese)\b[^.\d]{0,40}\d+/g;let q;while((q=rp.exec(full)))primeiro=Math.min(primeiro,q.index)}
     const ini0=full.search(/\S/);
+    // bloco que é item (inciso, alínea, §) de súmula/OJ/enunciado: o artigo citado no meio do texto é acessório, não ganha selo
+    const ehItem=/^\s*(?:[IVXLC]+\s*[-–—.]|[a-z]\)|§\s*\d+|Par[aá]grafo\s+[uú]nico)/.test(full);
     while((m=RE_ART.exec(full))){
       if(LEISECA&&m.index<=ini0+1)continue;
       const fim=m.index+m[0].length;curMi=m.index;primeiro=Math.min(primeiro,m.index);
+      if(ehItem&&m.index>ini0+30)continue;
       let jan=full.slice(fim,fim+110);const corte=jan.search(/;|\.\s+[A-ZÀ-Ú]|\n/);if(corte>=0)jan=jan.slice(0,corte);
       let slug=resolverLei(jan,inc);if(slug===undefined)slug=padrao&&inc.slugs[padrao]?padrao:null;
       if(!slug)continue;
