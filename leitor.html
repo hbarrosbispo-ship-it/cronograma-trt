@@ -1177,10 +1177,7 @@ async function atualizarIncidencia(){
           const fmt=t=>t.replace(/^PU/,'parágrafo único').replace(/§(\d+)/g,'§ $1º').replace(/\./g,', ');
           const nome=(!x.trecho||x.trecho==='caput')?'':', '+(x.extra?todos.map(t=>t.split('.').pop()).join(' e '):fmt(x.trecho)).replace(/^(?=[a-z](?: e [a-z])*$)/,fmt(x.trecho.slice(0,-2))+', ');
           novo.push({els:[x.el],n,url:g.url,art:rotArt,lei:inc.slugs[g.base],
-            rot:`${rotArt}${nome} · ${inc.slugs[g.base]}\nCobrado em ${n} ${n===1?'questão':'questões'} dos filtros (clique para abrir no compilado)`})});
-        // o selo "N×" do artigo ficava no caput mesmo quando só um inciso/§ foi cobrado: passa para o primeiro item cobrado
-        if(g.selo&&g.selo.isConnected){const cap=novo[ini];if(cap&&!cap.n){const alvo=novo.slice(ini).find(x=>x.n);
-          if(alvo){const h=alvo.els[0];if((h.dataset.semSelo||'').split(';').includes(g.selo.dataset.k)){g.selo.remove();total--}else{h.insertBefore(g.selo,h.firstChild);g.selo._b=h}}}}}
+            rot:`${rotArt}${nome} · ${inc.slugs[g.base]}\nCobrado em ${n} ${n===1?'questão':'questões'} dos filtros (clique para abrir no compilado)`})});}
       BARRAS=novo}}
   // onde o compilado não tem incidência, mostra a legenda do TRTeiros (cores que já vinham no PDF)
   const cobertos=new Set();BARRAS.filter(b=>b.n).forEach(b=>b.els.forEach(e=>cobertos.add(e)));
