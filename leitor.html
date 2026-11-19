@@ -1096,6 +1096,16 @@ async function atualizarIncidencia(){
       if(!qtd)continue;
       novoSelo('Súm. '+m[1]+' '+tr,m.index,badge(qtd,`Súmula ${m[1]} do ${m[2].toUpperCase()}\n`+(qtd?`Cobrada ${qtd}× nos filtros já resolvidos (clique para abrir no compilado)`:'Ainda não cobrada nos filtros já resolvidos'),reg?reg.url:'compilado/leis/jurisprudencia-'+tr+'.html','Súm. '+m[1]));
     }
+    // OJ do TST (SDI-1, SDI-2, SDC): chave tst-oj-sdi1-N no compilado (só ganha selo se estiver lá)
+    const RE_OJ=/\bOJ\s+(?:n[º°o.]*\s*(\d+)\s*(?:,?\s*d[ao]\s*)?(S?B?DI-?\s*[12]|SDC)|(?:d[ao]\s+)?(S?B?DI-?\s*[12]|SDC)\s*(?:,?\s*n[º°o.]*\s*)?(\d+))/gi;
+    RE_OJ.lastIndex=0;
+    while((m=RE_OJ.exec(full))){
+      curMi=m[0].length?m.index:0;primeiro=Math.min(primeiro,m.index);
+      const num=m[1]||m[4],orgao=(m[2]||m[3]).toLowerCase().replace(/[^a-z0-9]/g,'').replace(/^sb/,'s'),
+        org=orgao==='sdc'?'sdc':'sdi'+orgao.slice(-1),reg=inc.m[`tst-oj-${org}-${num}`];
+      if(!reg||!reg.n)continue;
+      novoSelo('OJ '+org+' '+num,m.index,badge(reg.n,`OJ ${num} da ${org.toUpperCase().replace('SDI','SDI-')} do TST\nCobrada ${reg.n}× nos filtros já resolvidos (clique para abrir no compilado)`,reg.url,'OJ '+num));
+    }
     // o selo mostra só a incidência da citação principal do bloco (a primeira); as demais citadas no texto são acessórias
     for(let i=ins.length-1;i>=0;i--)if(ins[i].mi!==primeiro){ins.splice(i,1);total--}
     ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
