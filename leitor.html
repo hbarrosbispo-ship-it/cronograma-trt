@@ -40,6 +40,14 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 .linha a.ini{padding:10px 14px;color:var(--mute);text-decoration:none;font-size:12px}
 .linha a.ini:hover{color:var(--g)}
 .allbody{padding:4px 16px 14px;column-width:430px;column-gap:30px}
+.linha button.top{border:1px solid var(--line);background:#fff;color:var(--mute);border-radius:999px;font-size:12px;padding:3px 11px;margin-right:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.linha button.top:hover{border-color:var(--g);color:var(--g)}
+.item>.sum{display:none;padding:2px 18px 12px 34px;background:#fafbfd;border-top:1px dashed #e3e7ee;column-width:360px;column-gap:28px;margin:0}
+.item.open>.sum{display:block}
+.item.open>.linha button.top{background:var(--g);color:#fff;border-color:var(--g)}
+.item{border-top:1px solid #eceff4}.item:first-child{border-top:none}
+.item>.linha{border-top:none}
+.grupo{display:flex;gap:6px;align-items:center}
 .allbody .capt{font-weight:bold;color:var(--gd);margin:14px 0 2px;break-after:avoid}
 .allbody .capt a{color:var(--gd);text-decoration:none}
 .allbody .capt small{color:var(--mute);font-weight:normal}
@@ -199,9 +207,8 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 
 <!-- ========== BIBLIOTECA ========== -->
 <div id="lista" hidden>
-  <header class="topo-site">
+  <header class="topo-site" style="padding-bottom:16px">
     <h1>Biblioteca de leitura</h1>
-    <div class="abas"><button id="aCap" class="on">Capítulos</button><button id="aSum">Sumários</button></div>
   </header>
   <div class="wrap">
     <input id="busca" type="search" placeholder="Buscar capítulo ou tópico (funciona sem acento)">
@@ -309,8 +316,8 @@ const $=s=>document.querySelector(s);
 const semAcento=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},raw(k){try{return localStorage.getItem(k)}catch(e){return null}}};
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-const ICONE={'Direito do Trabalho':'⚖️','Direito Processual do Trabalho':'👷','Direito Constitucional':'📜','Direito Administrativo':'🏛️','Direito Civil':'🏠','Direito Processual Civil':'🗂️','Direito Coletivo do Trabalho':'🤝','Estudo de Caso':'📝','Extras do curso':'⭐','Informática':'💻','Jurisprudência':'🔨','Português':'📖','RLM':'🧮'};
-const ORDEM=['Direito do Trabalho','Direito Processual do Trabalho','Direito Constitucional','Direito Administrativo','Direito Civil','Direito Processual Civil','Direito Coletivo do Trabalho'];
+const ICONE={'Direito do Trabalho':'⚖️','Direito Processual do Trabalho':'👷','Direito Constitucional':'📜','Direito Administrativo':'🏛️','Direito Civil':'🏠','Direito Processual Civil':'🗂️','Direito Coletivo do Trabalho':'🤝','Estudo de Caso':'📝','Extras do curso':'⭐','Direitos Humanos':'🕊️','Noções de Legislação':'📑','Pessoas com Deficiência (PCD)':'♿','Informática':'💻','Jurisprudência':'🔨','Português':'📖','RLM':'🧮'};
+const ORDEM=['Direito do Trabalho','Direito Processual do Trabalho','Direito Constitucional','Direito Administrativo','Direito Civil','Direito Processual Civil','Direito Coletivo do Trabalho','Noções de Legislação','Direitos Humanos','Pessoas com Deficiência (PCD)'];
 
 let ATU={};
 async function carregarAtu(){try{ATU=await (await fetch('leitor/docs/atualizacoes.json',{cache:'no-cache'})).json()}catch(e){ATU={}}}
@@ -385,35 +392,34 @@ async function biblioteca(){
   $('#lista').hidden=false;document.title='Biblioteca · Cronograma TRT';
   const docs=await (await fetch('leitor/docs/index.json',{cache:'no-cache'})).json();
   await carregarAtu();
+  docs.forEach(d=>{const m=/[\\/]TRT[\\/]([^\\/]+)[\\/](?:(.*)[\\/])?[^\\/]+$/.exec(d.arquivo||'');if(m){d.materia=m[1];d.grupo=(m[2]||'').split(/[\\/]/).filter(Boolean).join(' / ')}});
   const mats={};docs.forEach(d=>(mats[d.materia]=mats[d.materia]||[]).push(d));
   const nomes=Object.keys(mats).sort((a,b)=>{const i=ORDEM.indexOf(a),j=ORDEM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||a.localeCompare(b)});
-  let aba=LS.get('bibAba')||'cap';
   const alvo=d=>semAcento(d.titulo+' '+d.codigo+' '+d.sumario.map(s=>s.t).join(' '));
+  const abertos=new Set();
   function render(){
     const t=semAcento($('#busca').value);let h='';
-    $('#aCap').classList.toggle('on',aba==='cap');$('#aSum').classList.toggle('on',aba==='sum');
     nomes.forEach(m=>{
       const lista=mats[m].filter(d=>!t||alvo(d).includes(t));if(!lista.length)return;
-      if(aba==='cap'){
-        const grupos={};lista.forEach(d=>(grupos[d.grupo]=grupos[d.grupo]||[]).push(d));
-        h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s)</span></summary>`;
-        Object.keys(grupos).sort().forEach(g=>{
-          if(g)h+=`<div class="grupo">${esc(g)}</div>`;
-          grupos[g].forEach(d=>{const andando=!!LS.get('pos:'+d.slug);
-            h+=`<div class="linha"><a class="cap" href="?doc=${d.slug}"><span class="t">${esc(d.titulo)}</span>${andando?'<span class="tag">em andamento</span>':''}${ATU[d.slug]?`<span class="tag atu${atuNovo(d.slug)?' novo':''}" title="Atualizado pelo TRTeiros em ${dtbr(ultAtu(d.slug))}">${atuNovo(d.slug)?'atualizado · novo':'atualizado'}</span>`:''}<span class="meta">${d.paginas} pág.</span></a>${andando?`<a class="ini" href="?doc=${d.slug}&inicio=1" title="Abrir do início">↺ início</a>`:''}</div>`});
+      const grupos={};lista.forEach(d=>(grupos[d.grupo]=grupos[d.grupo]||[]).push(d));
+      h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s)</span></summary>`;
+      Object.keys(grupos).sort((x,y)=>x.localeCompare(y,'pt',{numeric:true})).forEach(g=>{
+        if(g)h+=`<div class="grupo">${esc(g.split(' / ').join(' › '))}</div>`;
+        grupos[g].sort((x,y)=>x.titulo.localeCompare(y.titulo,'pt',{numeric:true,sensitivity:'base'})).forEach(d=>{
+          const andando=!!LS.get('pos:'+d.slug);
+          const tituloBate=!t||semAcento(d.titulo+' '+d.codigo).includes(t);
+          const tops=d.sumario.map((x,i)=>({x,i})).filter(o=>tituloBate||semAcento(o.x.t).includes(t));
+          const aberto=!!t&&!tituloBate||abertos.has(d.slug);
+          h+=`<div class="item${aberto?' open':''}" data-s="${d.slug}"><div class="linha"><a class="cap" href="?doc=${d.slug}"><span class="t">${esc(d.titulo)}</span>${andando?'<span class="tag">em andamento</span>':''}${ATU[d.slug]?`<span class="tag atu${atuNovo(d.slug)?' novo':''}" title="Atualizado pelo TRTeiros em ${dtbr(ultAtu(d.slug))}">${atuNovo(d.slug)?'atualizado · novo':'atualizado'}</span>`:''}<span class="meta">${d.paginas} pág.</span></a>${andando?`<a class="ini" href="?doc=${d.slug}&inicio=1" title="Abrir do início">↺ início</a>`:''}${d.sumario.length?`<button class="top" type="button" data-top="${d.slug}">${d.sumario.length} tópicos ▾</button>`:''}</div>`+
+            (d.sumario.length?`<ul class="sum">${tops.map(o=>`<li class="${o.x.n}"><a href="?doc=${d.slug}&h=${o.i}">${esc(o.x.t)}</a> <small>pág. ${o.x.pg}</small></li>`).join('')}</ul>`:'')+`</div>`;
         });
-        h+='</details>';
-      }else{
-        const com=lista.filter(d=>d.sumario.length);if(!com.length)return;
-        const nt=com.reduce((a,d)=>a+d.sumario.length,0);
-        h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${nt} tópicos · ${com.length} capítulos</span></summary><div class="allbody">`+
-          com.map(d=>`<div class="capt"><a href="?doc=${d.slug}">${esc(d.titulo)}</a> <small>${d.paginas} pág.</small></div><ul class="sum">${d.sumario.map((x,i)=>`<li class="${x.n}"><a href="?doc=${d.slug}&h=${i}">${esc(x.t)}</a> <small>pág. ${x.pg}</small></li>`).join('')}</ul>`).join('')+`</div></details>`;
-      }
+      });
+      h+='</details>';
     });
     $('#mats').innerHTML=h||'<p style="color:var(--mute)">Nada encontrado.</p>';
   }
-  $('#aCap').onclick=()=>{aba='cap';LS.set('bibAba',aba);render()};
-  $('#aSum').onclick=()=>{aba='sum';LS.set('bibAba',aba);render()};
+  $('#mats').addEventListener('click',e=>{const b=e.target.closest('button.top');if(!b)return;const it=b.closest('.item');it.classList.toggle('open');
+    if(it.classList.contains('open'))abertos.add(b.dataset.top);else abertos.delete(b.dataset.top)});
   $('#busca').oninput=render;render();
 }
 
