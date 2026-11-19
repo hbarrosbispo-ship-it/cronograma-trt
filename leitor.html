@@ -1106,6 +1106,15 @@ async function atualizarIncidencia(){
       if(!reg||!reg.n)continue;
       novoSelo('OJ '+org+' '+num,m.index,badge(reg.n,`OJ ${num} da ${org.toUpperCase().replace('SDI','SDI-')} do TST\nCobrada ${reg.n}× nos filtros já resolvidos (clique para abrir no compilado)`,reg.url,'OJ '+num));
     }
+    // IRR do TST: chave tst-irr-N ("IRR 80 (TST)", "IRR nº 267 do TST", "Tema 80 (IRR)")
+    const RE_IRR=/\bIRR[\s-]*(?:n[º°o.]*\s*)?(\d+)|\bTema\s+(\d+)\s*\(IRR\)/g;
+    RE_IRR.lastIndex=0;
+    while((m=RE_IRR.exec(full))){
+      curMi=m.index;primeiro=Math.min(primeiro,m.index);
+      const num=m[1]||m[2],reg=inc.m['tst-irr-'+num];
+      if(!reg||!reg.n)continue;
+      novoSelo('IRR '+num,m.index,badge(reg.n,`IRR ${num} do TST\nCobrado ${reg.n}× nos filtros já resolvidos (clique para abrir no compilado)`,reg.url,'IRR '+num));
+    }
     // o selo mostra só a incidência da citação principal do bloco (a primeira); as demais citadas no texto são acessórias
     for(let i=ins.length-1;i>=0;i--)if(ins[i].mi!==primeiro){ins.splice(i,1);total--}
     ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
