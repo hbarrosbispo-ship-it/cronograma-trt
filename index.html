@@ -1184,6 +1184,7 @@ const BUILTIN_TASKS = [
   {date:'24/11/2026', subj:'DT', type:'Questões', desc:'Trabalho escravo contemporâneo', amount:1, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15496292', mins:2},
   {date:'18/11/2026', subj:'LEG', type:'Questões', desc:'Regimento Interno do TRT-8 (simulado offline)', amount:30, unit:'questões', off:'questoes/simulado-ri-trt8.html', mins:41},
   {date:'16/11/2026', subj:'LEG', type:'Questões', desc:'Res. TRT8 65/2025 (assédio)', amount:11, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15627107', mins:15},
+  {date:'19/11/2026', subj:'DCI', type:'Leitura', desc:'Código Civil: Direito de Empresa (artigos cobrados no filtro)', amount:6, unit:'páginas', bib:'dci-codigo-civil-direito-de-empresa-artigos-cobrados'},
 ];
 function estudoCasoEffort(desc){ return /assistir aula/i.test(desc||'') ? 120 : 60; }
 BUILTIN_TASKS.forEach((t,i)=>{ t.id='t'+i; t.effort = t.mins!=null ? t.mins : t.type==='Leitura' ? t.amount*6 : (t.type==='Questões' ? t.amount*3 : (t.type==='Estudo de Caso' ? estudoCasoEffort(t.desc) : 20)); });
@@ -1259,6 +1260,7 @@ function duplicateTask(id, copyPages, copyDate){
   if(t.link) copy.link = t.link;
   if(t.off) copy.off = t.off;
   if(t.file) copy.file = t.file;
+  if(t.bib) copy.bib = t.bib;
   const tp = effectiveTopics(t);
   if(tp) copy.topics = tp;
   let originalNew = null;
@@ -2194,9 +2196,9 @@ function rowHtml(t, firstCol, draggableRow){
   const rowClass = (timerTaskId===t.id) ? 'timing' : '';
   const linkHtml = t.link ? ` <a href="${t.link}" target="_blank" rel="noopener" class="qc-link" title="Abrir filtro no QConcursos">QConcursos ↗</a>` : '';
   const offHtml = t.off ? ` <a href="${t.off}" target="_blank" rel="noopener" class="qc-link" title="Abrir o simulado offline (com gabarito comentado)">Offline ↗</a>` : '';
-  const bibSlug = t.file && window.LEITOR_MAPA ? window.LEITOR_MAPA[t.file.split(String.fromCharCode(92)).pop().toLowerCase()] : null;
+  const bibSlug = t.bib || (t.file && window.LEITOR_MAPA ? window.LEITOR_MAPA[t.file.split(String.fromCharCode(92)).pop().toLowerCase()] : null);
   const bibHtml = bibSlug ? ` <a href="leitor.html?doc=${bibSlug}" target="_blank" rel="noopener" class="file-link-lib" title="Abrir este capítulo na Biblioteca (editor com marcador, volta de onde você parou)">Biblioteca ↗</a>` : '';
-  const fileHtml = t.file ? bibHtml + ` <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>` : '';
+  const fileHtml = !t.file ? bibHtml : bibHtml + ` <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>` : '';
   const topicsHtml = isQ ? `<textarea class="topicsedit" data-id="${t.id}" rows="1" placeholder="Assuntos abordados pelo filtro">${escapeHtml(effectiveTopics(t))}</textarea>` : '';
   const descHtml = `<span class="descedit" data-id="${t.id}" title="Clique duas vezes para editar o nome (botão direito: mais opções)">${escapeHtml(effectiveDesc(t))}</span>${linkHtml}${offHtml}${fileHtml}${topicsHtml}`;
   const amt = effectiveAmount(t);
