@@ -172,6 +172,8 @@ body.pincel-on #folha{cursor:copy}
 .upd::after{content:'\21bb';font-size:.7em;vertical-align:super;margin-left:1px;color:#1a73e8;font-weight:bold}
 .upd.rem{background:#fde8e8;border-bottom-color:#c0392b;font-style:italic;color:#8a1f11}
 .upd.rem::after{color:#c0392b}
+body:not(.ver-ult) .upd[data-visto]{background:none;border-bottom:0;cursor:inherit;font-style:inherit;color:inherit}
+body:not(.ver-ult) .upd[data-visto]::after{display:none}
 #updbar{max-width:1100px;margin:8px auto 0;padding:0 12px}
 #updbar details{background:#fff8e1;border:1.5px solid #e0a800;border-radius:8px;padding:8px 12px;font-size:13.5px}
 #updbar summary{cursor:pointer;font-weight:bold;color:#7a4b00}
@@ -266,7 +268,7 @@ body.pincel-on #folha{cursor:copy}
 
       <div class="grp"><div class="rows">
         <div class="r"><button data-menu="mMais" title="Mais opções">⋯ Mais</button></div>
-        <div class="r"><button id="btnUlt" hidden title="Mostra de novo o resumo das últimas alterações do TRTeiros neste capítulo">↻ Últimas alterações</button></div>
+        <div class="r"><button id="btnUlt" hidden title="Liga ou desliga as últimas alterações do TRTeiros: mostra de novo o resumo e as correções que você marcou como vistas">↻ Últimas alterações</button></div>
       </div><div class="gl">Capítulo</div></div>
     </div>
   </div>
@@ -640,6 +642,11 @@ $('#mSelo').insertAdjacentHTML('afterend','<div class="menu" id="mNov"><button d
 let novAlvo=null;$('#mNov').onmousedown=e=>e.preventDefault();
 $('#mNov').querySelector('button').onclick=()=>{const el=novAlvo&&novAlvo._el;fechaMenus();if(!el)return;el.dataset.semNov='1';el.removeAttribute('data-nov');novAlvo=null;atualizarIncidencia();marcar()};
 $('#margem').addEventListener('contextmenu',e=>{const b=e.target.closest('.rec-badge');if(!b)return;e.preventDefault();e.stopPropagation();novAlvo=b;menuEm('mNov',e.clientX,e.clientY)});
+$('#mNov').insertAdjacentHTML('afterend','<div class="menu" id="mUpd"><button data-x="visto"></button></div>');
+let updAlvo=null;$('#mUpd').onmousedown=e=>e.preventDefault();
+$('#mUpd').querySelector('button').onclick=()=>{const el=updAlvo;fechaMenus();updAlvo=null;if(!el)return;if(el.hasAttribute('data-visto'))el.removeAttribute('data-visto');else el.setAttribute('data-visto','1');marcar()};
+folha.addEventListener('contextmenu',e=>{const u=e.target.closest&&e.target.closest('.upd');if(!u||!folha.contains(u))return;e.preventDefault();e.stopPropagation();updAlvo=u;
+  $('#mUpd').querySelector('button').innerHTML='<span class="sw">&#10003;</span>'+(u.hasAttribute('data-visto')?'Marcar esta correção como não vista':'Marcar esta correção como vista');menuEm('mUpd',e.clientX,e.clientY)},true);
 let seloAlvo=null;$('#mSelo').onmousedown=e=>e.preventDefault();
 $('#mSelo').querySelector('button').onclick=()=>{const a=seloAlvo&&seloAlvo._anc;fechaMenus();if(!a||!a.dataset.k||!a._b)return;const e2={b:a._b,k:a.dataset.k};SELO_UNDO.push(e2);SELO_REDO.length=0;seloRecente=true;trRecente=false;a.remove();seloAlvo=null;seloMuda(e2,false)};
 const SELO_UNDO=[],SELO_REDO=[];let seloRecente=false;
@@ -1312,7 +1319,10 @@ async function editor(){
   try{ // texto salvo vazio/corrompido: volta ao original em vez de mostrar folha em branco
     if(folha.innerText.trim().length<30){const o=await original();if(o&&o.length>100){folha.innerHTML=semMarcas(o);try{localStorage.removeItem('doc:'+slug)}catch(e){}}}
   }catch(e){}
-  montarSumario();marcarLeiSeca();mostrarAtu();{const bu=$('#btnUlt');if(ATU[slug]&&ATU[slug].length){bu.hidden=false;bu.onclick=()=>{mostrarAtu(true);scrollTo(0,Math.max(0,$('#updbar').getBoundingClientRect().top+scrollY-200))}}}
+  montarSumario();marcarLeiSeca();mostrarAtu();{const bu=$('#btnUlt');document.body.classList.remove('ver-ult');bu.classList.remove('on');
+  if((ATU[slug]&&ATU[slug].length)||folha.querySelector('.upd')){bu.hidden=false;bu.onmousedown=e=>e.preventDefault();bu.onclick=()=>{
+    const on=!document.body.classList.contains('ver-ult');document.body.classList.toggle('ver-ult',on);bu.classList.toggle('on',on);
+    if(ATU[slug]&&ATU[slug].length){mostrarAtu(on);if(on)scrollTo(0,Math.max(0,$('#updbar').getBoundingClientRect().top+scrollY-200))}}}}
   atualizarIncidencia();prepararBotoes();
   const z=LS.get('zoom');if(z)setZoom(z);
   faixa(LS.get('ribOn')!==false);$('#btnInc').classList.toggle('on',LS.get('incOn')!==false);
