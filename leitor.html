@@ -393,12 +393,20 @@ function fundirAtualizacao(salvoHtml,novoHtml,rm){
 // =================== BIBLIOTECA ===================
 // Número do capítulo: o do próprio título (Capítulo 05.1, Pt. 3); o que não tem número recebe o próximo da sequência do grupo.
 function numerar(lista){
-  const re=/cap[ií]tulo\s*(\d+)(?:\.(\d+))?|cap\.\s*(\d+)(?:\.(\d+))?|\bpt\.?\s*(\d+)/i;
+  const re=/cap[ií]tulo\s*(\d+)(?:\.(\d+))?|cap\.\s*(\d+)(?:\.(\d+))?|\bpt\.?\s*(\d+)|^[A-Za-z]{1,8}\.?(\d{1,3})\)|^\s*(\d{1,3})[.)]\s|\baula\s*(\d+)/i;
   let max=0;
   lista.forEach(d=>{const m=re.exec(d.titulo||'');
-    if(m){const a=+(m[1]||m[3]||m[5]),b=m[2]||m[4];d._n=a+(b?(+b)/100:0);d._ns=b?a+'.'+b:String(a);if(a>max)max=a}else{d._n=null}});
+    if(m){const a=+(m[1]||m[3]||m[5]||m[6]||m[7]||m[8]),b=m[2]||m[4];d._n=a+(b?(+b)/100:0);d._ns=b?a+'.'+b:String(a);if(a>max)max=a}else{d._n=null}});
   lista.filter(d=>d._n===null).sort((x,y)=>x.titulo.localeCompare(y.titulo,'pt',{numeric:true,sensitivity:'base'})).forEach(d=>{max++;d._n=max;d._ns=String(max)});
 }
+function ordemMateria(l){ // mesma ordem da biblioteca: grupos (resoluções por último) e número do capítulo
+  const g={};l.forEach(d=>(g[d.grupo]=g[d.grupo]||[]).push(d));Object.values(g).forEach(numerar);
+  const resol=x=>/resolu/i.test(x)?1:0,out=[];
+  Object.keys(g).sort((x,y)=>resol(x)-resol(y)||x.localeCompare(y,'pt',{numeric:true})).forEach(k=>
+    out.push(...g[k].sort((x,y)=>x._n-y._n||x.titulo.localeCompare(y.titulo,'pt',{numeric:true,sensitivity:'base'}))));
+  return out;
+}
+function prepDocs(docs){docs.forEach(d=>{const m=/[\\/]TRT[\\/]([^\\/]+)[\\/](?:(.*)[\\/])?[^\\/]+$/.exec(d.arquivo||'');if(m){d.materia=m[1];d.grupo=(m[2]||'').split(/[\\/]/).filter(Boolean).join(' / ')}})}
 async function biblioteca(){
   $('#lista').hidden=false;document.title='Biblioteca · Cronograma TRT';
   const docs=await (await fetch('leitor/docs/index.json',{cache:'no-cache'})).json();
@@ -417,7 +425,7 @@ async function biblioteca(){
       const lista=mats[m].filter(d=>!t||alvo(d).includes(t));if(!lista.length)return;
       const grupos={};lista.forEach(d=>(grupos[d.grupo]=grupos[d.grupo]||[]).push(d));
       const uni=UNI[chave(m)];
-      h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s)</span>${uni?`<a class="uni" href="compilado/${encodeURI(uni)}" title="Todos os compilados desta matéria somados em um só">Unificar compilados</a>`:''}</summary>`;
+      h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s)</span>${mats[m].length>1&&!/extras|estudo de caso/i.test(m)?`<a class="uni" href="?doc=${encodeURIComponent('uni:'+m)}" title="Todos os PDFs desta matéria em um só texto, na ordem dos capítulos">Unificar PDFs</a>`:''}</summary>`;
       const resol=g=>/resolu/i.test(g)?1:0;
       Object.keys(grupos).sort((x,y)=>resol(x)-resol(y)||x.localeCompare(y,'pt',{numeric:true})).forEach(g=>{
         if(g)h+=`<div class="grupo">${esc(g.split(' / ').join(' › '))}</div>`;
@@ -855,7 +863,11 @@ function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,
 function salvar(){try{localStorage.setItem('doc:'+slug,htmlLimpo());$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
 folha.addEventListener('input',marcar);
 folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
-async function original(){const r=await fetch('leitor/docs/'+slug+'.html',{cache:'no-cache'});if(!r.ok)throw 0;return r.text()}
+let UNI_L=null;
+async function original(){
+  if(UNI_L){const ps=await Promise.all(UNI_L.map(d=>fetch('leitor/docs/'+d.slug+'.html',{cache:'no-cache'}).then(r=>r.ok?r.text():'')));
+    return UNI_L.map((d,i)=>`<h2 class="unif" data-pg="1"><strong>${esc(d._ns)} · ${esc(d.titulo)}</strong></h2>`+ps[i]).join('')}
+  const r=await fetch('leitor/docs/'+slug+'.html',{cache:'no-cache'});if(!r.ok)throw 0;return r.text()}
 $('#mMais').querySelector('[data-a=restaurar]').onclick=async()=>{fechaMenus();if(!confirm('Voltar ao texto original e perder suas edições deste capítulo?'))return;
   folha.innerHTML=semMarcas(await original());localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';montarSumario();marcarLeiSeca();atualizarIncidencia()};
 $('#mMais').querySelector('[data-a=baixar]').onclick=()=>{fechaMenus();const a=document.createElement('a');
@@ -1322,7 +1334,9 @@ async function editor(){
   $('#ed').hidden=false;
   const docs=await (await fetch('leitor/docs/index.json',{cache:'no-cache'})).json();
   await carregarAtu();
-  meta=docs.find(d=>d.slug===slug)||{titulo:slug,paginas:1};
+  if(slug.startsWith('uni:')){prepDocs(docs);const m=slug.slice(4);UNI_L=ordemMateria(docs.filter(d=>d.materia===m));
+    meta={titulo:'Unificado · '+m,paginas:UNI_L.reduce((a,d)=>a+(d.paginas||0),0)}}
+  else meta=docs.find(d=>d.slug===slug)||{titulo:slug,paginas:1};
   document.title=meta.titulo+' · Cronograma TRT';
   $('#titulo').textContent=meta.titulo;$('#titulo').title=meta.titulo;$('#pgTotal').textContent=meta.paginas;
   await carregarDiff();

@@ -538,9 +538,9 @@ body > .wrap > .tab-bar{display:none}
 
   <div id="view-desempenho" style="display:none;">
     <div class="subtab-bar">
+      <button class="subtab-btn" id="desSubEstatisticas">Estatísticas</button>
       <button class="subtab-btn" id="desSubDesempenho">Desempenho</button>
       <button class="subtab-btn" id="desSubAcertos">Acertos e erros</button>
-      <button class="subtab-btn" id="desSubEstatisticas">Estatísticas</button>
       <button class="subtab-btn" id="desSubHistorico">Histórico dos filtros e cadernos</button>
     </div>
     <div id="desempenho-content" style="display:none;">
@@ -1831,7 +1831,13 @@ function effectiveDate(t){
   const moved = lsGet('moveto_'+t.id, '');
   return moved && DAY_INFO[moved] ? moved : t.date;
 }
-function effectiveDesc(t){ const v = lsGet('desc_'+t.id,''); return v ? v : t.desc; }
+// "Filtro 50A" aparece como "Fazer caderno sobre <assunto>" (o número do filtro não é mais usado na tela)
+function descCaderno(t){
+  const m = /^(Refazer )?Filtro\s*\d+[A-Za-z]*(\s*\((parte \d+)\))?\s*$/i.exec(t.desc||'');
+  const tp = m && effectiveTopics(t);
+  return m && tp ? (m[1] ? 'Refazer' : 'Fazer')+' caderno sobre '+tp.trim()+(m[3] ? ' ('+m[3]+')' : '') : null;
+}
+function effectiveDesc(t){ const v = lsGet('desc_'+t.id,''); return v ? v : (descCaderno(t) || t.desc); }
 function effectiveAmount(t){
   // Questões e Leitura aceitam ajuste manual (qtd_<id>): questões pelo campo numérico, leitura
   // com duplo clique na quantidade de páginas (útil pra dividir um PDF em mais de um dia).
@@ -2290,7 +2296,7 @@ function rowHtml(t, firstCol, draggableRow){
   const acertos = isQ ? acertosTotalStr(t) : '';
   const typeClass = t.type==='Leitura' ? 'leitura' : (t.type==='Questões' ? 'questoes' : (t.type==='Estudo de Caso' ? 'estudocaso' : 'flashcards'));
   const rowClass = (timerTaskId===t.id) ? 'timing' : '';
-  const linkHtml = t.link ? ` <a href="${t.link}" target="_blank" rel="noopener" class="qc-link" title="Abrir filtro no QConcursos">QConcursos ↗</a>` : '';
+  const linkHtml = t.link ? ` <a href="${t.link}" target="_blank" rel="noopener" class="qc-link" title="Abrir o caderno no QConcursos">QConcursos ↗</a>` : '';
   const offHtml = t.off ? ` <a href="${t.off}" target="_blank" rel="noopener" class="qc-link" title="Abrir o simulado offline (com gabarito comentado)">Offline ↗</a>` : '';
   const bibSlug = t.bib || (t.file && window.LEITOR_MAPA ? window.LEITOR_MAPA[t.file.split(String.fromCharCode(92)).pop().toLowerCase()] : null);
   const bibHtml = bibSlug ? ` <a href="leitor.html?doc=${bibSlug}" target="_blank" rel="noopener" class="file-link-lib" title="Abrir este capítulo na Biblioteca (editor com marcador, volta de onde você parou)">Biblioteca ↗</a>` : '';
@@ -2298,7 +2304,7 @@ function rowHtml(t, firstCol, draggableRow){
   const leiP = (LEI_POR_MATERIA[t.subj]||[]).filter(()=>t.type!=='Flashcards').map(k=>LEI_URL[k]);
   const leiHtml = leiP.map(([nome,url])=>` <a href="${url}" target="_blank" rel="noopener" class="lei-link" title="Abrir ${nome} (legislação principal da matéria)">${nome} ↗</a>`).join('');
   const fileHtml = fileHtml0;
-  const topicsHtml = isQ ? `<textarea class="topicsedit" data-id="${t.id}" rows="1" placeholder="Assuntos abordados pelo filtro">${escapeHtml(effectiveTopics(t))}</textarea>` : '';
+  const topicsHtml = isQ && !(descCaderno(t) && !lsGet('desc_'+t.id,'')) ? `<textarea class="topicsedit" data-id="${t.id}" rows="1" placeholder="Assuntos abordados pelo filtro">${escapeHtml(effectiveTopics(t))}</textarea>` : '';
   const descHtml = `<span class="descedit" data-id="${t.id}" title="Clique duas vezes para editar o nome (botão direito: mais opções)">${escapeHtml(effectiveDesc(t))}</span>${linkHtml}${offHtml}${fileHtml}${topicsHtml}`;
   const amt = effectiveAmount(t);
   const qtdHtml = isQ
@@ -2836,7 +2842,7 @@ function renderDesempenho(){
 function refreshEditalIfVisible(){ const el=document.getElementById('view-edital'); if(el && el.style.display!=='none') renderEdital(); }
 function refreshDesempenhoIfVisible(){
   if(document.getElementById('view-desempenho').style.display !== 'none'){
-    const sub = lsGet('desempenhoSub','desempenho');
+    const sub = lsGet('desempenhoSub','estatisticas');
     if(sub==='historico') renderHistorico(); else if(sub==='estatisticas') renderEstatisticas(); else renderDesempenho();
   }
 }
@@ -3304,7 +3310,7 @@ function renderHistorico(){
       }).join('');
       let delta = '';
       if(resp.length>=2){ const d = pctOf(resp[resp.length-1]) - pctOf(resp[0]); delta = `<span class="dl ${d>=0?'up':'down'}">${d>=0?'▲ +':'▼ '}${d.toFixed(0)} pp</span>`; }
-      rows += `<div class="hr"><div class="hr-t"><b>${nome}</b><span>${topic || '&nbsp;'}</span></div><div class="hr-a">${chips}</div><div class="hr-d">${delta}</div></div>`;
+      rows += `<div class="hr"><div class="hr-t"><b>${escapeHtml(topic || nome)}</b></div><div class="hr-a">${chips}</div><div class="hr-d">${delta}</div></div>`;
     });
     if(!rows) return;
     det += `<details class="hist-det" data-sj="${sj}" style="--hc:${cor}" ${abertos.has(sj) || histBusca ? 'open' : ''}><summary><span class="hs-n">${sj} · ${SUBJECT_NAMES[sj]}</span><span class="hs-m"><span class="chip">${fl.length} filtros e cadernos</span><span class="chip ${histPctCls(p1)}">${fmtPct(p1)} na 1ª vez</span>${nRedo?`<span class="chip">${nRedo} refeito${nRedo>1?'s':''}</span>`:''}</span></summary>${rows}</details>`;
@@ -3558,7 +3564,7 @@ function activateTab(name){
     document.getElementById(viewMap[k]).style.display = (k===name) ? '' : 'none';
     document.getElementById(btnMap[k]).classList.toggle('active', k===name);
   });
-  if(name==='desempenho') activateDesempenhoSub(sub || lsGet('desempenhoSub','desempenho'));
+  if(name==='desempenho') activateDesempenhoSub(sub || lsGet('desempenhoSub','estatisticas'));
   if(name==='edital') activateEditalSub(edSub || lsGet('editalSub','geral'));
 }
 document.getElementById('tabBtnCronograma').addEventListener('click', ()=>activateTab('cronograma'));
