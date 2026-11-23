@@ -889,10 +889,23 @@ function altFixo(){return $('#fixo').offsetHeight+8}
 function irPara(el){if(!el)return;window.scrollTo({top:el.getBoundingClientRect().top+scrollY-altFixo(),behavior:'smooth'})}
 
 // ---- página original (data-pg) e posição ----
-let pgAtual=0;
+let pgAtual=0,PGV=null; // PGV: páginas do PDF que sobram com o filtro "só incidência" (null = sem filtro)
+function paginasVisiveis(){
+  if(!folha.querySelector('[data-fo]'))return null;
+  const s=new Set();[...folha.children].forEach(e=>{if(!e.hasAttribute('data-fo'))s.add(pagDoBloco(e))});
+  return [...s].sort((a,b)=>a-b);
+}
+function pintaPaginas(p){
+  const pill=$('#pgAtual').closest('.pill');
+  if(PGV&&PGV.length){
+    let i=PGV.findIndex(x=>x>=p);if(i<0)i=PGV.length-1;
+    $('#pgAtual').textContent=i+1;$('#pgTotal').textContent=PGV.length;
+    pill.title='Só incidência: '+PGV.length+' páginas do PDF. Páginas originais: '+PGV.join(', ')+' (você está na pág. '+p+' do PDF)';
+  }else{$('#pgAtual').textContent=p;$('#pgTotal').textContent=meta?meta.paginas:'–';pill.title=''}
+}
 function pagDoBloco(el){while(el){if(el.dataset&&el.dataset.pg)return +el.dataset.pg;el=el.previousElementSibling}return 1}
 function blocoNoMeio(){
-  const y=altFixo()+(innerHeight-altFixo())*0.35,kids=folha.children;
+  const y=altFixo()+(innerHeight-altFixo())*0.35,kids=folha.querySelector('[data-fo]')?[...folha.children].filter(k=>!k.hasAttribute('data-fo')):folha.children;
   let lo=0,hi=kids.length-1,r=0;
   while(lo<=hi){const m=(lo+hi)>>1,b=kids[m].getBoundingClientRect();if(b.bottom<y){lo=m+1}else{r=m;hi=m-1}}
   return kids[Math.min(r,kids.length-1)];
@@ -901,7 +914,7 @@ function guardarPos(){if(!meta||!folha.children.length)return;const b=blocoNoMei
 function aoRolar(){
   if(!meta||!folha.children.length)return;
   const p=pagDoBloco(blocoNoMeio());
-  if(p!==pgAtual){pgAtual=p;$('#pgAtual').textContent=p}
+  if(p!==pgAtual){pgAtual=p;pintaPaginas(p)}
   const hs=titulos();let at=-1;hs.forEach((h,i)=>{if(h.getBoundingClientRect().top<altFixo()+80)at=i});
   document.querySelectorAll('#sumLista a').forEach((a,i)=>a.classList.toggle('atual',i===at));
   clearTimeout(aoRolar.t);aoRolar.t=setTimeout(guardarPos,300);
@@ -1229,7 +1242,7 @@ function aplicarFiltroInc(){
   const kids=[...folha.children];kids.forEach(e=>e.removeAttribute('data-fo'));
   const on=LS.get('soInc:'+slug)===true&&LS.get('incOn')!==false;
   $('#btnSo').classList.toggle('on',on);
-  if(!on)return null;
+  if(!on){if(PGV){PGV=null;pgAtual=0;pintaPaginas(pgAtual||1);aoRolar()}return null}
   const filho=n=>{while(n&&n.parentNode!==folha)n=n.parentNode;return n&&n.parentNode===folha?n:null};
   const tem=new Set();
   BARRAS.forEach(g=>{if(g.n)g.els.forEach(e=>{const f=filho(e);if(f)tem.add(f)})});
@@ -1251,6 +1264,7 @@ function aplicarFiltroInc(){
   grupos.forEach((g,i)=>{if(!g.tit)return;const nv=nivel(g.els[0]);let vis=false;
     for(let j=i+1;j<grupos.length;j++){if(grupos[j].tit){if(nivel(grupos[j].els[0])<=nv)break;continue}if(grupos[j].vis){vis=true;break}}
     if(!vis)g.els[0].setAttribute('data-fo','1')});
+  PGV=paginasVisiveis();pgAtual=0;aoRolar();
   return n}
 $('#btnSo').onmousedown=e=>e.preventDefault();
 $('#btnSo').onclick=()=>{const on=LS.get('soInc:'+slug)!==true;LS.set('soInc:'+slug,on);
