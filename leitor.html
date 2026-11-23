@@ -907,12 +907,9 @@ function paginasVisiveis(){
 }
 function pintaPaginas(p){
   const pill=$('#pgAtual').closest('.pill');
-  if(PGV&&PGV.length){
-    let i=PGV.findIndex(x=>x>=p);if(i<0)i=PGV.length-1;
-    $('#pgAtual').textContent=i+1;$('#pgTotal').textContent=PGV.length;
-    let x=$('#pgPdf');if(!x){x=document.createElement('small');x.id='pgPdf';x.style.cssText='margin-left:6px;opacity:.85';pill.appendChild(x)}x.textContent='(pág. '+p+' do PDF)';
-    pill.title='Só incidência: '+PGV.length+' páginas do PDF. Páginas originais: '+PGV.join(', ')+' (você está na pág. '+p+' do PDF)';
-  }else{const x=$('#pgPdf');if(x)x.remove();$('#pgAtual').textContent=p;$('#pgTotal').textContent=meta?meta.paginas:'–';pill.title=''}
+  const x=$('#pgPdf');if(x)x.remove();
+  $('#pgAtual').textContent=p;$('#pgTotal').textContent=meta?meta.paginas:'–';
+  pill.title=PGV&&PGV.length?'Páginas do PDF com incidência: '+PGV.join(', '):'';
 }
 function pagDoBloco(el){while(el){if(el.dataset&&el.dataset.pg)return +el.dataset.pg;el=el.previousElementSibling}return 1}
 function blocoNoMeio(){
