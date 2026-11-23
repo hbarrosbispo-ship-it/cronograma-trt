@@ -391,19 +391,27 @@ function fundirAtualizacao(salvoHtml,novoHtml,rm){
   const d=document.createElement('div');res.forEach(e=>d.appendChild(e));return d.innerHTML;
 }
 // =================== BIBLIOTECA ===================
-// Número do capítulo: o do próprio título (Capítulo 05.1, Pt. 3); o que não tem número recebe o próximo da sequência do grupo.
-function numerar(lista){
-  const re=/cap[ií]tulo\s*(\d+)(?:\.(\d+))?|cap\.\s*(\d+)(?:\.(\d+))?|\bpt\.?\s*(\d+)|^[A-Za-z]{1,8}\.?(\d{1,3})\)|^\s*(\d{1,3})[.)]\s|\baula\s*(\d+)/i;
+// Numeração por matéria, na ordem em que aparece na biblioteca (e no Unificar PDFs): o número do capítulo vem do título
+// (Capítulo 05.1, Pt. 3); capítulos repetidos viram 1.1, 1.2...; o que não tem número recebe o próximo da sequência da matéria.
+function ordemMateria(l){
+  const g={};l.forEach(d=>(g[d.grupo]=g[d.grupo]||[]).push(d));
+  const resol=x=>/resolu/i.test(x)?1:0;
+  const chaves=Object.keys(g).sort((x,y)=>resol(x)-resol(y)||x.localeCompare(y,'pt',{numeric:true}));
+  const forte=/cap[ií]tulo\s*(\d+)(?:\.(\d+))?|cap\.\s*(\d+)(?:\.(\d+))?|\bpt\.?\s*(\d+)/i;
+  const fraco=d=>{const m=/^[A-Za-z]{1,8}\.?(\d{1,3})\)|^\s*(\d{1,3})[.)]\s|\baula\s*(\d+)/i.exec(d.titulo||'');return m?+(m[1]||m[2]||m[3]):9999};
+  const tit=(x,y)=>x.titulo.localeCompare(y.titulo,'pt',{numeric:true,sensitivity:'base'});
   let max=0;
-  lista.forEach(d=>{const m=re.exec(d.titulo||'');
-    if(m){const a=+(m[1]||m[3]||m[5]||m[6]||m[7]||m[8]),b=m[2]||m[4];d._n=a+(b?(+b)/100:0);d._ns=b?a+'.'+b:String(a);if(a>max)max=a}else{d._n=null}});
-  lista.filter(d=>d._n===null).sort((x,y)=>x.titulo.localeCompare(y.titulo,'pt',{numeric:true,sensitivity:'base'})).forEach(d=>{max++;d._n=max;d._ns=String(max)});
-}
-function ordemMateria(l){ // mesma ordem da biblioteca: grupos (resoluções por último) e número do capítulo
-  const g={};l.forEach(d=>(g[d.grupo]=g[d.grupo]||[]).push(d));Object.values(g).forEach(numerar);
-  const resol=x=>/resolu/i.test(x)?1:0,out=[];
-  Object.keys(g).sort((x,y)=>resol(x)-resol(y)||x.localeCompare(y,'pt',{numeric:true})).forEach(k=>
-    out.push(...g[k].sort((x,y)=>x._n-y._n||x.titulo.localeCompare(y.titulo,'pt',{numeric:true,sensitivity:'base'}))));
+  l.forEach(d=>{const m=forte.exec(d.titulo||'');
+    if(m){d._a=+(m[1]||m[3]||m[5]);d._b=+(m[2]||m[4]||0);if(d._a>max)max=d._a}else d._a=null});
+  const cnt={};l.filter(d=>d._a!==null&&!d._b).forEach(d=>cnt[d._a]=(cnt[d._a]||0)+1);
+  const vez={};l.filter(d=>d._a!==null&&!d._b).sort(tit).forEach(d=>{if(cnt[d._a]>1){vez[d._a]=(vez[d._a]||0)+1;d._b=vez[d._a]}});
+  l.forEach(d=>{if(d._a!==null){d._n=d._a+d._b/100;d._ns=d._b?d._a+'.'+d._b:String(d._a)}});
+  const out=[];
+  chaves.forEach(k=>{
+    const arr=g[k].slice().sort((x,y)=>((x._a===null)-(y._a===null))||(x._n-y._n)||(fraco(x)-fraco(y))||tit(x,y));
+    arr.forEach(d=>{if(d._a===null){max++;d._n=max;d._ns=String(max)}});
+    out.push(...arr);
+  });
   return out;
 }
 function prepDocs(docs){docs.forEach(d=>{const m=/[\\/]TRT[\\/]([^\\/]+)[\\/](?:(.*)[\\/])?[^\\/]+$/.exec(d.arquivo||'');if(m){d.materia=m[1];d.grupo=(m[2]||'').split(/[\\/]/).filter(Boolean).join(' / ')}})}
@@ -415,7 +423,7 @@ async function biblioteca(){
   let UNI={};try{UNI=await (await fetch('compilado/unificados.json',{cache:'no-cache'})).json()}catch(e){}
   const chave=x=>semAcento((x||'').replace(/\s*\(.*?\)\s*/g,' ')).trim();
   const mats={};docs.forEach(d=>(mats[d.materia]=mats[d.materia]||[]).push(d));
-  Object.values(mats).forEach(l=>{const g={};l.forEach(d=>(g[d.grupo]=g[d.grupo]||[]).push(d));Object.values(g).forEach(numerar)});
+  Object.values(mats).forEach(l=>ordemMateria(l));
   const nomes=Object.keys(mats).sort((a,b)=>{const i=ORDEM.indexOf(a),j=ORDEM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||a.localeCompare(b)});
   const alvo=d=>semAcento(d.titulo+' '+d.codigo+' '+d.sumario.map(s=>s.t).join(' '));
   const abertos=new Set();
@@ -866,7 +874,9 @@ folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||
 let UNI_L=null;
 async function original(){
   if(UNI_L){const ps=await Promise.all(UNI_L.map(d=>fetch('leitor/docs/'+d.slug+'.html',{cache:'no-cache'}).then(r=>r.ok?r.text():'')));
-    return UNI_L.map((d,i)=>`<h2 class="unif" data-pg="1"><strong>${esc(d._ns)} · ${esc(d.titulo)}</strong></h2>`+ps[i]).join('')}
+    let off=0;
+    return UNI_L.map((d,i)=>{const o=off;off+=(d.paginas||0);
+      return `<h2 class="unif" data-pg="${o+1}"><strong>${esc(d._ns)} · ${esc(d.titulo)}</strong></h2>`+ps[i].replace(/data-pg="(\d+)"/g,(m,n)=>`data-pg="${+n+o}"`)}).join('')}
   const r=await fetch('leitor/docs/'+slug+'.html',{cache:'no-cache'});if(!r.ok)throw 0;return r.text()}
 $('#mMais').querySelector('[data-a=restaurar]').onclick=async()=>{fechaMenus();if(!confirm('Voltar ao texto original e perder suas edições deste capítulo?'))return;
   folha.innerHTML=semMarcas(await original());localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';montarSumario();marcarLeiSeca();atualizarIncidencia()};
@@ -900,8 +910,9 @@ function pintaPaginas(p){
   if(PGV&&PGV.length){
     let i=PGV.findIndex(x=>x>=p);if(i<0)i=PGV.length-1;
     $('#pgAtual').textContent=i+1;$('#pgTotal').textContent=PGV.length;
+    let x=$('#pgPdf');if(!x){x=document.createElement('small');x.id='pgPdf';x.style.cssText='margin-left:6px;opacity:.85';pill.appendChild(x)}x.textContent='(pág. '+p+' do PDF)';
     pill.title='Só incidência: '+PGV.length+' páginas do PDF. Páginas originais: '+PGV.join(', ')+' (você está na pág. '+p+' do PDF)';
-  }else{$('#pgAtual').textContent=p;$('#pgTotal').textContent=meta?meta.paginas:'–';pill.title=''}
+  }else{const x=$('#pgPdf');if(x)x.remove();$('#pgAtual').textContent=p;$('#pgTotal').textContent=meta?meta.paginas:'–';pill.title=''}
 }
 function pagDoBloco(el){while(el){if(el.dataset&&el.dataset.pg)return +el.dataset.pg;el=el.previousElementSibling}return 1}
 function blocoNoMeio(){
