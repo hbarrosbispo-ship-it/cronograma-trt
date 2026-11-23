@@ -1205,7 +1205,7 @@ const BUILTIN_TASKS = [
   {date:'13/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
   {date:'14/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: Português, Informática e RLM', amount:null, unit:'', mins:90},
   {date:'14/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
-  {date:'15/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DH, Legislação e PCD', amount:null, unit:'', mins:75},
+  {date:'08/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DH, Legislação e PCD', amount:null, unit:'', mins:75},
   {date:'15/01/2027', subj:'-', type:'Estudo de Caso', desc:'Revisão dos Estudos de Caso', amount:null, unit:'', mins:45},
   {date:'15/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
   {date:'16/01/2027', subj:'-', type:'Leitura', desc:'Véspera: revisão rápida de todos os tudões', amount:null, unit:'', mins:90},
@@ -1217,7 +1217,43 @@ const BUILTIN_TASKS = [
   {date:'19/11/2026', subj:'DCI', type:'Leitura', desc:'Código Civil: Direito de Empresa (artigos cobrados no filtro)', amount:6, unit:'páginas', bib:'dci-codigo-civil-direito-de-empresa-artigos-cobrados'},
   {date:'02/01/2027', subj:'-', type:'Questões', desc:'Fazer caderno sobre Administração Pública (sem PDF)', amount:33, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15496270', topics:'Administração Pública (sem PDF)'},
   {date:'03/01/2027', subj:'DA', type:'Questões', desc:'Fazer caderno sobre a Lei nº 11.416/2006 (1 FCC + 9 de estilo parecido)', amount:10, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15679478', topics:'Lei nº 11.416/2006 (carreiras dos servidores do Poder Judiciário)'},
-  {date:'03/01/2027', subj:'DPC', type:'Questões', desc:'Fazer caderno sobre a Lei nº 13.140/2015, Mediação (só FCC)', amount:7, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15679487', topics:'Lei nº 13.140/2015 (Mediação)'}
+  {date:'03/01/2027', subj:'DPC', type:'Questões', desc:'Fazer caderno sobre a Lei nº 13.140/2015, Mediação (só FCC)', amount:7, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15679487', topics:'Lei nº 13.140/2015 (Mediação)'},
+  {date:'19/12/2026', subj:'DH', type:'Questões', desc:'Refazer Caderno - Direitos Humanos, Caps. 01 a 03', amount:32, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15262241', mins:44},
+  {date:'19/12/2026', subj:'LEG', type:'Questões', desc:'Refazer Caderno - Regimento Interno do TRT-8 (simulado offline)', amount:30, unit:'questões', off:'questoes/simulado-ri-trt8.html', mins:41},
+  {date:'19/12/2026', subj:'DA', type:'Questões', desc:'Refazer Caderno - LAI', amount:18, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15262242', mins:29},
+  {date:'19/12/2026', subj:'DCI', type:'Questões', desc:'Refazer Caderno - Lei do Bem de família (Lei 8.009 - impenhorabilidade do bem de família)', amount:5, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15508590', mins:6},
+  {date:'20/12/2026', subj:'DCI', type:'Questões', desc:'Refazer Caderno - Direito de Empresa (CC arts. 966 e ss.)', amount:27, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15496276', mins:36},
+  {date:'20/12/2026', subj:'LEG', type:'Questões', desc:'Refazer Caderno - Regimento Interno do TRT-8', amount:20, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15406434', mins:27},
+  {date:'20/12/2026', subj:'LEG', type:'Questões', desc:'Refazer Caderno - Res. CNJ 400', amount:18, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15262246', mins:24},
+  {date:'20/12/2026', subj:'DT', type:'Questões', desc:'Refazer Caderno - Cap. 15 Lei do FGTS', amount:17, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251309', mins:23},
+  {date:'20/12/2026', subj:'DCI', type:'Questões', desc:'Refazer Caderno - Cap. 09 Direito de família', amount:16, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251283', mins:18},
+  {date:'24/12/2026', subj:'LEG', type:'Questões', desc:'Refazer Caderno - Res. CNJ 492', amount:3, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15262247', mins:4},
+  {date:'24/12/2026', subj:'DT', type:'Questões', desc:'Refazer Caderno - Lei Emprega + Mulheres (Lei 14.457)', amount:3, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15406592', mins:4},
+  {date:'24/12/2026', subj:'DT', type:'Questões', desc:'Refazer Caderno - Lei do Trabalho Avulso (Lei 12.023)', amount:3, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15407249', mins:4},
+  {date:'24/12/2026', subj:'DT', type:'Questões', desc:'Refazer Caderno - Meio ambiente do trabalho', amount:1, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15496291', mins:2},
+  {date:'24/12/2026', subj:'DT', type:'Questões', desc:'Refazer Caderno - Trabalho escravo contemporâneo', amount:1, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15496292', mins:2},
+  {date:'26/12/2026', subj:'PCD', type:'Questões', desc:'Refazer Caderno - Pessoa com Deficiência (Estatuto e legislação extravagante)', amount:62, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15406568', mins:84},
+  {date:'26/12/2026', subj:'DA', type:'Questões', desc:'Refazer Caderno - LGPD', amount:30, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15262243', mins:48},
+  {date:'26/12/2026', subj:'DPT', type:'Questões', desc:'Refazer Caderno - IN 39', amount:22, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251654', mins:31},
+  {date:'26/12/2026', subj:'DCI', type:'Questões', desc:'Refazer Caderno - Nome empresarial', amount:2, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15262244', mins:2},
+  {date:'27/12/2026', subj:'DA', type:'Questões', desc:'Refazer Caderno - Abuso de autoridade (Lei 13.869)', amount:14, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15406585', mins:22},
+  {date:'27/12/2026', subj:'DT', type:'Questões', desc:'Refazer Caderno - Cap. 13 arts. 611-A e 611-B', amount:15, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251313', mins:20},
+  {date:'27/12/2026', subj:'LEG', type:'Questões', desc:'Refazer Caderno - Código de Ética do TRT-8', amount:5, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15406435', mins:7},
+  {date:'01/01/2027', subj:'LEG', type:'Questões', desc:'Refazer Caderno - Res. TRT8 65/2025 (assédio)', amount:11, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15627107', mins:15},
+  {date:'01/01/2027', subj:'DT', type:'Questões', desc:'Refazer Caderno - Rescisão por acordo (art. 484-A)', amount:10, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15344477', mins:14},
+  {date:'01/01/2027', subj:'DPC', type:'Questões', desc:'Refazer Caderno - Lei 9.099', amount:11, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251584', mins:13},
+  {date:'01/01/2027', subj:'DCI', type:'Questões', desc:'Refazer Caderno - Cap. 10 Direito das sucessões', amount:12, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251285', mins:13},
+  {date:'01/01/2027', subj:'DCT', type:'Questões', desc:'Refazer Caderno - Lei de Greve', amount:7, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251320', mins:10},
+  {date:'02/01/2027', subj:'DA', type:'Questões', desc:'Refazer Caderno - Terceiro setor e OSCs (Lei 13.019)', amount:6, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15406589', mins:10},
+  {date:'02/01/2027', subj:'LEG', type:'Questões', desc:'Refazer Caderno - Tribunal Penal Internacional', amount:6, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15262216', mins:8},
+  {date:'02/01/2027', subj:'DT', type:'Questões', desc:'Refazer Caderno - Igualdade salarial (Lei 14.611)', amount:1, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15496289', mins:2},
+  {date:'02/01/2027', subj:'DPT', type:'Questões', desc:'Refazer Caderno - Seguro Garantia Judicial', amount:1, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251590', mins:1},
+  {date:'03/01/2027', subj:'LEG', type:'Questões', desc:'Refazer Caderno - Res. CSJT 368', amount:6, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15262236', mins:8},
+  {date:'03/01/2027', subj:'DT', type:'Questões', desc:'Refazer Caderno - Convenção 87 da OIT', amount:4, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15262245', mins:5},
+  {date:'03/01/2027', subj:'DPC', type:'Questões', desc:'Refazer Caderno - Mandado de Segurança', amount:4, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251527', mins:5},
+  {date:'03/01/2027', subj:'DPT', type:'Questões', desc:'Refazer Caderno - LC 75', amount:3, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251647', mins:4},
+  {date:'03/01/2027', subj:'DPC', type:'Questões', desc:'Refazer Caderno - Lei da ACP', amount:3, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15251572', mins:4},
+  {date:'07/01/2027', subj:'-', type:'Questões', desc:'Simulado + correção (60 questões)', amount:60, unit:'questões', mins:120},
 ];
 function estudoCasoEffort(desc){ return /assistir aula/i.test(desc||'') ? 120 : 60; }
 BUILTIN_TASKS.forEach((t,i)=>{ t.id='t'+i; t.effort = t.mins!=null ? t.mins : t.type==='Leitura' ? t.amount*6 : (t.type==='Questões' ? t.amount*3 : (t.type==='Estudo de Caso' ? estudoCasoEffort(t.desc) : 20)); });
@@ -1840,7 +1876,9 @@ function descCaderno(t){
   const tp = m && effectiveTopics(t);
   return m && tp ? (m[1] ? 'Refazer' : 'Fazer')+' caderno sobre '+tp.trim()+(m[3] ? ' ('+m[3]+')' : '') : null;
 }
-function effectiveDesc(t){ const v = lsGet('desc_'+t.id,''); return v ? v : (descCaderno(t) || t.desc); }
+// "Fazer/Refazer caderno sobre X" (inclusive texto já salvo) aparece como "Fazer/Refazer Caderno - X"
+function fmtCaderno(s){ return (s||'').replace(/^(Refazer|Fazer) caderno sobre (?:a |o )?/i, function(m,a){ return a+' Caderno - '; }); }
+function effectiveDesc(t){ const v = lsGet('desc_'+t.id,''); return fmtCaderno(v ? v : (descCaderno(t) || t.desc)); }
 function effectiveAmount(t){
   // Questões e Leitura aceitam ajuste manual (qtd_<id>): questões pelo campo numérico, leitura
   // com duplo clique na quantidade de páginas (útil pra dividir um PDF em mais de um dia).
