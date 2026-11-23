@@ -968,7 +968,9 @@ function separarCaixas(){
     el.textContent='';uteis.forEach(g=>{const p=document.createElement('p');g.forEach(n=>p.appendChild(n));el.appendChild(p)})})}
 // quadro cortado pela virada de página: o PDF termina o quadro numa página e o resto vem em outro quadro no topo da seguinte.
 // Une os dois quando o primeiro termina sem ponto final (":", ";", "," ou no meio da frase). Só move nós: grifos e edições ficam intactos.
+let CORTES=null;   // leitor/docs/cortes.json: páginas (por capítulo) cujo 1º quadro continua o da página anterior, medido na geometria do PDF
 function unirCaixasPagina(){
+  const geo=CORTES&&Array.isArray(CORTES[slug])?CORTES[slug]:null;
   const eCall=el=>el&&el.nodeType===1&&el.tagName==='DIV'&&el.classList.contains('call')&&!el.classList.contains('band');
   const paras=el=>{const ps=[...el.children].filter(c=>c.tagName==='P');
     if(ps.length&&ps.length===el.children.length&&[...el.childNodes].every(n=>n.nodeType!==3||!n.data.trim()))return{p:true,l:ps.map(p=>[...p.childNodes])};
@@ -978,7 +980,7 @@ function unirCaixasPagina(){
   while(a){
     const b=a.nextElementSibling;
     const pa=+(a.dataset.pgf||a.dataset.pg),pb=b&&+b.dataset.pg;
-    if(eCall(b)&&pa&&pb===pa+1&&!/[.!?…]["”')\]]?$/.test(txt([...a.childNodes]))&&!a.querySelector('img,table')&&!b.querySelector('img,table')){
+    if(eCall(b)&&pa&&pb===pa+1&&(geo?geo.includes(pb):!/[.!?…]["”')\]]?$/.test(txt([...a.childNodes])))&&!a.querySelector('img,table')&&!b.querySelector('img,table')){
       const A=paras(a),B=paras(b);
       if(!A.l.length||!B.l.length){a=b;continue}
       const ta=txt(A.l[A.l.length-1]),tb=txt(B.l[0]);
@@ -1387,6 +1389,7 @@ async function editor(){
   document.title=meta.titulo+' · Cronograma TRT';
   $('#titulo').textContent=meta.titulo;$('#titulo').title=meta.titulo;$('#pgTotal').textContent=meta.paginas;
   await carregarDiff();
+  try{CORTES=await fetch('leitor/docs/cortes.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null)}catch(e){CORTES=null}
   const salvo=LS.raw('doc:'+slug);
   try{
     const orig=await original();
