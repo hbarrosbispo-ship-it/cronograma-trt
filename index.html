@@ -1186,7 +1186,7 @@ const BUILTIN_TASKS = [
   {date:'16/12/2026', subj:'INF', type:'Leitura', desc:'Tudão de Informática', amount:null, unit:'', mins:75, bib:'tudao-inf'},
   {date:'16/12/2026', subj:'RLM', type:'Leitura', desc:'Tudão de RLM', amount:null, unit:'', mins:75, bib:'tudao-rlm'},
   {date:'04/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
-  {date:'06/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DA, DCO, DPT e DT', amount:null, unit:'', mins:150},
+  {date:'06/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DA, DCO, DPT e DT', amount:null, unit:'', mins:150, bib:'tudao-da,tudao-dco,tudao-dpt,tudao-dt'},
   {date:'05/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
   {date:'06/01/2027', subj:'-', type:'Questões', desc:'Simulado + correção (60 questões)', amount:60, unit:'questões', mins:120},
   {date:'06/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
@@ -1197,18 +1197,18 @@ const BUILTIN_TASKS = [
   {date:'09/01/2027', subj:'-', type:'Questões', desc:'Ensaio geral: simulado + Estudo de Caso', amount:null, unit:'', mins:0},
   {date:'09/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
   {date:'10/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
-  {date:'11/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DPT (foco) + RLM', amount:null, unit:'', mins:120},
+  {date:'11/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DPT (foco) + RLM', amount:null, unit:'', mins:120, bib:'tudao-dpt,tudao-rlm'},
   {date:'11/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
-  {date:'12/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DPC (foco) + Informática + PCD', amount:null, unit:'', mins:150},
+  {date:'12/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DPC (foco) + Informática + PCD', amount:null, unit:'', mins:150, bib:'tudao-dpc,tudao-inf,tudao-pcd'},
   {date:'12/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
-  {date:'13/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DCI (foco) + Português', amount:null, unit:'', mins:120},
+  {date:'13/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DCI (foco) + Português', amount:null, unit:'', mins:120, bib:'tudao-dci,tudao-port'},
   {date:'13/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
-  {date:'14/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DCO (foco) + Legislação', amount:null, unit:'', mins:120},
+  {date:'14/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DCO (foco) + Legislação', amount:null, unit:'', mins:120, bib:'tudao-dco,tudao-leg'},
   {date:'14/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
-  {date:'08/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DH, Legislação e PCD', amount:null, unit:'', mins:75},
+  {date:'08/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DH, Legislação e PCD', amount:null, unit:'', mins:75, bib:'tudao-dh,tudao-leg,tudao-pcd'},
   {date:'15/01/2027', subj:'-', type:'Estudo de Caso', desc:'Revisão dos Estudos de Caso', amount:null, unit:'', mins:45},
   {date:'15/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
-  {date:'16/01/2027', subj:'-', type:'Leitura', desc:'Véspera: revisão rápida de todos os tudões', amount:null, unit:'', mins:90},
+  {date:'16/01/2027', subj:'-', type:'Leitura', desc:'Véspera: revisão rápida de todos os tudões', amount:null, unit:'', mins:90, bib:'tudao-da,tudao-dco,tudao-dci,tudao-dpt,tudao-dpc,tudao-dt,tudao-port,tudao-dh,tudao-leg,tudao-pcd,tudao-inf,tudao-rlm'},
   {date:'16/01/2027', subj:'-', type:'Flashcards', desc:'Revisão diária de flashcards', amount:null, unit:'', mins:15},
   {date:'19/11/2026', subj:'DT', type:'Questões', desc:'Meio ambiente do trabalho', amount:1, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15496291', mins:2},
   {date:'24/11/2026', subj:'DT', type:'Questões', desc:'Trabalho escravo contemporâneo', amount:1, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15496292', mins:2},
@@ -1253,8 +1253,8 @@ const BUILTIN_TASKS = [
   {date:'30/12/2026', subj:'LEG', type:'Questões', desc:'Refazer Caderno - Tribunal Penal Internacional', amount:6, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15262216', mins:8},
   {date:'23/12/2026', subj:'DT', type:'Questões', desc:'Refazer Caderno - Lei Emprega + Mulheres (Lei 14.457)', amount:3, unit:'questões', link:'https://www.qconcursos.com/questoes-de-concursos/questoes?notebook_ids%5B%5D=15406592', mins:4},
   {date:'07/01/2027', subj:'-', type:'Questões', desc:'Simulado + correção (60 questões)', amount:60, unit:'questões', mins:120},
-  {date:'10/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DT (foco) + DH', amount:null, unit:'', mins:120},
-  {date:'15/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DA (foco)', amount:null, unit:'', mins:90},
+  {date:'10/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DT (foco) + DH', amount:null, unit:'', mins:120, bib:'tudao-dt,tudao-dh'},
+  {date:'15/01/2027', subj:'-', type:'Leitura', desc:'Revisão do tudão: DA (foco)', amount:null, unit:'', mins:90, bib:'tudao-da'},
   {date:'10/01/2027', subj:'-', type:'Questões', desc:'Meio simulado + correção (30 questões)', amount:30, unit:'questões', mins:60},
   {date:'11/01/2027', subj:'-', type:'Questões', desc:'Meio simulado + correção (30 questões)', amount:30, unit:'questões', mins:60},
   {date:'12/01/2027', subj:'-', type:'Questões', desc:'Meio simulado + correção (30 questões)', amount:30, unit:'questões', mins:60},
@@ -2357,7 +2357,7 @@ function rowHtml(t, firstCol, draggableRow){
   const linkHtml = t.link ? ` <a href="${t.link}" target="_blank" rel="noopener" class="qc-link" title="Abrir o caderno no QConcursos">QConcursos ↗</a>` : '';
   const offHtml = t.off ? ` <a href="${t.off}" target="_blank" rel="noopener" class="qc-link" title="Abrir o simulado offline (com gabarito comentado)">Offline ↗</a>` : '';
   const bibSlug = t.bib || (t.file && window.LEITOR_MAPA ? window.LEITOR_MAPA[t.file.split(String.fromCharCode(92)).pop().toLowerCase()] : null);
-  const bibHtml = bibSlug ? ` <a href="leitor.html?doc=${bibSlug}" target="_blank" rel="noopener" class="file-link-lib" title="Abrir este capítulo na Biblioteca (editor com marcador, volta de onde você parou)">Biblioteca ↗</a>` : '';
+  const bibHtml = !bibSlug ? '' : bibSlug.split(',').map((sl,_i,a)=>` <a href="leitor.html?doc=${sl}" target="_blank" rel="noopener" class="file-link-lib" title="Abrir na Biblioteca (editor com marcador, volta de onde você parou)">Biblioteca${a.length>1&&/^tudao-/.test(sl)?' · '+sl.slice(6).toUpperCase():''} ↗</a>`).join('');
   const fileHtml0 = !t.file ? bibHtml : bibHtml + ` <a href="${fileUriChrome(t.file)}" class="file-link-chrome" title="Abrir o PDF no Google Chrome (só funciona neste computador)">Chrome ↗</a>`;
   const leiP = (LEI_POR_MATERIA[t.subj]||[]).filter(()=>t.type!=='Flashcards').map(k=>LEI_URL[k]);
   const leiHtml = leiP.map(([nome,url])=>` <a href="${url}" target="_blank" rel="noopener" class="lei-link" title="Abrir ${nome} (legislação principal da matéria)">${nome} ↗</a>`).join('');
