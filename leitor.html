@@ -319,8 +319,8 @@ const $=s=>document.querySelector(s);
 const semAcento=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},raw(k){try{return localStorage.getItem(k)}catch(e){return null}}};
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-const ICONE={'Direito do Trabalho':'⚖️','Direito Processual do Trabalho':'👷','Direito Constitucional':'📜','Direito Administrativo':'🏛️','Direito Civil':'🏠','Direito Processual Civil':'🗂️','Direito Coletivo do Trabalho':'🤝','Estudo de Caso':'📝','Extras do curso':'⭐','Direitos Humanos':'🕊️','Noções de Legislação':'📑','Pessoas com Deficiência (PCD)':'♿','Informática':'💻','Jurisprudência':'🔨','Português':'📖','RLM':'🧮'};
-const ORDEM=['Direito do Trabalho','Direito Processual do Trabalho','Direito Constitucional','Direito Administrativo','Direito Civil','Direito Processual Civil','Direito Coletivo do Trabalho','Noções de Legislação','Direitos Humanos','Pessoas com Deficiência (PCD)'];
+const ICONE={'Tudões':'🧠','Direito do Trabalho':'⚖️','Direito Processual do Trabalho':'👷','Direito Constitucional':'📜','Direito Administrativo':'🏛️','Direito Civil':'🏠','Direito Processual Civil':'🗂️','Direito Coletivo do Trabalho':'🤝','Estudo de Caso':'📝','Extras do curso':'⭐','Direitos Humanos':'🕊️','Noções de Legislação':'📑','Pessoas com Deficiência (PCD)':'♿','Informática':'💻','Jurisprudência':'🔨','Português':'📖','RLM':'🧮'};
+const ORDEM=['Tudões','Direito do Trabalho','Direito Processual do Trabalho','Direito Constitucional','Direito Administrativo','Direito Civil','Direito Processual Civil','Direito Coletivo do Trabalho','Noções de Legislação','Direitos Humanos','Pessoas com Deficiência (PCD)'];
 
 let ATU={};
 async function carregarAtu(){try{ATU=await (await fetch('leitor/docs/atualizacoes.json',{cache:'no-cache'})).json()}catch(e){ATU={}}}
@@ -433,7 +433,7 @@ async function biblioteca(){
       const lista=mats[m].filter(d=>!t||alvo(d).includes(t));if(!lista.length)return;
       const grupos={};lista.forEach(d=>(grupos[d.grupo]=grupos[d.grupo]||[]).push(d));
       const uni=UNI[chave(m)];
-      h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s)</span>${mats[m].length>1&&!/extras|estudo de caso/i.test(m)?`<a class="uni" href="?doc=${encodeURIComponent('uni:'+m)}" title="Todos os PDFs desta matéria em um só texto, na ordem dos capítulos">Unificar PDFs</a>`:''}</summary>`;
+      h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s)</span>${mats[m].length>1&&!/extras|estudo de caso|tud[õo]es/i.test(m)?`<a class="uni" href="?doc=${encodeURIComponent('uni:'+m)}" title="Todos os PDFs desta matéria em um só texto, na ordem dos capítulos">Unificar PDFs</a>`:''}</summary>`;
       const resol=g=>/resolu/i.test(g)?1:0;
       Object.keys(grupos).sort((x,y)=>resol(x)-resol(y)||x.localeCompare(y,'pt',{numeric:true})).forEach(g=>{
         if(g)h+=`<div class="grupo">${esc(g.split(' / ').join(' › '))}</div>`;
