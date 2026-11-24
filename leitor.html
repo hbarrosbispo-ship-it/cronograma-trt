@@ -206,7 +206,7 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 </style>
 </head>
 <body>
-<nav class="sitenav"><span class="logo">Cronograma TRT</span><a href="index.html#cronograma">Cronograma</a><a href="leitor.html" class="on">Biblioteca</a><a href="index.html#desempenho">Desempenho e Estatísticas</a><a href="index.html#edital">Edital</a><a href="compilado/index.html">Compilado de Revisão</a></nav>
+<nav class="sitenav"><span class="logo">Cronograma TRT</span><a href="index.html#cronograma">Cronograma</a><a href="leitor.html" class="on">Biblioteca</a><a href="index.html#desempenho">Desempenho e Estatísticas</a><a href="index.html#edital">Edital</a><a href="compilado/index.html">Compilado de Revisão</a><a href="mapa/dpt.html">Mapa temático</a></nav>
 
 <!-- ========== BIBLIOTECA ========== -->
 <div id="lista" hidden>
@@ -932,6 +932,11 @@ addEventListener('beforeunload',guardarPos);
 function restaurarPosicao(params){
   const h=params.get('h');
   if(h!==null){const el=titulos()[+h];if(el){window.scrollTo(0,el.getBoundingClientRect().top+scrollY-altFixo());return}}
+  // ?pg=N&q=trecho: abre na página N do PDF, no bloco que contém o trecho (vem do Mapa temático)
+  const pg=params.get('pg');
+  if(pg){const bl=[...folha.querySelectorAll('[data-pg="'+pg+'"]')];const q=(params.get('q')||'').replace(/\s+/g,' ').trim().slice(0,40);
+    const norm=s=>s.replace(/\s+/g,' ');const el=(q&&bl.find(b=>norm(b.textContent).includes(q)))||bl[0];
+    if(el){window.scrollTo(0,el.getBoundingClientRect().top+scrollY-altFixo()-20);if(q&&el!==bl[0]||q){el.style.transition='background 1.5s';el.style.background='#fff3b0';setTimeout(()=>el.style.background='',2500)}return}}
   if(params.get('inicio'))return;
   const pos=LS.get('pos:'+slug);
   if(pos&&folha.children[pos.i]){const el=folha.children[pos.i];window.scrollTo(0,el.getBoundingClientRect().top+scrollY-altFixo()+(pos.off||0))}
