@@ -340,7 +340,7 @@ $('#topo').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 let atualAnt=null,raf=0;
 function atualizaPos(){
   cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{
-    const H=innerHeight,Y=Math.max(1,Math.ceil(document.documentElement.scrollHeight/H));
+    const H=innerHeight;if(!H)return;const Y=Math.max(1,Math.ceil(document.documentElement.scrollHeight/H));
     const X=Math.min(Y,Math.max(1,Math.ceil((scrollY+H)/H)));
     $('#pgn').innerHTML=`Pág. <b>${X}</b> de ${Y}`;
     // tópico atual = último cabeçalho que já passou do topo da tela
