@@ -868,46 +868,7 @@ addEventListener('resize',fixoAltura);
 // ---- salvar texto ----
 function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(salvar,500);montarSumario()}
 function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,.inc-badge').forEach(b=>b.remove());c.querySelectorAll('[data-fo]').forEach(b=>b.removeAttribute('data-fo'));return c.innerHTML}
-function salvar(){try{localStorage.setItem('doc:'+slug,htmlLimpo());$('#status').textContent='salvo neste navegador';
-  if(NUVEM()){localStorage.setItem('dt:'+slug,String(Date.now()));clearTimeout(nuvemTimer);nuvemTimer=setTimeout(nuvemEnviar,1500)}}catch(e){$('#status').textContent='não foi possível salvar'}}
-// ---- nuvem (só os tudões): o texto vai para o backend do cronograma (Apps Script, arquivo no Drive) e volta em qualquer navegador ----
-// dt:<slug> = hora da última edição neste navegador; ds:<slug> = hora da última versão já sincronizada com a nuvem.
-const WEBAPP_URL='https://script.google.com/macros/s/AKfycbwrbaghAE1EsQzcvOCsTLn-B6lYzT29bXtrA_hPVM5A0qMlxBl_dfJ4P-zFi6VjdXuVqA/exec';
-let nuvemTimer=null;
-const NUVEM=()=>/^tudao-/.test(slug||'');
-const chaveNuvem=()=>{try{return localStorage.getItem('cronoKey')||''}catch(e){return ''}};
-const lsNum=k=>{try{return +localStorage.getItem(k)||0}catch(e){return 0}};
-function nuvemEnviar(){
-  if(!NUVEM())return Promise.resolve();
-  const k=chaveNuvem();if(!k){$('#status').textContent='salvo neste navegador (sem chave da nuvem: abra o cronograma e informe a chave)';return Promise.resolve()}
-  const html=localStorage.getItem('doc:'+slug);if(html==null)return Promise.resolve();
-  const t=lsNum('dt:'+slug)||Date.now();
-  $('#status').textContent='enviando para a nuvem…';
-  return fetch(WEBAPP_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({ak:k,action:'saveDoc',slug,html,t})})
-    .then(r=>r.json()).then(j=>{
-      if(!j||!j.ok)throw new Error(j&&j.erro||'falhou');
-      try{localStorage.setItem('ds:'+slug,String(j.t||t))}catch(e){}
-      $('#status').textContent='salvo na nuvem'})
-    .catch(()=>{$('#status').textContent='salvo neste navegador (a nuvem falhou, tento de novo)';clearTimeout(nuvemTimer);nuvemTimer=setTimeout(nuvemEnviar,15000)});
-}
-async function nuvemEntrada(){
-  if(!NUVEM())return;const k=chaveNuvem();if(!k)return;
-  try{
-    const j=await fetch(WEBAPP_URL+'?action=doc&slug='+encodeURIComponent(slug)+'&ak='+encodeURIComponent(k)).then(r=>r.json());
-    if(!j||!j.ok)return;
-    const dt=lsNum('dt:'+slug),ds=lsNum('ds:'+slug),local=localStorage.getItem('doc:'+slug);
-    if(j.html!=null&&j.t>ds){
-      if(local!=null&&dt>ds){ // há edição aqui que a nuvem não tem: a daqui vale e a da nuvem fica guardada
-        try{localStorage.setItem('doc:'+slug+':nuvem',j.html);localStorage.setItem('dt:'+slug,String(Date.now()))}catch(e){}
-      }else{
-        try{localStorage.setItem('doc:'+slug,j.html);localStorage.setItem('ds:'+slug,String(j.t));localStorage.setItem('dt:'+slug,String(j.t))}catch(e){}
-        return}
-    }
-    if(local!=null&&(dt>ds||j.html==null))await nuvemEnviar();
-  }catch(e){}
-}
-addEventListener('beforeunload',()=>{if(NUVEM()&&lsNum('dt:'+slug)>lsNum('ds:'+slug)){const k=chaveNuvem(),html=localStorage.getItem('doc:'+slug);
-  if(k&&html!=null){try{navigator.sendBeacon(WEBAPP_URL,new Blob([JSON.stringify({ak:k,action:'saveDoc',slug,html,t:lsNum('dt:'+slug)})],{type:'text/plain;charset=utf-8'}))}catch(e){}}}});
+function salvar(){try{localStorage.setItem('doc:'+slug,htmlLimpo());$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
 folha.addEventListener('input',marcar);
 folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
 let UNI_L=null;
@@ -918,7 +879,7 @@ async function original(){
       return `<h2 class="unif" data-pg="${o+1}"><strong>${esc(d._ns)} · ${esc(d.titulo)}</strong></h2>`+ps[i].replace(/data-pg="(\d+)"/g,(m,n)=>`data-pg="${+n+o}"`)}).join('')}
   const r=await fetch('leitor/docs/'+slug+'.html',{cache:'no-cache'});if(!r.ok)throw 0;return r.text()}
 $('#mMais').querySelector('[data-a=restaurar]').onclick=async()=>{fechaMenus();if(!confirm('Voltar ao texto original e perder suas edições deste capítulo?'))return;
-  folha.innerHTML=semMarcas(await original());localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';if(NUVEM())salvar();montarSumario();marcarLeiSeca();atualizarIncidencia()};
+  folha.innerHTML=semMarcas(await original());localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';montarSumario();marcarLeiSeca();atualizarIncidencia()};
 $('#mMais').querySelector('[data-a=baixar]').onclick=()=>{fechaMenus();const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob(['<!doctype html><meta charset="utf-8"><body style="font-family:Arial;max-width:800px;margin:auto">'+htmlLimpo()],{type:'text/html'}));
   a.download=slug+'.html';a.click()};
@@ -1429,7 +1390,6 @@ async function editor(){
   $('#titulo').textContent=meta.titulo;$('#titulo').title=meta.titulo;$('#pgTotal').textContent=meta.paginas;
   await carregarDiff();
   try{CORTES=await fetch('leitor/docs/cortes.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null)}catch(e){CORTES=null}
-  await nuvemEntrada();
   const salvo=LS.raw('doc:'+slug);
   try{
     const orig=await original();
