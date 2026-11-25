@@ -503,6 +503,7 @@ function ligar(t,forcar){
   tool=(!forcar&&tool&&mesmo(tool,t))?null:t;
   document.body.classList.toggle('tool-on',!!tool);
   const on=k=>!!tool&&tool.k===k;
+  const cn=$('#cxN');if(cn)cn.classList.toggle('ativo',on('bd'));
   $('#btnMk').classList.toggle('on',on('hl'));$('#tBd').classList.toggle('on',on('bd'));$('#tUl').classList.toggle('on',on('ul'));
   $('#tSt').classList.toggle('on',on('st'));$('#tBor').classList.toggle('on',on('er'));
   document.querySelectorAll('#dots b,#mMk [data-t]').forEach(b=>b.classList.toggle('ativo',!!tool&&mesmo(tool,JSON.parse(b.dataset.t))));
@@ -585,6 +586,8 @@ document.addEventListener('keydown',e=>{
   const code=e.code||'';
   if(/^(Digit|Numpad)[0-9]$/.test(code)){e.preventDefault();ligar(ATALHO[code.slice(-1)],true);return}
   if(e.altKey&&!e.ctrlKey&&code==='KeyE'){e.preventDefault();ligar({k:'er'},true)}
+  // Ctrl+B e Ctrl+N: negrito ligado (como o marcador); aperte de novo para desligar
+  if(e.ctrlKey&&!e.altKey&&(code==='KeyB'||code==='KeyN')){e.preventDefault();ligar(ATALHO['3'],false)}
 });
 
 // ---- botão direito: escolher a ferramenta (Alt+1, Alt+2...) ----
@@ -592,7 +595,7 @@ const FONTES=['Arial','Calibri','Times New Roman','Georgia','Verdana','Courier N
 const itensCtx=()=>[ATALHO['1'],ATALHO['2'],ATALHO['5']].map((t,i)=>itemFerr(t,t.n,'Alt+'+['1','2','5'][i])).join('')+itemFerr({k:'er'},'Borracha','Alt+E');
 $('#mCtx').innerHTML=`<div class="mini">
  <div class="mrow"><button data-x="fonte" id="cxFonte" title="Fonte">Arial ▾</button><button data-x="tam" id="cxTam" title="Tamanho da fonte">11 ▾</button><button data-x="mais" title="Aumentar a fonte">A<sup>▲</sup></button><button data-x="menos" title="Diminuir a fonte">A<sub>▼</sub></button><button data-x="pincel" title="Pincel de formatação: copia o formato do trecho e aplica no próximo que você selecionar">🖌</button></div>
- <div class="mrow"><button data-x="n" title="Negrito"><b>N</b></button><button data-x="i" title="Itálico"><i>I</i></button><button data-x="s" title="Sublinhado"><u>S</u></button>
+ <div class="mrow"><button data-x="n" id="cxN" title="Negrito (Ctrl+B ou Ctrl+N): liga e depois é só selecionar o texto"><b>N</b></button><button data-x="i" title="Itálico"><i>I</i></button><button data-x="s" title="Sublinhado"><u>S</u></button>
   <span class="split"><button data-x="hl" class="main" title="Marca-texto"><span class="aa-hl">Aa</span></button><button data-x="hlArr" class="arr" title="Escolher a cor do marca-texto">▾</button></span>
   <button data-x="limpa" title="Limpar o grifo e o sublinhado do trecho"><span class="aa-hl">Aa</span>⌫</button>
   <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
@@ -620,7 +623,7 @@ const acaoCtx={
   hlArr:b=>{const r=b.getBoundingClientRect();fechaMenus();menuEm('mHl3',r.left,r.bottom+4)},
   corArr:b=>{const r=b.getBoundingClientRect();fechaMenus();menuEm('mTxt',r.left,r.bottom+4)},
   mais:()=>{fechaMenus();mudarTamanho(1)},menos:()=>{fechaMenus();mudarTamanho(-1)},
-  n:()=>{fechaMenus();exec('bold')},i:()=>{fechaMenus();exec('italic')},s:()=>{fechaMenus();exec('underline')},
+  n:()=>{fechaMenus();ligar(ATALHO['3'],false)},i:()=>{fechaMenus();exec('italic')},s:()=>{fechaMenus();exec('underline')},
   hl:()=>{fechaMenus();ligar({k:'hl',c:corMk},true)},limpa:()=>{fechaMenus();$('#bLimpaGrifo').click()},
   cor:()=>{fechaMenus();exec('foreColor',corTx)},ul:()=>{fechaMenus();exec('insertUnorderedList')},ol:()=>{fechaMenus();exec('insertOrderedList')},
   pincel:()=>{fechaMenus();pincel=pegaFormato();document.body.classList.toggle('pincel-on',!!pincel)}};
