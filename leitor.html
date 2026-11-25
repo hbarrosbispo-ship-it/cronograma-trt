@@ -10,8 +10,8 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Arial,Helvetica,sans-serif;padding-bottom:40px}
 button,select,input{font:inherit;color:var(--ink)}
 a{color:var(--g)}
-.sitenav{background:#1F4E78;display:flex;gap:4px;align-items:center;padding:0 16px;height:40px;position:relative;z-index:60;overflow-x:auto;white-space:nowrap}
-.sitenav a{color:#dbe4f5;text-decoration:none;font-size:13.5px;font-weight:bold;padding:9px 14px;border-radius:6px}
+.sitenav{background:#1F4E78;display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:0 16px;min-height:40px;position:relative;z-index:60}
+.sitenav a{color:#dbe4f5;text-decoration:none;font-size:13.5px;font-weight:bold;padding:9px 11px;border-radius:6px}
 .sitenav a:hover{background:rgba(255,255,255,.12)}.sitenav a.on{background:rgba(255,255,255,.2);color:#fff}
 .sitenav .logo{color:#fff;font-weight:bold;margin-right:10px;letter-spacing:.4px;font-size:13.5px}
 
@@ -35,7 +35,8 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 .linha a.cap{flex:1;display:flex;gap:10px;align-items:center;padding:10px 16px;color:var(--ink);text-decoration:none}
 .linha a.cap:hover{background:#f5f7fa}
 .linha .t{flex:1}
-.linha .meta{color:var(--mute);font-size:12px;white-space:nowrap}
+.linha .meta{color:var(--mute);font-size:12px;white-space:nowrap;flex:none;width:62px;text-align:right;padding-right:16px}
+.linha .topc{flex:none;width:112px;text-align:right}
 .linha .tag{background:#e8f0fe;color:var(--g);border-radius:10px;padding:2px 9px;font-size:11.5px;font-weight:bold}
 .linha a.ini{padding:10px 14px;color:var(--mute);text-decoration:none;font-size:12px}
 .linha a.ini:hover{color:var(--g)}
@@ -43,7 +44,7 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 details.mat>summary a.uni{margin-left:12px;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:999px;font-size:12px;font-weight:bold;padding:3px 12px;text-decoration:none}
 details.mat>summary a.uni:hover{background:rgba(255,255,255,.32)}
 .allbody{padding:4px 16px 14px;column-width:430px;column-gap:30px}
-.linha button.top{border:1px solid var(--line);background:#fff;color:var(--mute);border-radius:999px;font-size:12px;padding:3px 11px;margin-right:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.linha button.top{border:1px solid var(--line);background:#fff;color:var(--mute);border-radius:999px;font-size:12px;padding:3px 11px;margin-right:10px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .linha button.top:hover{border-color:var(--g);color:var(--g)}
 .item>.sum{display:none;padding:2px 18px 12px 34px;background:#fafbfd;border-top:1px dashed #e3e7ee;column-width:360px;column-gap:28px;margin:0}
 .item.open>.sum{display:block}
@@ -206,7 +207,7 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 </style>
 </head>
 <body>
-<nav class="sitenav"><span class="logo">Cronograma TRT</span><a href="index.html#cronograma">Cronograma</a><a href="leitor.html" class="on">Biblioteca</a><a href="index.html#desempenho">Desempenho e Estatísticas</a><a href="index.html#edital">Edital</a><a href="compilado/index.html">Compilado de Revisão</a><a href="mapa/index.html">Mapa temático</a></nav>
+<nav class="sitenav"><span class="logo">Cronograma TRT</span><a href="index.html#cronograma">Cronograma</a><a href="leitor.html" class="on">Biblioteca</a><a href="index.html#desempenho">Desempenho e Estatísticas</a><a href="index.html#edital">Edital</a><a href="compilado/index.html">Compilado de Revisão</a><a href="mapa/index.html">Mapa</a></nav>
 
 <!-- ========== BIBLIOTECA ========== -->
 <div id="lista" hidden>
@@ -433,7 +434,7 @@ async function biblioteca(){
       const lista=mats[m].filter(d=>!t||alvo(d).includes(t));if(!lista.length)return;
       const grupos={};lista.forEach(d=>(grupos[d.grupo]=grupos[d.grupo]||[]).push(d));
       const uni=UNI[chave(m)];
-      h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s)</span>${mats[m].length>1&&!/extras|estudo de caso|tud[õo]es/i.test(m)?`<a class="uni" href="?doc=${encodeURIComponent('uni:'+m)}" title="Todos os PDFs desta matéria em um só texto, na ordem dos capítulos">Unificar PDFs</a>`:''}</summary>`;
+      h+=`<details class="mat" ${t?'open':''}><summary><span class="ic">${ICONE[m]||'📘'}</span>${esc(m)}<span class="n">${lista.length} capítulo(s) · ${lista.reduce((z,d)=>z+(+d.paginas||0),0)} pág.</span>${mats[m].length>1&&!/extras|estudo de caso|tud[õo]es/i.test(m)?`<a class="uni" href="?doc=${encodeURIComponent('uni:'+m)}" title="Todos os PDFs desta matéria em um só texto, na ordem dos capítulos">Unificar PDFs</a>`:''}</summary>`;
       const resol=g=>/resolu/i.test(g)?1:0;
       Object.keys(grupos).sort((x,y)=>resol(x)-resol(y)||x.localeCompare(y,'pt',{numeric:true})).forEach(g=>{
         if(g)h+=`<div class="grupo">${esc(g.split(' / ').join(' › '))}</div>`;
@@ -442,7 +443,7 @@ async function biblioteca(){
           const tituloBate=!t||semAcento(d.titulo+' '+d.codigo).includes(t);
           const tops=d.sumario.map((x,i)=>({x,i})).filter(o=>tituloBate||semAcento(o.x.t).includes(t));
           const aberto=!!t&&!tituloBate||abertos.has(d.slug);
-          h+=`<div class="item${aberto?' open':''}" data-s="${d.slug}"><div class="linha"><a class="cap" href="?doc=${d.slug}"><span class="num">${esc(d._ns)}</span><span class="t">${esc(d.titulo)}</span><span class="meta">${d.paginas} pág.</span></a>${d.sumario.length?`<button class="top" type="button" data-top="${d.slug}">${d.sumario.length} tópicos ▾</button>`:''}</div>`+
+          h+=`<div class="item${aberto?' open':''}" data-s="${d.slug}"><div class="linha"><a class="cap" href="?doc=${d.slug}"><span class="num">${esc(d._ns)}</span><span class="t">${esc(d.titulo)}</span></a><span class="topc">${d.sumario.length?`<button class="top" type="button" data-top="${d.slug}">${d.sumario.length} tópicos ▾</button>`:''}</span><span class="meta">${d.paginas} pág.</span></div>`+
             (d.sumario.length?`<ul class="sum">${tops.map(o=>`<li class="${o.x.n}"><a href="?doc=${d.slug}&h=${o.i}">${esc(o.x.t)}</a> <small>pág. ${o.x.pg}</small></li>`).join('')}</ul>`:'')+`</div>`;
         });
       });
