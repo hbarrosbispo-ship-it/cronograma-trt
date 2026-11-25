@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mapa · Direito Processual do Trabalho</title>
 <style>
-:root{--azul:#305496;--azul2:#1F4E78;--fundo:#eef2f8;--borda:#d5ddeb;--texto:#1d2433;--suave:#5b6577;
- --f1:#f2d500;--f2:#3cb44b;--f3:#5fc4f0;--f4:#f08bc0;--f5:#e23b3b}
+:root{--azul:#305496;--azul2:#1F4E78;--fundo:#eef2f8;--borda:#d5ddeb;--texto:#1d2433;--suave:#5b6577;}
 *{box-sizing:border-box}
 body{margin:0;background:var(--fundo);color:var(--texto);font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5}
 a{color:var(--azul)}
@@ -114,8 +113,7 @@ details.it>summary:hover{background:#f6f8fc}
 .tag.jur{color:#7a3d00;border-color:#efc9a2;background:#fff5eb}
 .tag.dout{color:#27468a;border-color:#b6c8ec;background:#eef3fc}
 .tag.sec{color:var(--suave);border-color:var(--borda)}
-.inc{display:inline-flex;gap:1px;vertical-align:middle}
-.inc i{width:5px;height:12px;border-radius:1px;display:inline-block}
+span.cp{cursor:help}
 .bib{text-decoration:none;font-size:13px;opacity:.7}.bib:hover{opacity:1}
 .prev{color:var(--suave);font-size:13.5px;flex:1 1 300px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 details.it[open] .prev{display:none}
@@ -149,6 +147,9 @@ details.it[open] .prev{display:none}
  .rot{white-space:normal}
  .slista{columns:1}
 }
+nav.sum,#sumario,.card{border:3px solid var(--azul);border-radius:4px;box-shadow:0 0 0 4px rgba(48,84,150,.18)}
+#sumario,.card{margin-bottom:22px}
+@media print{nav.sum,#sumario,.card{box-shadow:none}}
 </style>
 </head>
 <body>
@@ -172,7 +173,7 @@ details.it[open] .prev{display:none}
   <button class="btn" id="abrir">Abrir tudo</button><button class="btn" id="fechar">Fechar tudo</button>
   <span class="cont" id="cont"></span>
  </div>
- <div class="leg">Incidência no PDF: <span><i style="background:var(--f1);width:8px;height:8px;display:inline-block"></i>1×</span><span><i style="background:var(--f2);width:8px;height:8px;display:inline-block"></i>2×</span><span><i style="background:var(--f3);width:8px;height:8px;display:inline-block"></i>3×</span><span><i style="background:var(--f4);width:8px;height:8px;display:inline-block"></i>4×</span><span><i style="background:var(--f5);width:8px;height:8px;display:inline-block"></i>5+</span><span><b class="cp">N×</b> vezes cobrado no compilado</span></div>
+ <div class="leg"><span><b class="cp">N×</b> vezes já cobrado</span></div>
 </header>
 <div class="wrap" id="wrap">
  <nav class="sum" id="sum"></nav>
@@ -184,7 +185,6 @@ const D=JSON.parse(document.getElementById('dados').textContent);
 const $=s=>document.querySelector(s);
 const SA=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const CORES=['','var(--f1)','var(--f2)','var(--f3)','var(--f4)','var(--f5)'];
 const NOS=D.arvore,NODE={},ITEM={},POR={};
 const pilha=[];
 NOS.forEach(n=>{NODE[n.id]=n;while(pilha.length&&pilha[pilha.length-1].l>=n.l)pilha.pop();n.pai=pilha.length?pilha[pilha.length-1].id:null;n.fil=[];if(n.pai)NODE[n.pai].fil.push(n.id);pilha.push(n);if(n.f)POR[n.id]=[]});
@@ -214,10 +214,13 @@ function preview(it){
 }
 function linkLeitor(slug,pg,q){return `../leitor.html?doc=${encodeURIComponent(slug)}${pg?'&pg='+pg:''}${q?'&q='+encodeURIComponent(q):''}`}
 function incHtml(it){
-  let h='';
-  if(it.tr)h+=`<span class="inc" title="Incidência marcada no PDF: ${it.tr}${it.tr>=5?'+':''}×"><i style="background:${CORES[it.tr]}"></i></span>`;
-  if(it.cp)h+=`<a class="cp" href="../${it.cp[1]}" target="_blank" rel="noopener" title="Vezes que caiu nos filtros já resolvidos (compilado)" onclick="event.stopPropagation()">${it.cp[0]}×</a>`;
-  return h;
+  // um número só: o maior entre a marcação do PDF (tr, 5 = cinco ou mais) e o compilado (cp)
+  const tr=it.tr||0,cp=it.cp?+it.cp[0]:0,n=Math.max(tr,cp);
+  if(!n)return '';
+  const txt=n+(tr===5&&cp<=5?'+':'')+'×';
+  const dica=[tr?`marcação do PDF: ${tr}${tr>=5?'+':''}×`:'',cp?`compilado: ${cp}×`:''].filter(Boolean).join(' · ');
+  return it.cp?`<a class="cp" href="../${it.cp[1]}" target="_blank" rel="noopener" title="Vezes já cobrado (${dica}). Clique para abrir no compilado" onclick="event.stopPropagation()">${txt}</a>`
+    :`<span class="cp" title="Vezes já cobrado (${dica})">${txt}</span>`;
 }
 function itemHtml(it,princ,leaf){
   const sec=!princ?`<span class="tag sec" title="Este item está principalmente em: ${esc(NODE[it.s[0]].n+' '+NODE[it.s[0]].t)}">também aqui</span>`:'';
