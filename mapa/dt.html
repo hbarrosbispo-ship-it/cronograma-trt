@@ -417,7 +417,7 @@ document.body.insertAdjacentHTML('beforeend',`<div class="menu" id="mCtx"><div c
   <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
   <button data-x="ul" title="Lista com marcadores">•≡</button><button data-x="ol" title="Lista numerada">1≡</button></div></div><hr>
  ${itensCtx}<hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr>
- <button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button><hr data-bib><button data-x="bib" data-bib><span class="sw">📖</span>Abrir na Biblioteca</button></div>
+ <button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button><button data-x="paste"><span class="sw">📋</span>Colar<small>Ctrl+V</small></button><hr data-bib><button data-x="bib" data-bib><span class="sw">📖</span>Abrir na Biblioteca</button></div>
 <div class="menu" id="mFonte">${FONTES.map(f=>`<button data-f="${f}" style="font-family:'${f}'">${f}</button>`).join('')}</div>
 <div class="menu" id="mTam">${[8,9,10,11,12,14,16,18,20,24,28,32,36,48].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div>
 <div class="menu" id="mHl3">${[ATALHO['1'],ATALHO['2'],ATALHO['5']].map(t=>itemFerr(t,t.n,'')).join('')}</div>
@@ -564,6 +564,17 @@ function aplicarPincel(){
   const est=`font-weight:${f.w};font-style:${f.i};color:${f.c};font-size:${f.fs}pt;font-family:${f.ff};text-decoration-line:${f.td==='none'?'none':f.td}${f.bg?`;background-color:${f.bg}`:''}`;
   substituirSelecao(c=>c.querySelectorAll('[style]').forEach(e=>{['font-weight','font-style','color','font-size','font-family','text-decoration','text-decoration-line','background-color','background'].forEach(k=>e.style.removeProperty(k))}),est)}
 
+// Colar do botão direito: o navegador pede permissão na primeira vez para ler a área de transferência
+let ctxSel=null;
+function guardaSel(){const s=getSelection();ctxSel=s.rangeCount?s.getRangeAt(0).cloneRange():null}
+async function colar(alvo){
+  const r=ctxSel;let t='';
+  try{t=await navigator.clipboard.readText()}
+  catch(e){alert('O navegador não liberou a área de transferência. Permita o acesso no cadeado ao lado do endereço ou use Ctrl+V.');return false}
+  if(!t||!r||!alvo.contains(r.commonAncestorContainer))return false;
+  alvo.focus({preventScroll:true});const s=getSelection();s.removeAllRanges();s.addRange(r);
+  document.execCommand('insertText',false,t);return true;
+}
 // ---- menu do botão direito ----
 const acaoCtx={
   fonte:b=>{const r=b.getBoundingClientRect();menuEm('mFonte',r.left,r.bottom+4)},
@@ -577,11 +588,12 @@ const acaoCtx={
   pincel:()=>{fechaMenus();pincel=pegaFormato();document.body.classList.toggle('pincel-on',!!pincel)},
   off:()=>{if(tool)ligar(tool,false);fechaMenus()},
   bib:()=>{fechaMenus();abreBib(edAtivo.closest('details.it').dataset.id)},
+  paste:()=>{fechaMenus();colar(edAtivo)},
   copy:()=>{document.execCommand('copy');fechaMenus()},cut:()=>{document.execCommand('cut');fechaMenus()}};
 $('#mCtx').querySelectorAll('[data-x]').forEach(b=>{b.onclick=()=>acaoCtx[b.dataset.x](b)});
 main_.addEventListener('contextmenu',e=>{
   const ed=edDe(e.target);if(!ed)return;
-  e.preventDefault();edAtivo=ed;
+  e.preventDefault();edAtivo=ed;guardaSel();
   const f=ITEM[ed.closest('details.it').dataset.id].f;
   document.querySelectorAll('#mCtx [data-bib]').forEach(x=>x.style.display=f&&f[0]?'':'none');
   $('#cxFonte').textContent=fonteAtual()+' ▾';$('#cxTam').textContent=tamanhoAtual()+' ▾';$('#cxBarTxt').style.background=corTx;
@@ -604,6 +616,7 @@ document.addEventListener('keydown',e=>{
 
 // ===== menu do botão direito no título do item: renomear, mover, excluir; Ctrl+Z / Ctrl+Y para essas mudanças =====
 document.body.insertAdjacentHTML('beforeend',`<div class="menu" id="mItem">
+ <button data-a="cop"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button>
  <button data-a="bib"><span class="sw">📖</span>Abrir na Biblioteca</button>
  <button data-a="ren"><span class="sw">✎</span>Renomear</button>
  <button data-a="mov"><span class="sw">⇄</span>Mover para outro tópico…</button><hr>
@@ -653,7 +666,8 @@ function dialogo(titulo,{valor='',lista=null,ok='OK'}){
 main_.addEventListener('contextmenu',e=>{
   const sm=e.target.closest&&e.target.closest('details.it>summary');if(!sm)return;
   const d=sm.parentElement;e.preventDefault();e.stopPropagation();
-  alvoItem={id:d.dataset.id,leaf:d.dataset.sub};
+  const s=getSelection();
+  alvoItem={id:d.dataset.id,leaf:d.dataset.sub,sel:!s.isCollapsed&&sm.contains(s.anchorNode)?s.toString():''};
   const it=ITEM[alvoItem.id];
   $('#mItem [data-a=delTodos]').style.display=it.s.length>1?'':'none';
   $('#mItem [data-a=bib]').style.display=it.f&&it.f[0]?'':'none';
@@ -662,7 +676,8 @@ main_.addEventListener('contextmenu',e=>{
 $('#mItem').querySelectorAll('[data-a]').forEach(b=>b.onclick=async()=>{
   fechaMenus();if(!alvoItem)return;
   const {id,leaf}=alvoItem,it=ITEM[id],o=Object.assign({},OV[id]||{});
-  if(b.dataset.a==='bib'){abreBib(id)}
+  if(b.dataset.a==='cop'){try{await navigator.clipboard.writeText(alvoItem.sel||it.r)}catch(e){alert('Não foi possível copiar. Selecione o texto e use Ctrl+C.')}}
+  else if(b.dataset.a==='bib'){abreBib(id)}
   else if(b.dataset.a==='ren'){
     const n=await dialogo('Novo nome do item',{valor:it.r});
     if(n&&n!==it.r){o.r=n;mudaItem(id,o)}

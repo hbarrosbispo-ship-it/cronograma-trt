@@ -607,7 +607,7 @@ $('#mCtx').innerHTML=`<div class="mini">
   <button data-x="limpa" title="Limpar o grifo e o sublinhado do trecho"><span class="aa-hl">Aa</span>⌫</button>
   <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
   <button data-x="ul" title="Lista com marcadores">•≡</button><button data-x="ol" title="Lista numerada">1≡</button></div></div><hr>`
- +itensCtx()+'<hr><button data-x="quadro" title="Transforma o parágrafo em quadro de destaque (ou desfaz)"><span class="sw">▭</span>Quadro</button><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#7ED957,#5271FF,#FFD966,#FF9F43,#FF3131)"></span>Barra de incidência ▸</button><hr id="cxTabHr" hidden><button data-x="deltab" id="cxDelTab" hidden title="Apaga a tabela inteira clicada"><span class="sw">🗑</span>Excluir tabela</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
+ +itensCtx()+'<hr><button data-x="quadro" title="Transforma o parágrafo em quadro de destaque (ou desfaz)"><span class="sw">▭</span>Quadro</button><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#7ED957,#5271FF,#FFD966,#FF9F43,#FF3131)"></span>Barra de incidência ▸</button><hr id="cxTabHr" hidden><button data-x="deltab" id="cxDelTab" hidden title="Apaga a tabela inteira clicada"><span class="sw">🗑</span>Excluir tabela</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button><button data-x="paste"><span class="sw">📋</span>Colar<small>Ctrl+V</small></button>';
 $('#mCtx').insertAdjacentHTML('afterend',`<div class="menu" id="mFonte">${FONTES.map(f=>`<button data-f="${f}" style="font-family:'${f}'">${f}</button>`).join('')}</div><div class="menu" id="mTam">${[8,9,10,11,12,14,16,18,20,24,28,32,36,48].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div><div class="menu" id="mHl3">${[ATALHO['1'],ATALHO['2'],ATALHO['5']].map(t=>itemFerr(t,t.n,'')).join('')}</div>`);
 ['mFonte','mTam','mHl3'].forEach(id=>$('#'+id).onmousedown=e=>e.preventDefault());
 ligaBotoes($('#mHl3'));
@@ -642,7 +642,19 @@ $('#mCtx').querySelector('[data-x=quadro]').onclick=()=>{fechaMenus();$('#caixa'
 $('#mCtx').querySelector('[data-x=off]').onclick=()=>{if(tool)ligar(tool,false);fechaMenus()};
 $('#mCtx').querySelector('[data-x=copy]').onclick=()=>{document.execCommand('copy');fechaMenus()};
 $('#mCtx').querySelector('[data-x=cut]').onclick=()=>{document.execCommand('cut');fechaMenus();marcar()};
-folha.addEventListener('contextmenu',e=>{e.preventDefault();ctxBloco=blocoDe(e.target);ctxTab=(e.target.closest&&e.target.closest('table'))||null;if(ctxTab&&!folha.contains(ctxTab))ctxTab=null;$('#cxDelTab').hidden=$('#cxTabHr').hidden=!ctxTab;$('#cxFonte').textContent=fonteAtual()+' ▾';$('#cxTam').textContent=tamanhoAtual()+' ▾';$('#cxBarTxt').style.background=corTx;menuEm('mCtx',e.clientX,e.clientY)});
+// Colar do botão direito: o navegador pede permissão na primeira vez para ler a área de transferência
+let ctxSel=null;
+function guardaSel(){const s=getSelection();ctxSel=s.rangeCount?s.getRangeAt(0).cloneRange():null}
+async function colar(alvo){
+  const r=ctxSel;let t='';
+  try{t=await navigator.clipboard.readText()}
+  catch(e){alert('O navegador não liberou a área de transferência. Permita o acesso no cadeado ao lado do endereço ou use Ctrl+V.');return false}
+  if(!t||!r||!alvo.contains(r.commonAncestorContainer))return false;
+  alvo.focus({preventScroll:true});const s=getSelection();s.removeAllRanges();s.addRange(r);
+  document.execCommand('insertText',false,t);return true;
+}
+$('#mCtx').querySelector('[data-x=paste]').onclick=async()=>{fechaMenus();if(await colar(folha))marcar()};
+folha.addEventListener('contextmenu',e=>{e.preventDefault();guardaSel();ctxBloco=blocoDe(e.target);ctxTab=(e.target.closest&&e.target.closest('table'))||null;if(ctxTab&&!folha.contains(ctxTab))ctxTab=null;$('#cxDelTab').hidden=$('#cxTabHr').hidden=!ctxTab;$('#cxFonte').textContent=fonteAtual()+' ▾';$('#cxTam').textContent=tamanhoAtual()+' ▾';$('#cxBarTxt').style.background=corTx;menuEm('mCtx',e.clientX,e.clientY)});
 // ---- linha de incidência posta à mão (conta como incidência do compilado) (ao lado esquerdo do artigo) ----
 let ctxBloco=null;let ctxTab=null;
 $('#cxDelTab').onclick=()=>{const t=ctxTab;ctxTab=null;fechaMenus();if(!t)return;t.remove();marcar()};
