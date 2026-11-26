@@ -75,18 +75,6 @@ body.sem-grifo-bib .corpo u{text-decoration:none}
 .menu .mini .split .main{flex-direction:column;gap:0;align-items:center;padding:2px 6px}
 .menu .mini .split .arr{padding:4px 3px;font-size:10px;min-width:0}
 .menu .mini .bar{display:block;width:16px;height:3px;background:#d90000;border-radius:1px}
-/* caixa do botão direito compacta */
-.menu#mCtx,.menu#mHl3,.menu#mItem,.menu#mFonte,.menu#mTam,.menu#mTxt{padding:4px;min-width:0}
-.menu#mCtx button,.menu#mHl3 button,.menu#mItem button,.menu#mFonte button,.menu#mTam button,.menu#mTxt button{padding:3px 8px;font-size:12.5px;gap:7px;line-height:1.35}
-.menu#mCtx button .sw,.menu#mHl3 button .sw{width:13px;height:13px;font-size:10px;line-height:13px}
-.menu#mCtx hr,.menu#mItem hr{margin:2px 0}
-.menu#mCtx .mini{padding:0}
-.menu#mCtx .mini .mrow{padding:0;gap:1px}
-.menu#mCtx .mini button{padding:2px 5px;min-width:24px;height:25px;font-size:12.5px;gap:1px}
-.menu#mCtx .mini .split .main{padding:1px 4px}
-.menu#mCtx .mini .split .arr{padding:2px;font-size:9px;min-width:0}
-.menu#mCtx .par{display:flex;gap:2px}
-.menu#mCtx .par button{justify-content:center}
 main{min-width:0}
 
 #sumario{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:12px 16px 14px;margin-bottom:22px}
@@ -121,6 +109,7 @@ details.it>summary::-webkit-details-marker{display:none}
 details.it[open]>summary .seta::before{content:'▾'}
 .seta:hover{background:#dfe8f7}
 details.it[open]>summary{cursor:default}
+.rot,details.it>summary .prev{cursor:text;user-select:text}
 details.it>summary:hover{background:#f6f8fc}
 .rot{font-weight:bold;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .tag{font-size:11px;border-radius:4px;padding:0 5px;border:1px solid;white-space:nowrap}
@@ -129,7 +118,6 @@ details.it>summary:hover{background:#f6f8fc}
 .tag.dout{color:#27468a;border-color:#b6c8ec;background:#eef3fc}
 .tag.sec{color:var(--suave);border-color:var(--borda)}
 span.cp{cursor:help}
-.bib{text-decoration:none;font-size:13px;opacity:.7}.bib:hover{opacity:1}
 .prev{color:var(--suave);font-size:13.5px;flex:1 1 300px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 details.it[open] .prev{display:none}
 .corpo{padding:6px 8px 14px 22px;font-size:15.5px;line-height:1.8}
@@ -228,6 +216,8 @@ function preview(it){
   return t.slice(0,200);
 }
 function linkLeitor(slug,pg,q){return `../leitor.html?doc=${encodeURIComponent(slug)}${pg?'&pg='+pg:''}${q?'&q='+encodeURIComponent(q):''}`}
+// abre a Biblioteca na página do item (opção do botão direito)
+function abreBib(id){const f=ITEM[id]&&ITEM[id].f;if(f&&f[0])window.open(linkLeitor(f[0],f[1],f[2]),'_blank','noopener')}
 function incHtml(it){
   // um número só: o maior entre a marcação do PDF (tr, 5 = cinco ou mais) e o compilado (cp)
   const tr=it.tr||0,cp=it.cp?+it.cp[0]:0,n=Math.max(tr,cp);
@@ -239,8 +229,7 @@ function incHtml(it){
 }
 function itemHtml(it,princ,leaf){
   const sec=!princ?`<span class="tag sec" title="Este item está principalmente em: ${esc(NODE[it.s[0]].n+' '+NODE[it.s[0]].t)}">também aqui</span>`:'';
-  const bib=it.f&&it.f[0]?`<a class="bib" href="${linkLeitor(it.f[0],it.f[1],it.f[2])}" target="_blank" rel="noopener" title="Abrir na Biblioteca, na página deste item" onclick="event.stopPropagation()">📖</a>`:'';
-  return `<details class="it" data-id="${esc(it.id)}" data-sub="${leaf}" data-p="${princ?1:0}"><summary><i class="seta" title="Abrir ou recolher o texto"></i><span class="tag ${it.k}">${it.k==='lei'?'Lei':it.k==='dout'?'Doutrina':'Jurisp.'}</span><span class="rot">${esc(it.r)}</span>${incHtml(it)}${bib}${sec}<span class="prev">${esc(preview(it))}</span></summary></details>`;
+  return `<details class="it" data-id="${esc(it.id)}" data-sub="${leaf}" data-p="${princ?1:0}"><summary><i class="seta" title="Abrir ou recolher o texto"></i><span class="tag ${it.k}">${it.k==='lei'?'Lei':it.k==='dout'?'Doutrina':'Jurisp.'}</span><span class="rot">${esc(it.r)}</span>${incHtml(it)}${sec}<span class="prev">${esc(preview(it))}</span></summary></details>`;
 }
 function corpoInterno(it){
   const e=ED[it.id]||{};
@@ -299,7 +288,10 @@ main_.addEventListener('toggle',e=>{
 // item aberto só recolhe pela setinha: clicar no título não esconde o texto
 main_.addEventListener('click',e=>{
   const sm=e.target.closest&&e.target.closest('details.it>summary');
-  if(sm&&sm.parentElement.open&&!e.target.closest('.seta,a'))e.preventDefault();
+  if(!sm||e.target.closest('.seta,a'))return;
+  // com texto selecionado no título, o clique que encerra a seleção também não abre o item
+  const s=getSelection(),selecionou=!s.isCollapsed&&sm.contains(s.anchorNode);
+  if(sm.parentElement.open||selecionou)e.preventDefault();
 });
 // edição local (só neste navegador; a biblioteca não muda)
 let tsave;
@@ -425,7 +417,7 @@ document.body.insertAdjacentHTML('beforeend',`<div class="menu" id="mCtx"><div c
   <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
   <button data-x="ul" title="Lista com marcadores">•≡</button><button data-x="ol" title="Lista numerada">1≡</button></div></div><hr>
  ${itensCtx}<hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr>
- <div class="par"><button data-x="copy" title="Copiar (Ctrl+C)"><span class="sw">⧉</span>Copiar</button><button data-x="cut" title="Recortar (Ctrl+X)"><span class="sw">✂</span>Recortar</button></div></div>
+ <button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button><hr data-bib><button data-x="bib" data-bib><span class="sw">📖</span>Abrir na Biblioteca</button></div>
 <div class="menu" id="mFonte">${FONTES.map(f=>`<button data-f="${f}" style="font-family:'${f}'">${f}</button>`).join('')}</div>
 <div class="menu" id="mTam">${[8,9,10,11,12,14,16,18,20,24,28,32,36,48].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div>
 <div class="menu" id="mHl3">${[ATALHO['1'],ATALHO['2'],ATALHO['5']].map(t=>itemFerr(t,t.n,'')).join('')}</div>
@@ -584,11 +576,14 @@ const acaoCtx={
   cor:()=>{fechaMenus();exec('foreColor',corTx)},ul:()=>{fechaMenus();exec('insertUnorderedList')},ol:()=>{fechaMenus();exec('insertOrderedList')},
   pincel:()=>{fechaMenus();pincel=pegaFormato();document.body.classList.toggle('pincel-on',!!pincel)},
   off:()=>{if(tool)ligar(tool,false);fechaMenus()},
+  bib:()=>{fechaMenus();abreBib(edAtivo.closest('details.it').dataset.id)},
   copy:()=>{document.execCommand('copy');fechaMenus()},cut:()=>{document.execCommand('cut');fechaMenus()}};
 $('#mCtx').querySelectorAll('[data-x]').forEach(b=>{b.onclick=()=>acaoCtx[b.dataset.x](b)});
 main_.addEventListener('contextmenu',e=>{
   const ed=edDe(e.target);if(!ed)return;
   e.preventDefault();edAtivo=ed;
+  const f=ITEM[ed.closest('details.it').dataset.id].f;
+  document.querySelectorAll('#mCtx [data-bib]').forEach(x=>x.style.display=f&&f[0]?'':'none');
   $('#cxFonte').textContent=fonteAtual()+' ▾';$('#cxTam').textContent=tamanhoAtual()+' ▾';$('#cxBarTxt').style.background=corTx;
   menuEm('mCtx',e.clientX,e.clientY);
 });
@@ -609,6 +604,7 @@ document.addEventListener('keydown',e=>{
 
 // ===== menu do botão direito no título do item: renomear, mover, excluir; Ctrl+Z / Ctrl+Y para essas mudanças =====
 document.body.insertAdjacentHTML('beforeend',`<div class="menu" id="mItem">
+ <button data-a="bib"><span class="sw">📖</span>Abrir na Biblioteca</button>
  <button data-a="ren"><span class="sw">✎</span>Renomear</button>
  <button data-a="mov"><span class="sw">⇄</span>Mover para outro tópico…</button><hr>
  <button data-a="del" class="perigo"><span class="sw">🗑</span>Excluir deste tópico</button>
@@ -660,12 +656,14 @@ main_.addEventListener('contextmenu',e=>{
   alvoItem={id:d.dataset.id,leaf:d.dataset.sub};
   const it=ITEM[alvoItem.id];
   $('#mItem [data-a=delTodos]').style.display=it.s.length>1?'':'none';
+  $('#mItem [data-a=bib]').style.display=it.f&&it.f[0]?'':'none';
   menuEm('mItem',e.clientX,e.clientY);
 });
 $('#mItem').querySelectorAll('[data-a]').forEach(b=>b.onclick=async()=>{
   fechaMenus();if(!alvoItem)return;
   const {id,leaf}=alvoItem,it=ITEM[id],o=Object.assign({},OV[id]||{});
-  if(b.dataset.a==='ren'){
+  if(b.dataset.a==='bib'){abreBib(id)}
+  else if(b.dataset.a==='ren'){
     const n=await dialogo('Novo nome do item',{valor:it.r});
     if(n&&n!==it.r){o.r=n;mudaItem(id,o)}
   }else if(b.dataset.a==='mov'){

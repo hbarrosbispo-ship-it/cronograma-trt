@@ -200,7 +200,9 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 [data-u="c"]{box-shadow:-5px 0 0 #f29900;background:rgba(242,153,0,.12)}
 [data-u]:hover{outline:1px dashed #888}
 @media print{[data-u]{box-shadow:none;background:none}}
-/* faixa de ferramentas e caixa do botão direito compactas */
+/* divisória de página dos Tudões: continua no texto (marca a página), mas sem a linha */
+#folha hr{border:0;height:0}
+/* faixa de ferramentas compacta */
 .rib{padding:2px 6px 0}
 .grp{padding:0 5px}
 .grp .rows{gap:0}
@@ -211,20 +213,8 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 .rib .split .main .ic{font-size:12px}
 .rib .split .main i{height:3px;margin-top:0}
 .rib input[type=range]{width:86px;height:14px}
-.rib .leg{font-size:10px;padding:0 2px}
 #zoomVal{min-width:44px}
 #topo{padding:4px 12px}
-.menu{padding:4px;min-width:0}
-.menu button{padding:3px 8px;font-size:12.5px;gap:7px;line-height:1.35}
-.menu button .sw{width:13px;height:13px;font-size:10px;line-height:13px}
-.menu hr{margin:2px 0}
-.menu .mini{padding:0}
-.menu .mini .mrow{padding:0;gap:1px}
-.menu .mini button{padding:2px 5px;min-width:24px;height:25px;font-size:12.5px;gap:1px}
-.menu .mini .split .main{padding:1px 4px}
-.menu .mini .split .arr{padding:2px;font-size:9px}
-.menu .par{display:flex;gap:2px}
-.menu .par button{justify-content:center}
 </style>
 </head>
 <body>
@@ -293,7 +283,6 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 
       <div class="grp"><div class="rows">
         <div class="r"><button id="btnInc" title="Liga ou desliga a incidência ao lado dos artigos">📊 Incidência</button><button id="btnSo" title="Mostra só os artigos, incisos e parágrafos que têm incidência (compilado ou legenda do TRTeiros) ou alteração legislativa recente, com os quadros de Caiu em prova, anotações e observações deles">🔎 Só incidência</button><button data-menu="mVer" id="btnVer" title="Escolher qual incidência aparece: compilado, TRTeiros ou as duas">Ver: tudo ▾</button></div>
-        <div class="r"><span class="leg"><i class="f1"></i>1× <i class="f2"></i>2× <i class="f3"></i>3× <i class="f4"></i>4× <i class="f5"></i>5+ <i class="f0"></i>0×</span></div>
       </div><div class="gl" id="incInfo">incidência</div></div>
 
       <div class="grp"><div class="rows">
@@ -618,7 +607,7 @@ $('#mCtx').innerHTML=`<div class="mini">
   <button data-x="limpa" title="Limpar o grifo e o sublinhado do trecho"><span class="aa-hl">Aa</span>⌫</button>
   <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
   <button data-x="ul" title="Lista com marcadores">•≡</button><button data-x="ol" title="Lista numerada">1≡</button></div></div><hr>`
- +itensCtx()+'<hr><button data-x="quadro" title="Transforma o parágrafo em quadro de destaque (ou desfaz)"><span class="sw">▭</span>Quadro</button><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#7ED957,#5271FF,#FFD966,#FF9F43,#FF3131)"></span>Barra de incidência ▸</button><hr id="cxTabHr" hidden><button data-x="deltab" id="cxDelTab" hidden title="Apaga a tabela inteira clicada"><span class="sw">🗑</span>Excluir tabela</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><div class="par"><button data-x="copy" title="Copiar (Ctrl+C)"><span class="sw">⧉</span>Copiar</button><button data-x="cut" title="Recortar (Ctrl+X)"><span class="sw">✂</span>Recortar</button></div>';
+ +itensCtx()+'<hr><button data-x="quadro" title="Transforma o parágrafo em quadro de destaque (ou desfaz)"><span class="sw">▭</span>Quadro</button><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#7ED957,#5271FF,#FFD966,#FF9F43,#FF3131)"></span>Barra de incidência ▸</button><hr id="cxTabHr" hidden><button data-x="deltab" id="cxDelTab" hidden title="Apaga a tabela inteira clicada"><span class="sw">🗑</span>Excluir tabela</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
 $('#mCtx').insertAdjacentHTML('afterend',`<div class="menu" id="mFonte">${FONTES.map(f=>`<button data-f="${f}" style="font-family:'${f}'">${f}</button>`).join('')}</div><div class="menu" id="mTam">${[8,9,10,11,12,14,16,18,20,24,28,32,36,48].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div><div class="menu" id="mHl3">${[ATALHO['1'],ATALHO['2'],ATALHO['5']].map(t=>itemFerr(t,t.n,'')).join('')}</div>`);
 ['mFonte','mTam','mHl3'].forEach(id=>$('#'+id).onmousedown=e=>e.preventDefault());
 ligaBotoes($('#mHl3'));
