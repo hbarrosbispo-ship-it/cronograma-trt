@@ -202,6 +202,8 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 @media print{[data-u]{box-shadow:none;background:none}}
 /* divisória de página dos Tudões: continua no texto (marca a página), mas sem a linha */
 #folha hr{border:0;height:0}
+/* Tudões: linha fina separando cada bloco, acima do título (como no mapa) */
+#folha p[data-tit="linha"]{border-top:1px solid #d5ddeb;padding-top:.75em;margin-top:.3em}
 /* faixa de ferramentas compacta */
 .rib{padding:2px 6px 0}
 .grp{padding:0 5px}
@@ -888,9 +890,26 @@ function faixa(on){$('#rib').classList.toggle('off',!on);$('#btnRib').textConten
 $('#btnRib').onclick=()=>faixa($('#rib').classList.contains('off'));
 addEventListener('resize',fixoAltura);
 
+// ---- Tudões: parágrafo todo em negrito é título; o primeiro de cada bloco ganha a linha separadora ----
+// só visual: o atributo é tirado antes de salvar, então o texto do usuário não muda
+function ehTitulo(p){
+  if(p.tagName!=='P'||!p.textContent.trim())return false;
+  const w=document.createTreeWalker(p,NodeFilter.SHOW_TEXT);let n;
+  while((n=w.nextNode())){if(n.data.trim()&&!(parseInt(getComputedStyle(n.parentElement).fontWeight,10)>=600))return false}
+  return true}
+function marcarTitulos(){
+  if(!slug||!(slug.startsWith('tudao-')||slug==='uni:Tudões'))return;
+  let anterior=true;   // no começo da folha não há o que separar
+  [...folha.children].forEach(e=>{
+    const tit=ehTitulo(e),vazio=!e.textContent.trim();
+    const v=tit?(anterior?'junto':'linha'):null;
+    if(v){if(e.getAttribute('data-tit')!==v)e.setAttribute('data-tit',v)}else if(e.hasAttribute('data-tit'))e.removeAttribute('data-tit');
+    if(!vazio)anterior=tit||/^H[1-6]$/.test(e.tagName);
+  });
+}
 // ---- salvar texto ----
-function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(salvar,500);montarSumario()}
-function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,.inc-badge').forEach(b=>b.remove());c.querySelectorAll('[data-fo]').forEach(b=>b.removeAttribute('data-fo'));return c.innerHTML}
+function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(()=>{marcarTitulos();salvar()},500);montarSumario()}
+function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,.inc-badge').forEach(b=>b.remove());c.querySelectorAll('[data-fo]').forEach(b=>b.removeAttribute('data-fo'));c.querySelectorAll('[data-tit]').forEach(b=>b.removeAttribute('data-tit'));return c.innerHTML}
 function salvar(){try{localStorage.setItem('doc:'+slug,htmlLimpo());$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
 folha.addEventListener('input',marcar);
 folha.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)});
@@ -902,7 +921,7 @@ async function original(){
       return `<h2 class="unif" data-pg="${o+1}"><strong>${esc(d._ns)} · ${esc(d.titulo)}</strong></h2>`+ps[i].replace(/data-pg="(\d+)"/g,(m,n)=>`data-pg="${+n+o}"`)}).join('')}
   const r=await fetch('leitor/docs/'+slug+'.html',{cache:'no-cache'});if(!r.ok)throw 0;return r.text()}
 $('#mMais').querySelector('[data-a=restaurar]').onclick=async()=>{fechaMenus();if(!confirm('Voltar ao texto original e perder suas edições deste capítulo?'))return;
-  folha.innerHTML=semMarcas(await original());localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';montarSumario();marcarLeiSeca();atualizarIncidencia()};
+  folha.innerHTML=semMarcas(await original());localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';marcarTitulos();montarSumario();marcarLeiSeca();atualizarIncidencia()};
 $('#mMais').querySelector('[data-a=baixar]').onclick=()=>{fechaMenus();const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob(['<!doctype html><meta charset="utf-8"><body style="font-family:Arial;max-width:800px;margin:auto">'+htmlLimpo()],{type:'text/html'}));
   a.download=slug+'.html';a.click()};
@@ -1433,7 +1452,7 @@ async function editor(){
   try{ // texto salvo vazio/corrompido: volta ao original em vez de mostrar folha em branco
     if(folha.innerText.trim().length<30){const o=await original();if(o&&o.length>100){folha.innerHTML=semMarcas(o);try{localStorage.removeItem('doc:'+slug)}catch(e){}}}
   }catch(e){}
-  montarSumario();marcarLeiSeca();mostrarAtu();{const bu=$('#btnUlt');document.body.classList.remove('ver-ult');bu.classList.remove('on');
+  marcarTitulos();montarSumario();marcarLeiSeca();mostrarAtu();{const bu=$('#btnUlt');document.body.classList.remove('ver-ult');bu.classList.remove('on');
   if((ATU[slug]&&ATU[slug].length)||folha.querySelector('.upd')){bu.hidden=false;bu.onmousedown=e=>e.preventDefault();bu.onclick=()=>{
     const on=!document.body.classList.contains('ver-ult');document.body.classList.toggle('ver-ult',on);bu.classList.toggle('on',on);
     if(ATU[slug]&&ATU[slug].length){mostrarAtu(on);if(on)scrollTo(0,Math.max(0,$('#updbar').getBoundingClientRect().top+scrollY-200))}}}}
