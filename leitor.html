@@ -897,8 +897,9 @@ function ehTitulo(p){
   const w=document.createTreeWalker(p,NodeFilter.SHOW_TEXT);let n;
   while((n=w.nextNode())){if(n.data.trim()&&!(parseInt(getComputedStyle(n.parentElement).fontWeight,10)>=600))return false}
   return true}
+const ehTudao=()=>!!slug&&(slug.startsWith('tudao-')||slug==='uni:Tudões');
 function marcarTitulos(){
-  if(!slug||!(slug.startsWith('tudao-')||slug==='uni:Tudões'))return;
+  if(!ehTudao())return;
   let anterior=true;   // no começo da folha não há o que separar
   [...folha.children].forEach(e=>{
     const tit=ehTitulo(e),vazio=!e.textContent.trim();
@@ -908,7 +909,7 @@ function marcarTitulos(){
   });
 }
 // ---- salvar texto ----
-function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(()=>{marcarTitulos();salvar()},500);montarSumario()}
+function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);timer=setTimeout(()=>{marcarTitulos();salvar();if(ehTudao())aoRolar()},500);montarSumario()}
 function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,.inc-badge').forEach(b=>b.remove());c.querySelectorAll('[data-fo]').forEach(b=>b.removeAttribute('data-fo'));c.querySelectorAll('[data-tit]').forEach(b=>b.removeAttribute('data-tit'));return c.innerHTML}
 function salvar(){try{localStorage.setItem('doc:'+slug,htmlLimpo());$('#status').textContent='salvo neste navegador'}catch(e){$('#status').textContent='não foi possível salvar'}}
 folha.addEventListener('input',marcar);
@@ -953,6 +954,13 @@ function pintaPaginas(p){
   $('#pgAtual').textContent=p;$('#pgTotal').textContent=meta?meta.paginas:'–';
   pill.title=PGV&&PGV.length?'Páginas do PDF com incidência: '+PGV.join(', '):'';
 }
+// Tudões não vêm de um PDF: as páginas são contadas pelo tamanho do texto (folha A4), até a última linha escrita
+function paginasTudao(){
+  const f=folha.getBoundingClientRect(),H=f.width*297/210;if(!H)return [1,1];
+  let u=folha.lastElementChild;while(u&&!u.textContent.trim())u=u.previousElementSibling;
+  const total=u?Math.max(1,Math.ceil((u.getBoundingClientRect().bottom-f.top)/H)):1;
+  const y=altFixo()+(innerHeight-altFixo())*0.35-f.top;
+  return [Math.min(total,Math.max(1,Math.floor(y/H)+1)),total]}
 function pagDoBloco(el){while(el){if(el.dataset&&el.dataset.pg)return +el.dataset.pg;el=el.previousElementSibling}return 1}
 function blocoNoMeio(){
   const y=altFixo()+(innerHeight-altFixo())*0.35,kids=folha.querySelector('[data-fo]')?[...folha.children].filter(k=>!k.hasAttribute('data-fo')):folha.children;
@@ -963,8 +971,8 @@ function blocoNoMeio(){
 function guardarPos(){if(!meta||!folha.children.length)return;const b=blocoNoMeio();LS.set('pos:'+slug,{i:[...folha.children].indexOf(b),off:Math.round(altFixo()-b.getBoundingClientRect().top)})}
 function aoRolar(){
   if(!meta||!folha.children.length)return;
-  const p=pagDoBloco(blocoNoMeio());
-  if(p!==pgAtual){pgAtual=p;pintaPaginas(p)}
+  if(ehTudao()){const [p,n]=paginasTudao();$('#pgAtual').textContent=p;$('#pgTotal').textContent=n}
+  else{const p=pagDoBloco(blocoNoMeio());if(p!==pgAtual){pgAtual=p;pintaPaginas(p)}}
   const hs=titulos();let at=-1;hs.forEach((h,i)=>{if(h.getBoundingClientRect().top<altFixo()+80)at=i});
   document.querySelectorAll('#sumLista a').forEach((a,i)=>a.classList.toggle('atual',i===at));
   clearTimeout(aoRolar.t);aoRolar.t=setTimeout(guardarPos,300);
