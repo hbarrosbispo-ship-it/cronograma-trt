@@ -90,10 +90,6 @@ details.mat>summary a.uni:hover{background:rgba(255,255,255,.32)}
 .rib .split .main{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:0 5px;gap:0}
 .rib .split .main i{display:block;height:4px;width:16px;border-radius:1px;margin-top:1px}
 .rib .split .main .ic{line-height:1;font-size:14px}
-.rib .dots{display:flex;gap:4px;padding:0 4px;align-items:center}
-.rib .dots b{width:16px;height:16px;border-radius:50%;cursor:pointer;box-shadow:0 0 0 1px #c9ced6;display:block}
-.rib .dots b:hover{box-shadow:0 0 0 2px var(--g)}
-.rib .dots b.ativo{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--g)}
 .rib input[type=range]{width:110px;accent-color:var(--g)}
 #zoomVal{min-width:50px;font-weight:bold}
 .menu{position:fixed;z-index:80;background:#fff;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.25);padding:6px;display:none;min-width:200px}
@@ -204,6 +200,31 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 [data-u="c"]{box-shadow:-5px 0 0 #f29900;background:rgba(242,153,0,.12)}
 [data-u]:hover{outline:1px dashed #888}
 @media print{[data-u]{box-shadow:none;background:none}}
+/* faixa de ferramentas e caixa do botão direito compactas */
+.rib{padding:2px 6px 0}
+.grp{padding:0 5px}
+.grp .rows{gap:0}
+.grp .r{min-height:23px}
+.grp .gl{font-size:9.5px;line-height:1.2;padding:0 0 1px}
+.rib button,.rib select{height:23px;min-width:24px;padding:0 4px;font-size:12.5px;border-radius:4px}
+.rib .split .arr{min-width:12px;width:12px}
+.rib .split .main .ic{font-size:12px}
+.rib .split .main i{height:3px;margin-top:0}
+.rib input[type=range]{width:86px;height:14px}
+.rib .leg{font-size:10px;padding:0 2px}
+#zoomVal{min-width:44px}
+#topo{padding:4px 12px}
+.menu{padding:4px;min-width:0}
+.menu button{padding:3px 8px;font-size:12.5px;gap:7px;line-height:1.35}
+.menu button .sw{width:13px;height:13px;font-size:10px;line-height:13px}
+.menu hr{margin:2px 0}
+.menu .mini{padding:0}
+.menu .mini .mrow{padding:0;gap:1px}
+.menu .mini button{padding:2px 5px;min-width:24px;height:25px;font-size:12.5px;gap:1px}
+.menu .mini .split .main{padding:1px 4px}
+.menu .mini .split .arr{padding:2px;font-size:9px}
+.menu .par{display:flex;gap:2px}
+.menu .par button{justify-content:center}
 </style>
 </head>
 <body>
@@ -250,7 +271,6 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
       <div class="grp"><div class="rows">
         <div class="r"><span class="split"><button class="main" id="btnMk" title="Marcador: clique e depois selecione os trechos (Alt+1, Alt+2...)"><span class="ic aa-hl">Aa</span><i id="barMk" style="background:#fff176"></i></button><button class="arr" data-menu="mMk">▾</button></span>
           <button id="tBor" title="Borracha (Alt+E): tira marca-texto, negrito, sublinhado e cor da fonte">⌫ Borracha</button></div>
-        <div class="r"><span class="dots" id="dots"></span></div>
       </div><div class="gl">Marcador</div></div>
 
       <div class="grp"><div class="rows">
@@ -273,7 +293,6 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 
       <div class="grp"><div class="rows">
         <div class="r"><button id="btnInc" title="Liga ou desliga a incidência ao lado dos artigos">📊 Incidência</button><button id="btnSo" title="Mostra só os artigos, incisos e parágrafos que têm incidência (compilado ou legenda do TRTeiros) ou alteração legislativa recente, com os quadros de Caiu em prova, anotações e observações deles">🔎 Só incidência</button><button data-menu="mVer" id="btnVer" title="Escolher qual incidência aparece: compilado, TRTeiros ou as duas">Ver: tudo ▾</button></div>
-        <div class="r"><button data-menu="mTR" title="Põe ao lado esquerdo do artigo a linha colorida de incidência (1 a 5 vezes)">&#9612; Linha de incidência &#9662;</button></div>
         <div class="r"><span class="leg"><i class="f1"></i>1× <i class="f2"></i>2× <i class="f3"></i>3× <i class="f4"></i>4× <i class="f5"></i>5+ <i class="f0"></i>0×</span></div>
       </div><div class="gl" id="incInfo">incidência</div></div>
 
@@ -492,9 +511,8 @@ function itemFerr(t,rotulo,tecla){
 function listaFerramentas(){
   return ORDEM_ATALHO.map(n=>itemFerr(ATALHO[n],ATALHO[n].n,'Alt+'+n)).join('')+'<hr>'+itemFerr({k:'st'},'Tachado','')+itemFerr({k:'er'},'Borracha','Alt+E')}
 $('#mMk').innerHTML=listaFerramentas();
-$('#dots').innerHTML=ORDEM_ATALHO.filter(n=>ATALHO[n].k==='hl').map(n=>`<b data-t='${JSON.stringify(ATALHO[n])}' style="background:${ATALHO[n].c}" title="${ATALHO[n].n} (Alt+${n})"></b>`).join('');
 function ligaBotoes(raiz){raiz.querySelectorAll('[data-t]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>{ligar(JSON.parse(b.dataset.t),true);fechaMenus()}})}
-ligaBotoes($('#mMk'));ligaBotoes($('#dots'));
+ligaBotoes($('#mMk'));
 $('#btnMk').onmousedown=e=>e.preventDefault();$('#btnMk').onclick=()=>ligar({k:'hl',c:corMk});
 [['tBd','bd'],['tUl','ul'],['tSt','st'],['tBor','er']].forEach(([id,k])=>{$('#'+id).onmousedown=e=>e.preventDefault();$('#'+id).onclick=()=>ligar({k})});
 
@@ -506,7 +524,7 @@ function ligar(t,forcar){
   const cn=$('#cxN');if(cn)cn.classList.toggle('ativo',on('bd'));
   $('#btnMk').classList.toggle('on',on('hl'));$('#tBd').classList.toggle('on',on('bd'));$('#tUl').classList.toggle('on',on('ul'));
   $('#tSt').classList.toggle('on',on('st'));$('#tBor').classList.toggle('on',on('er'));
-  document.querySelectorAll('#dots b,#mMk [data-t]').forEach(b=>b.classList.toggle('ativo',!!tool&&mesmo(tool,JSON.parse(b.dataset.t))));
+  document.querySelectorAll('#mMk [data-t]').forEach(b=>b.classList.toggle('ativo',!!tool&&mesmo(tool,JSON.parse(b.dataset.t))));
   if(tool&&selecaoNaFolha())aplicar();
 }
 function selecaoNaFolha(){const s=getSelection();return s.rangeCount&&!s.isCollapsed&&folha.contains(s.anchorNode)&&folha.contains(s.focusNode)}
@@ -592,7 +610,7 @@ document.addEventListener('keydown',e=>{
 
 // ---- botão direito: escolher a ferramenta (Alt+1, Alt+2...) ----
 const FONTES=['Arial','Calibri','Times New Roman','Georgia','Verdana','Courier New'];
-const itensCtx=()=>[ATALHO['1'],ATALHO['2'],ATALHO['5']].map((t,i)=>itemFerr(t,t.n,'Alt+'+['1','2','5'][i])).join('')+itemFerr({k:'er'},'Borracha','Alt+E');
+const itensCtx=()=>[ATALHO['1'],ATALHO['2'],ATALHO['5']].map((t,i)=>itemFerr(t,t.n,'Alt+'+['1','2','5'][i])).join('');
 $('#mCtx').innerHTML=`<div class="mini">
  <div class="mrow"><button data-x="fonte" id="cxFonte" title="Fonte">Arial ▾</button><button data-x="tam" id="cxTam" title="Tamanho da fonte">11 ▾</button><button data-x="mais" title="Aumentar a fonte">A<sup>▲</sup></button><button data-x="menos" title="Diminuir a fonte">A<sub>▼</sub></button><button data-x="pincel" title="Pincel de formatação: copia o formato do trecho e aplica no próximo que você selecionar">🖌</button></div>
  <div class="mrow"><button data-x="n" id="cxN" title="Negrito (Ctrl+B ou Ctrl+N): liga e depois é só selecionar o texto"><b>N</b></button><button data-x="i" title="Itálico"><i>I</i></button><button data-x="s" title="Sublinhado"><u>S</u></button>
@@ -600,7 +618,7 @@ $('#mCtx').innerHTML=`<div class="mini">
   <button data-x="limpa" title="Limpar o grifo e o sublinhado do trecho"><span class="aa-hl">Aa</span>⌫</button>
   <span class="split"><button data-x="cor" class="main" title="Cor da letra"><b>A</b><i class="bar" id="cxBarTxt"></i></button><button data-x="corArr" class="arr" title="Escolher a cor da letra">▾</button></span>
   <button data-x="ul" title="Lista com marcadores">•≡</button><button data-x="ol" title="Lista numerada">1≡</button></div></div><hr>`
- +itensCtx()+'<hr><button data-x="quadro" title="Transforma o parágrafo em quadro de destaque (ou desfaz)"><span class="sw">▭</span>Quadro</button><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#7ED957,#5271FF,#FFD966,#FF9F43,#FF3131)"></span>Barra de incidência ▸</button><hr id="cxTabHr" hidden><button data-x="deltab" id="cxDelTab" hidden title="Apaga a tabela inteira clicada"><span class="sw">🗑</span>Excluir tabela</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><button data-x="copy"><span class="sw">⧉</span>Copiar<small>Ctrl+C</small></button><button data-x="cut"><span class="sw">✂</span>Recortar<small>Ctrl+X</small></button>';
+ +itensCtx()+'<hr><button data-x="quadro" title="Transforma o parágrafo em quadro de destaque (ou desfaz)"><span class="sw">▭</span>Quadro</button><button data-x="novidade" title="Põe o selo roxo de Alteração recente ao lado do parágrafo clicado"><span class="sw" style="background:#F3E8FF;border:1px solid #6b21a8"></span>Inserir selo de novidade</button><button data-x="trmenu" title="Põe a linha colorida de incidência ao lado do parágrafo clicado"><span class="sw" style="background:linear-gradient(#7ED957,#5271FF,#FFD966,#FF9F43,#FF3131)"></span>Barra de incidência ▸</button><hr id="cxTabHr" hidden><button data-x="deltab" id="cxDelTab" hidden title="Apaga a tabela inteira clicada"><span class="sw">🗑</span>Excluir tabela</button><hr><button data-x="off"><span class="sw">✕</span>Desligar ferramenta<small>Esc</small></button><hr><div class="par"><button data-x="copy" title="Copiar (Ctrl+C)"><span class="sw">⧉</span>Copiar</button><button data-x="cut" title="Recortar (Ctrl+X)"><span class="sw">✂</span>Recortar</button></div>';
 $('#mCtx').insertAdjacentHTML('afterend',`<div class="menu" id="mFonte">${FONTES.map(f=>`<button data-f="${f}" style="font-family:'${f}'">${f}</button>`).join('')}</div><div class="menu" id="mTam">${[8,9,10,11,12,14,16,18,20,24,28,32,36,48].map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div><div class="menu" id="mHl3">${[ATALHO['1'],ATALHO['2'],ATALHO['5']].map(t=>itemFerr(t,t.n,'')).join('')}</div>`);
 ['mFonte','mTam','mHl3'].forEach(id=>$('#'+id).onmousedown=e=>e.preventDefault());
 ligaBotoes($('#mHl3'));
@@ -623,7 +641,7 @@ const acaoCtx={
   hlArr:b=>{const r=b.getBoundingClientRect();fechaMenus();menuEm('mHl3',r.left,r.bottom+4)},
   corArr:b=>{const r=b.getBoundingClientRect();fechaMenus();menuEm('mTxt',r.left,r.bottom+4)},
   mais:()=>{fechaMenus();mudarTamanho(1)},menos:()=>{fechaMenus();mudarTamanho(-1)},
-  n:()=>{fechaMenus();ligar(ATALHO['3'],false)},i:()=>{fechaMenus();exec('italic')},s:()=>{fechaMenus();exec('underline')},
+  n:()=>{fechaMenus();if(selecaoNaFolha()){const ant=tool;tool=ATALHO['3'];aplicar();tool=ant}else ligar(ATALHO['3'],false)},i:()=>{fechaMenus();exec('italic')},s:()=>{fechaMenus();exec('underline')},
   hl:()=>{fechaMenus();ligar({k:'hl',c:corMk},true)},limpa:()=>{fechaMenus();$('#bLimpaGrifo').click()},
   cor:()=>{fechaMenus();exec('foreColor',corTx)},ul:()=>{fechaMenus();exec('insertUnorderedList')},ol:()=>{fechaMenus();exec('insertOrderedList')},
   pincel:()=>{fechaMenus();pincel=pegaFormato();document.body.classList.toggle('pincel-on',!!pincel)}};
