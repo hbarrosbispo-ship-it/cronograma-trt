@@ -40,7 +40,7 @@ details.mat>summary .n{margin-left:auto;font-weight:400;color:#c9d7ec;font-size:
 .linha .tag{background:#e8f0fe;color:var(--g);border-radius:10px;padding:2px 9px;font-size:11.5px;font-weight:bold}
 .linha a.ini{padding:10px 14px;color:var(--mute);text-decoration:none;font-size:12px}
 .linha a.ini:hover{color:var(--g)}
-.linha .num{flex:none;min-width:30px;text-align:center;background:#eef1f7;color:var(--gd);border-radius:6px;padding:2px 6px;font-size:12px;font-weight:bold}
+.linha .num{flex:none;min-width:30px;text-align:center;background:#eef1f7;color:var(--gd);border-radius:6px;padding:2px 6px;font-size:12px;font-weight:bold}.linha .num:empty{visibility:hidden}
 details.mat>summary a.uni{margin-left:12px;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:999px;font-size:12px;font-weight:bold;padding:3px 12px;text-decoration:none}
 details.mat>summary a.uni:hover{background:rgba(255,255,255,.32)}
 .allbody{padding:4px 16px 14px;column-width:430px;column-gap:30px}
@@ -405,6 +405,9 @@ function fundirAtualizacao(salvoHtml,novoHtml,rm){
 // Numeração por matéria, na ordem em que aparece na biblioteca (e no Unificar PDFs): o número do capítulo vem do título
 // (Capítulo 05.1, Pt. 3); capítulos repetidos viram 1.1, 1.2...; o que não tem número recebe o próximo da sequência da matéria.
 function ordemMateria(l){
+  if(l.length&&l.every(d=>d.num!==undefined)){ // numeração fixa (a mesma do Anki), em leitor/numeracao.json; sem número vai ao fim
+    l.forEach(d=>{d._ns=d.num;d._n=d.num?d.num.split('.').reduce((z,x,i)=>z+(+x)/100**i,0):9999});
+    return l.slice().sort((x,y)=>x._n-y._n)}
   const g={};l.forEach(d=>(g[d.grupo]=g[d.grupo]||[]).push(d));
   const resol=x=>/resolu/i.test(x)?1:0;
   const chaves=Object.keys(g).sort((x,y)=>resol(x)-resol(y)||x.localeCompare(y,'pt',{numeric:true}));
@@ -421,22 +424,26 @@ function ordemMateria(l){
   chaves.forEach(k=>{
     const arr=g[k].slice().sort((x,y)=>((x._a===null)-(y._a===null))||(x._n-y._n)||(fraco(x)-fraco(y))||tit(x,y));
     arr.forEach(d=>{if(d._a===null){max++;d._n=max;d._ns=String(max)}});
+    arr.forEach(d=>d._ns=d._ns.replace(/^(\d)(?!\d)/,'0$1'));
     out.push(...arr);
   });
   return out;
 }
-function prepDocs(docs){docs.forEach(d=>{const m=/[\\/]TRT[\\/]([^\\/]+)[\\/](?:(.*)[\\/])?[^\\/]+$/.exec(d.arquivo||'');if(m){d.materia=m[1];d.grupo=(m[2]||'').split(/[\\/]/).filter(Boolean).join(' / ')}})}
+async function prepDocs(docs){
+  let tab={};try{tab=(await (await fetch('leitor/numeracao.json',{cache:'no-cache'})).json()).docs||{}}catch(e){}
+  docs.forEach(d=>{const m=/[\\/]TRT[\\/]([^\\/]+)[\\/](?:(.*)[\\/])?[^\\/]+$/.exec(d.arquivo||'');if(m){d.materia=m[1];d.grupo=(m[2]||'').split(/[\\/]/).filter(Boolean).join(' / ')}
+    const n=tab[d.slug];d.nome=d.titulo;if(n){[d.materia,d.num,d.nome]=n;d.grupo=''}})}
 async function biblioteca(){
   $('#lista').hidden=false;document.title='Biblioteca · Cronograma TRT';
   const docs=await (await fetch('leitor/docs/index.json',{cache:'no-cache'})).json();
   await carregarAtu();
-  docs.forEach(d=>{const m=/[\\/]TRT[\\/]([^\\/]+)[\\/](?:(.*)[\\/])?[^\\/]+$/.exec(d.arquivo||'');if(m){d.materia=m[1];d.grupo=(m[2]||'').split(/[\\/]/).filter(Boolean).join(' / ')}});
+  await prepDocs(docs);
   let UNI={};try{UNI=await (await fetch('compilado/unificados.json',{cache:'no-cache'})).json()}catch(e){}
   const chave=x=>semAcento((x||'').replace(/\s*\(.*?\)\s*/g,' ')).trim();
   const mats={};docs.forEach(d=>(mats[d.materia]=mats[d.materia]||[]).push(d));
   Object.values(mats).forEach(l=>ordemMateria(l));
   const nomes=Object.keys(mats).sort((a,b)=>{const i=ORDEM.indexOf(a),j=ORDEM.indexOf(b);return (i<0?99:i)-(j<0?99:j)||a.localeCompare(b)});
-  const alvo=d=>semAcento(d.titulo+' '+d.codigo+' '+d.sumario.map(s=>s.t).join(' '));
+  const alvo=d=>semAcento(d.nome+' '+d.titulo+' '+d.codigo+' '+d.sumario.map(s=>s.t).join(' '));
   const abertos=new Set();
   function render(){
     const t=semAcento($('#busca').value);let h='';
@@ -448,12 +455,12 @@ async function biblioteca(){
       const resol=g=>/resolu/i.test(g)?1:0;
       Object.keys(grupos).sort((x,y)=>resol(x)-resol(y)||x.localeCompare(y,'pt',{numeric:true})).forEach(g=>{
         if(g)h+=`<div class="grupo">${esc(g.split(' / ').join(' › '))}</div>`;
-        grupos[g].sort((x,y)=>x._n-y._n||x.titulo.localeCompare(y.titulo,'pt',{numeric:true,sensitivity:'base'})).forEach(d=>{
+        grupos[g].sort((x,y)=>x._n-y._n||x.nome.localeCompare(y.nome,'pt',{numeric:true,sensitivity:'base'})).forEach(d=>{
           const andando=false;
-          const tituloBate=!t||semAcento(d.titulo+' '+d.codigo).includes(t);
+          const tituloBate=!t||semAcento(d.nome+' '+d.titulo+' '+d.codigo).includes(t);
           const tops=d.sumario.map((x,i)=>({x,i})).filter(o=>tituloBate||semAcento(o.x.t).includes(t));
           const aberto=!!t&&!tituloBate||abertos.has(d.slug);
-          h+=`<div class="item${aberto?' open':''}" data-s="${d.slug}"><div class="linha"><a class="cap" href="?doc=${d.slug}"><span class="num">${esc(d._ns)}</span><span class="t">${esc(d.titulo)}</span></a><span class="topc">${d.sumario.length?`<button class="top" type="button" data-top="${d.slug}">${d.sumario.length} tópicos ▾</button>`:''}</span><span class="meta">${d.paginas} pág.</span></div>`+
+          h+=`<div class="item${aberto?' open':''}" data-s="${d.slug}"><div class="linha"><a class="cap" href="?doc=${d.slug}"><span class="num">${esc(d._ns)}</span><span class="t">${esc(d.nome)}</span></a><span class="topc">${d.sumario.length?`<button class="top" type="button" data-top="${d.slug}">${d.sumario.length} tópicos ▾</button>`:''}</span><span class="meta">${d.paginas} pág.</span></div>`+
             (d.sumario.length?`<ul class="sum">${tops.map(o=>`<li class="${o.x.n}"><a href="?doc=${d.slug}&h=${o.i}">${esc(o.x.t)}</a> <small>pág. ${o.x.pg}</small></li>`).join('')}</ul>`:'')+`</div>`;
         });
       });
@@ -919,7 +926,7 @@ async function original(){
   if(UNI_L){const ps=await Promise.all(UNI_L.map(d=>fetch('leitor/docs/'+d.slug+'.html',{cache:'no-cache'}).then(r=>r.ok?r.text():'')));
     let off=0;
     return UNI_L.map((d,i)=>{const o=off;off+=(d.paginas||0);
-      return `<h2 class="unif" data-pg="${o+1}"><strong>${esc(d._ns)} · ${esc(d.titulo)}</strong></h2>`+ps[i].replace(/data-pg="(\d+)"/g,(m,n)=>`data-pg="${+n+o}"`)}).join('')}
+      return `<h2 class="unif" data-pg="${o+1}"><strong>${d._ns?esc(d._ns)+' - ':''}${esc(d.nome)}</strong></h2>`+ps[i].replace(/data-pg="(\d+)"/g,(m,n)=>`data-pg="${+n+o}"`)}).join('')}
   const r=await fetch('leitor/docs/'+slug+'.html',{cache:'no-cache'});if(!r.ok)throw 0;return r.text()}
 $('#mMais').querySelector('[data-a=restaurar]').onclick=async()=>{fechaMenus();if(!confirm('Voltar ao texto original e perder suas edições deste capítulo?'))return;
   folha.innerHTML=semMarcas(await original());localStorage.removeItem('doc:'+slug);$('#status').textContent='original restaurado';marcarTitulos();montarSumario();marcarLeiSeca();atualizarIncidencia()};
@@ -1430,7 +1437,7 @@ async function prepararBotoes(){
 // ---- baixar em PDF (imprimir e salvar como PDF) ----
 let _zAntes=1;
 addEventListener('beforeprint',()=>{_zAntes=zoom;$('#papel').style.zoom=1;if(meta)document.title=meta.titulo});
-addEventListener('afterprint',()=>{$('#papel').style.zoom=_zAntes;if(meta)document.title=meta.titulo+' · Cronograma TRT'});
+addEventListener('afterprint',()=>{$('#papel').style.zoom=_zAntes;if(meta)document.title=$('#titulo').textContent+' · Cronograma TRT'});
 $('#mMais').querySelector('[data-a=pdf]').onclick=()=>{fechaMenus();setTimeout(()=>window.print(),50)};
 
 async function editor(){
@@ -1438,11 +1445,13 @@ async function editor(){
   $('#ed').hidden=false;
   const docs=await (await fetch('leitor/docs/index.json',{cache:'no-cache'})).json();
   await carregarAtu();
-  if(slug.startsWith('uni:')){prepDocs(docs);const m=slug.slice(4);UNI_L=ordemMateria(docs.filter(d=>d.materia===m));
+  await prepDocs(docs);
+  if(slug.startsWith('uni:')){const m=slug.slice(4);UNI_L=ordemMateria(docs.filter(d=>d.materia===m));
     meta={titulo:'Unificado · '+m,paginas:UNI_L.reduce((a,d)=>a+(d.paginas||0),0)}}
   else meta=docs.find(d=>d.slug===slug)||{titulo:slug,paginas:1};
-  document.title=meta.titulo+' · Cronograma TRT';
-  $('#titulo').textContent=meta.titulo;$('#titulo').title=meta.titulo;$('#pgTotal').textContent=meta.paginas;
+  const rotulo=meta.nome?(meta.num?meta.num+' - ':'')+meta.nome:meta.titulo;
+  document.title=rotulo+' · Cronograma TRT';
+  $('#titulo').textContent=rotulo;$('#titulo').title=rotulo;$('#pgTotal').textContent=meta.paginas;
   await carregarDiff();
   try{CORTES=await fetch('leitor/docs/cortes.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null)}catch(e){CORTES=null}
   const salvo=LS.raw('doc:'+slug);
