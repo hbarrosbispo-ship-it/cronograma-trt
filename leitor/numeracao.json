@@ -200,11 +200,9 @@
   "INF-Seguranca-da-Informacao": ["02", "Segurança da Informação"],
   "INF-Redes-de-Computadores": ["03", "Redes de Computadores"],
   "INF-Sistemas-Operacionais": ["04", "Sistemas Operacionais"],
-  "PORT-Pt1": ["01.1", "Ortografia, Crase e Pontuação"],
-  "PORT-Pt1-complemento": ["01.2", "Ortografia, Crase e Pontuação - complemento"],
+  "PORT-Pt1": ["01", "Ortografia, Crase e Pontuação"],
   "PORT-Pt2": ["02", "Morfologia - Verbos e Conjunções"],
-  "PORT-Pt3": ["03.1", "Sintaxe"],
-  "PORT-Pt3-compl": ["03.2", "Sintaxe - complemento"],
+  "PORT-Pt3": ["03", "Sintaxe"],
   "PORT-Pt4": ["04", "Reescritura de texto"],
   "PORT-Pt6": ["06", "Discurso"]
  }
