@@ -107,6 +107,7 @@ details.mat>summary a.uni:hover{background:rgba(255,255,255,.32)}
 #sumario h4{margin:0 0 6px;font-size:13px;color:var(--gd)}
 #sumario a{display:block;padding:3px 0;color:var(--ink);text-decoration:none;cursor:pointer}
 #sumario a.h3{padding-left:14px;color:var(--mute)}
+#sumario a.h4{padding-left:28px;color:var(--mute);font-size:12px}
 #sumario a.atual{font-weight:bold;color:var(--g)}
 @media(max-width:1000px){#sumario.on{position:fixed;left:8px;top:calc(var(--fh) + 10px);z-index:40;max-height:60vh;box-shadow:0 6px 20px rgba(0,0,0,.3)}}
 #papel{position:relative;width:100%;max-width:840px;margin:18px 0 80px;flex:none}
@@ -202,19 +203,47 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 @media print{[data-u]{box-shadow:none;background:none}}
 /* divisória de página dos Tudões: continua no texto (marca a página), mas sem a linha */
 #folha hr{border:0;height:0}
-/* Tudões: linha fina separando cada bloco, acima do título (como no mapa) */
-#folha p[data-tit="linha"]{border-top:1px solid #d5ddeb;padding-top:.75em;margin-top:.3em}
+/* Tudões: linha separando cada bloco, acima do título; a força da linha acompanha o nível do título */
+#folha p[data-tit="linha"]{border-top:1px dotted #dfe5ef;padding-top:.6em;margin-top:.3em}
+#folha p[data-tit="linha"][data-tn="1"]{border-top:2px solid #305496;padding-top:.7em;margin-top:1.2em}
+#folha p[data-tit="linha"][data-tn="2"]{border-top:1px solid #b9c7e0;padding-top:.65em;margin-top:.7em}
+body.tud-h #folha p[data-tit="linha"][data-tn="9"]{border-top:0;padding-top:0}
+/* Tudões com títulos de verdade (Título / Subtítulo / Subtítulo 2): numeração 1, 1.1, 1.1.1 automática */
+body.tud #folha h2[data-num],body.tud #folha h3[data-num],body.tud #folha h4[data-num]{position:relative;text-align:left}
+body.tud #folha h2[data-num]{font-size:13pt;color:#1F3864;border-top:2.5px solid #305496;padding-top:.55em;margin:1.8em 0 .7em}
+body.tud #folha h3[data-num]{font-size:12pt;color:#1F4E78;border-top:1px solid #b9c7e0;padding-top:.5em;margin:1.4em 0 .55em}
+body.tud #folha h4[data-num]{font-size:11pt;color:#1f2937;margin:1.1em 0 .4em}
+body.tud #folha [data-num]::before{content:attr(data-num) "\00a0\00a0";color:#305496}
+body.tud #folha [data-incv]::after{content:attr(data-incv) "×";position:absolute;left:-64px;top:var(--inc-top,.62em);font:700 8.5pt Arial,sans-serif;line-height:1.25;padding:0 5px;border-radius:9px;border:1px solid transparent;user-select:none;pointer-events:none}
+body.tud #folha h4[data-incv]::after{--inc-top:.1em;top:.1em}
+body.tud #folha [data-incf="1"]::after{background:#E3F6DA;color:#2a6b12;border-color:#7ED957}
+body.tud #folha [data-incf="2"]::after{background:#DDE3FF;color:#2a3fb0;border-color:#5271FF}
+body.tud #folha [data-incf="3"]::after{background:#FFF3CC;color:#7a5b00;border-color:#FFD966}
+body.tud #folha [data-incf="4"]::after{background:#FFE6CC;color:#9a4a00;border-color:#FF9F43}
+body.tud #folha [data-incf="5"]::after{background:#FFD9D9;color:#a30f0f;border-color:#FF3131}
+@media(max-width:700px){body.tud #folha [data-incv]::after{left:-42px;font-size:7.5pt;padding:0 3px}}
+#folha nav.tud-sum{display:block;border:1px solid #c9d5ea;border-radius:6px;background:#f7f9fd;padding:10px 14px;margin:0 0 1.6em;text-align:left;user-select:none;font-size:10.5pt}
+#folha nav.tud-sum .ts-t{font-weight:bold;color:#1F3864;margin-bottom:6px;font-size:11pt}
+#folha nav.tud-sum a{display:flex;gap:6px;align-items:baseline;color:#1f2937;text-decoration:none;cursor:pointer;padding:1px 0}
+#folha nav.tud-sum a:hover .x{text-decoration:underline}
+#folha nav.tud-sum a.l1{font-weight:bold;color:#1F3864;margin-top:4px}
+#folha nav.tud-sum a.l2{padding-left:18px}
+#folha nav.tud-sum a.l3{padding-left:36px;color:#4b5563;font-size:10pt}
+#folha nav.tud-sum .n{flex:none;color:#305496}
+#folha nav.tud-sum .d{flex:1 1 auto;border-bottom:1px dotted #9aa6b8;min-width:14px;transform:translateY(-3px)}
+#folha nav.tud-sum .p{flex:none;color:#4b5563;font-weight:normal}
+#folha nav.tud-sum .vazio{color:#6b7280;font-style:italic}
 /* faixa de ferramentas compacta */
 .rib{padding:2px 6px 0}
 .grp{padding:0 5px}
 .grp .rows{gap:0}
-.grp .r{min-height:23px}
-.grp .gl{font-size:9.5px;line-height:1.2;padding:0 0 1px}
-.rib button,.rib select{height:23px;min-width:24px;padding:0 4px;font-size:12.5px;border-radius:4px}
-.rib .split .arr{min-width:12px;width:12px}
-.rib .split .main .ic{font-size:12px}
-.rib .split .main i{height:3px;margin-top:0}
-.rib input[type=range]{width:86px;height:14px}
+.grp .r{min-height:26px}
+.grp .gl{font-size:10.5px;line-height:1.25;padding:0 0 2px}
+.rib button,.rib select{height:26px;min-width:26px;padding:0 5px;font-size:13.5px;border-radius:5px}
+.rib .split .arr{min-width:13px;width:13px}
+.rib .split .main .ic{font-size:13px}
+.rib .split .main i{height:3px;margin-top:1px}
+.rib input[type=range]{width:96px;height:15px}
 #zoomVal{min-width:44px}
 #topo{padding:4px 12px}
 </style>
@@ -247,7 +276,7 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
     <div class="rib" id="rib">
       <div class="grp"><div class="rows">
         <div class="r"><button data-cmd="undo" title="Desfazer (Ctrl+Z)">↶</button><button data-cmd="redo" title="Refazer (Ctrl+Y)">↷</button>
-          <select id="bloco" title="Estilo do parágrafo"><option value="p">Texto normal</option><option value="h2">Título</option><option value="h3">Subtítulo</option></select>
+          <select id="bloco" title="Estilo do parágrafo"><option value="p">Texto normal</option><option value="h2">Título</option><option value="h3">Subtítulo</option><option value="h4">Subtítulo 2</option></select>
           <button id="fMais" title="Aumentar o tamanho do texto selecionado">A<sup>▲</sup></button><button id="fMenos" title="Diminuir o tamanho do texto selecionado">A<sub>▼</sub></button>
           <button data-menu="mCase" title="Maiúsculas e minúsculas">Aa ▾</button>
           <button id="bLimpaGrifo" title="Limpar o grifo e o sublinhado do trecho selecionado (mantém negrito e cor da letra). Ctrl+Z desfaz, Ctrl+Y refaz"><span style="background:#fff176;padding:0 3px;border-radius:2px;text-decoration:underline">Aa</span>⌫</button></div>
@@ -653,7 +682,7 @@ document.addEventListener('keydown',e=>{
 const FONTES=['Arial','Calibri','Times New Roman','Georgia','Verdana','Courier New'];
 const itensCtx=()=>[ATALHO['1'],ATALHO['2'],ATALHO['5']].map((t,i)=>itemFerr(t,t.n,'Alt+'+['1','2','5'][i])).join('');
 $('#mCtx').innerHTML=`<div class="mini">
- <div class="mrow"><button data-x="fonte" id="cxFonte" title="Fonte">Arial ▾</button><button data-x="tam" id="cxTam" title="Tamanho da fonte">11 ▾</button><button data-x="mais" title="Aumentar a fonte">A<sup>▲</sup></button><button data-x="menos" title="Diminuir a fonte">A<sub>▼</sub></button><button data-x="pincel" title="Pincel de formatação: copia o formato do trecho e aplica no próximo que você selecionar">🖌</button></div>
+ <div class="mrow"><button data-x="bp" title="Volta o parágrafo a texto normal">Texto</button><button data-x="b2" title="Título (nível 1, numerado: 1, 2, 3)"><b>Título</b></button><button data-x="b3" title="Subtítulo (nível 2, numerado: 1.1, 1.2)"><b style="font-size:12.5px">Subtítulo</b></button><button data-x="b4" title="Subtítulo 2 (nível 3, numerado: 1.1.1)"><b style="font-size:11.5px">Subtítulo 2</b></button><button data-x="tam" id="cxTam" title="Tamanho da fonte">11 ▾</button></div>
  <div class="mrow"><button data-x="n" id="cxN" title="Negrito (Ctrl+B ou Ctrl+N): liga e depois é só selecionar o texto"><b>N</b></button><button data-x="i" title="Itálico"><i>I</i></button><button data-x="s" title="Sublinhado"><u>S</u></button>
   <span class="split"><button data-x="hl" class="main" title="Marca-texto"><span class="aa-hl">Aa</span></button><button data-x="hlArr" class="arr" title="Escolher a cor do marca-texto">▾</button></span>
   <button data-x="limpa" title="Limpar o grifo e o sublinhado do trecho"><span class="aa-hl">Aa</span>⌫</button>
@@ -685,7 +714,26 @@ const acaoCtx={
   n:()=>{fechaMenus();if(selecaoNaFolha()){const ant=tool;tool=ATALHO['3'];aplicar();tool=ant}else ligar(ATALHO['3'],false)},i:()=>{fechaMenus();exec('italic')},s:()=>{fechaMenus();exec('underline')},
   hl:()=>{fechaMenus();ligar({k:'hl',c:corMk},true)},limpa:()=>{fechaMenus();$('#bLimpaGrifo').click()},
   cor:()=>{fechaMenus();exec('foreColor',corTx)},ul:()=>{fechaMenus();exec('insertUnorderedList')},ol:()=>{fechaMenus();exec('insertOrderedList')},
-  pincel:()=>{fechaMenus();pincel=pegaFormato();document.body.classList.toggle('pincel-on',!!pincel)}};
+  pincel:()=>{fechaMenus();pincel=pegaFormato();document.body.classList.toggle('pincel-on',!!pincel)},
+  bp:()=>{fechaMenus();aplicarBloco('p')},b2:()=>{fechaMenus();aplicarBloco('h2')},b3:()=>{fechaMenus();aplicarBloco('h3')},b4:()=>{fechaMenus();aplicarBloco('h4')}};
+// Título / Subtítulo pelo botão direito: vale para o parágrafo clicado (ou para todos os parágrafos da seleção)
+function aplicarBloco(tag){
+  const s=getSelection();let r=ctxSel&&folha.contains(ctxSel.commonAncestorContainer)?ctxSel:null;
+  if(!r||r.collapsed){if(!ctxBloco)return;r=document.createRange();r.selectNodeContents(ctxBloco)}
+  folha.focus({preventScroll:true});s.removeAllRanges();s.addRange(r);
+  exec('formatBlock',tag);
+  if(tag!=='p'){ // título numerado: tira o número digitado à mão e o tamanho/negrito postos à mão
+    const r2=s.rangeCount?s.getRangeAt(0):r,a=blocoDe(r2.startContainer)||blocoDe(r2.commonAncestorContainer),b=blocoDe(r2.endContainer)||a,kids=[...folha.children];
+    if(!a)return marcar();
+    const ia=kids.indexOf(a),ib=kids.indexOf(b);
+    kids.slice(Math.max(0,Math.min(ia,ib)),Math.max(ia,ib)+1).forEach(h=>{
+      if(!/^H[2-4]$/.test(h.tagName))return;
+      h.querySelectorAll('[style]').forEach(e=>{e.style.removeProperty('font-size');e.style.removeProperty('font-weight');if(!e.getAttribute('style'))e.removeAttribute('style')});
+      const w=document.createTreeWalker(h,NodeFilter.SHOW_TEXT);let n;while((n=w.nextNode())){if(n.data.trim()){n.data=n.data.replace(/^\s*\d+(?:\.\d+)+\.?\s+|^\s*\d+\.\s+/,'');break}}
+    });
+  }
+  ctxBloco=null;marcar();
+}
 $('#mCtx').querySelectorAll('.mini [data-x]').forEach(b=>{b.onclick=()=>acaoCtx[b.dataset.x](b)});
 ligaBotoes($('#mCtx'));
 $('#mCtx').querySelector('[data-x=novidade]').onclick=()=>{const sel=getSelection();const bl=ctxBloco||(sel.anchorNode&&blocoDe(sel.anchorNode));fechaMenus();ctxBloco=null;if(!bl)return;bl.dataset.nov='1';bl.removeAttribute('data-sem-nov');atualizarIncidencia();marcar()};
@@ -706,7 +754,7 @@ async function colar(alvo){
   document.execCommand('insertText',false,t);return true;
 }
 $('#mCtx').querySelector('[data-x=paste]').onclick=async()=>{fechaMenus();if(await colar(folha))marcar()};
-folha.addEventListener('contextmenu',e=>{e.preventDefault();guardaSel();ctxBloco=blocoDe(e.target);ctxTab=(e.target.closest&&e.target.closest('table'))||null;if(ctxTab&&!folha.contains(ctxTab))ctxTab=null;$('#cxDelTab').hidden=$('#cxTabHr').hidden=!ctxTab;$('#cxFonte').textContent=fonteAtual()+' ▾';$('#cxTam').textContent=tamanhoAtual()+' ▾';$('#cxBarTxt').style.background=corTx;menuEm('mCtx',e.clientX,e.clientY)});
+folha.addEventListener('contextmenu',e=>{e.preventDefault();guardaSel();ctxBloco=blocoDe(e.target);ctxTab=(e.target.closest&&e.target.closest('table'))||null;if(ctxTab&&!folha.contains(ctxTab))ctxTab=null;$('#cxDelTab').hidden=$('#cxTabHr').hidden=!ctxTab;$('#cxTam').textContent=tamanhoAtual()+' ▾';$('#cxBarTxt').style.background=corTx;menuEm('mCtx',e.clientX,e.clientY)});
 // ---- linha de incidência posta à mão (conta como incidência do compilado) (ao lado esquerdo do artigo) ----
 let ctxBloco=null;let ctxTab=null;
 $('#cxDelTab').onclick=()=>{const t=ctxTab;ctxTab=null;fechaMenus();if(!t)return;t.remove();marcar()};
@@ -924,7 +972,7 @@ $('#mTab').querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
 
 document.addEventListener('selectionchange',()=>{
   document.querySelectorAll('[data-cmd]').forEach(b=>{if(/italic|subscript|superscript|justify/.test(b.dataset.cmd)){try{b.classList.toggle('on',document.queryCommandState(b.dataset.cmd))}catch(e){}}});
-  const b=blocoAtual();if(b){const t=b.tagName.toLowerCase();$('#bloco').value=['h2','h3'].includes(t)?t:'p'}
+  const b=blocoAtual();if(b){const t=b.tagName.toLowerCase();$('#bloco').value=['h2','h3','h4'].includes(t)?t:'p'}
 });
 
 // ---- zoom do texto ----
@@ -955,8 +1003,59 @@ function marcarTitulos(){
     const tit=ehTitulo(e),vazio=!e.textContent.trim();
     const v=tit?(anterior?'junto':'linha'):null;
     if(v){if(e.getAttribute('data-tit')!==v)e.setAttribute('data-tit',v)}else if(e.hasAttribute('data-tit'))e.removeAttribute('data-tit');
+    if(tit){const m=/^\s*(\d+(?:\.\d+)*)[.\s]/.exec(e.textContent);const tn=m?String(Math.min(3,m[1].split('.').length)):'9';if(e.getAttribute('data-tn')!==tn)e.setAttribute('data-tn',tn)}else if(e.hasAttribute('data-tn'))e.removeAttribute('data-tn');
     if(!vazio)anterior=tit||/^H[1-6]$/.test(e.tagName);
   });
+  numerarTudao();
+}
+// ---- Tudões: numeração 1 / 1.1 / 1.1.1 dos títulos, incidência somada e sumário com páginas no começo ----
+// tudo só visual (atributos data-num/data-incv/data-incf e o sumário saem antes de salvar); a incidência própria fica em data-inc
+const NIVEL={H2:1,H3:2,H4:3};
+function ehTituloDoc(h){return h.classList.contains('unif')||(h.tagName==='H2'&&h===folha.firstElementChild)}
+function numerarTudao(){
+  document.body.classList.toggle('tud',ehTudao());
+  if(!ehTudao())return;
+  const hs=[...folha.querySelectorAll('h2,h3,h4')].filter(h=>h.parentNode===folha);
+  document.body.classList.toggle('tud-h',hs.some(h=>!ehTituloDoc(h)));
+  let c=[0,0,0];
+  hs.forEach(h=>{
+    if(ehTituloDoc(h)){c=[0,0,0];['data-num','data-incv','data-incf'].forEach(a=>h.removeAttribute(a));return}
+    const nv=NIVEL[h.tagName];c[nv-1]++;for(let i=nv;i<3;i++)c[i]=0;
+    const num=c.slice(0,nv).map(x=>x||1).join('.');if(h.dataset.num!==num)h.dataset.num=num;
+  });
+  // incidência: título sem subtítulos mostra a própria (data-inc); com subtítulos, a soma deles
+  const val=new Map();
+  // liga cada título ao pai (o último título de nível menor antes dele)
+  const pais=[];const filhos=new Map();
+  hs.forEach(h=>{if(ehTituloDoc(h)){pais.length=0;return}const nv=NIVEL[h.tagName];while(pais.length&&NIVEL[pais[pais.length-1].tagName]>=nv)pais.pop();
+    const p=pais[pais.length-1];if(p){if(!filhos.has(p))filhos.set(p,[]);filhos.get(p).push(h)}pais.push(h)});
+  const calc=h=>{if(val.has(h))return val.get(h);const f=filhos.get(h);const v=f&&f.length?f.reduce((z,x)=>z+calc(x),0):(+h.dataset.inc||0);val.set(h,v);return v};
+  hs.forEach(h=>{if(ehTituloDoc(h))return;const v=calc(h);
+    if(v){if(h.dataset.incv!==String(v))h.dataset.incv=v;const f=String(v>=5?5:v);if(h.dataset.incf!==f)h.dataset.incf=f}
+    else{h.removeAttribute('data-incv');h.removeAttribute('data-incf')}});
+  montarSumarioTudao(hs);
+}
+function montarSumarioTudao(hs){
+  let nav=folha.querySelector(':scope>nav.tud-sum');
+  const reais=hs.filter(h=>!ehTituloDoc(h));
+  // Tudão sem títulos de verdade: usa os títulos em negrito numerados à mão (1, 2.1...)
+  const itens=reais.length?reais.map(h=>({el:h,nv:NIVEL[h.tagName],n:h.dataset.num,t:h.textContent})):
+    [...folha.querySelectorAll(':scope>p[data-tn]')].filter(p=>p.dataset.tn!=='9').map(p=>{const m=/^\s*(\d+(?:\.\d+)*)\.?\s*(.*)$/.exec(p.textContent);return {el:p,nv:+p.dataset.tn,n:m?m[1]:'',t:m?m[2]:p.textContent}});
+  if(!nav){nav=document.createElement('nav');nav.className='tud-sum';nav.contentEditable='false';
+    const t=folha.firstElementChild;if(t&&t.tagName==='H2')t.after(nav);else folha.prepend(nav)}
+  const f=folha.getBoundingClientRect(),H=f.width*297/210||1;
+  const pag=el=>Math.max(1,Math.floor((el.getBoundingClientRect().top-f.top)/H)+1);
+  const html='<div class="ts-t">Sumário</div>'+(itens.length?itens.map((x,i)=>`<a class="l${x.nv}" data-i="${i}"><span class="n">${esc(x.n||'')}</span><span class="x">${esc(x.t.replace(/\s+/g,' ').trim())}</span><span class="d"></span><span class="p">${pag(x.el)}</span></a>`).join(''):'<div class="vazio">Os títulos aparecem aqui quando você usar Título ou Subtítulo (botão direito).</div>');
+  if(nav.innerHTML!==html)nav.innerHTML=html;
+  nav._itens=itens.map(x=>x.el);
+}
+folha.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('nav.tud-sum a');if(!a)return;e.preventDefault();const nav=a.closest('nav');irPara(nav._itens&&nav._itens[+a.dataset.i])});
+let _nt=null;addEventListener('resize',()=>{clearTimeout(_nt);_nt=setTimeout(numerarTudao,250)});
+// Tudão: tira as linhas vazias acumuladas no fim (deixa uma para continuar escrevendo)
+function aparaFimTudao(raiz){
+  let u=raiz.lastElementChild;
+  const vazio=e=>e&&!e.textContent.trim()&&!e.querySelector('img,table,hr')&&/^(P|DIV|BR|H[1-6])$/.test(e.tagName);
+  while(u&&vazio(u)&&vazio(u.previousElementSibling)){const a=u.previousElementSibling;u.remove();u=a}
 }
 // ---- salvar texto ----
 function marcar(){$('#status').textContent='salvando…';clearTimeout(timer);pendente=true;timer=setTimeout(()=>{pendente=false;marcarTitulos();salvar();if(ehTudao())aoRolar()},500);montarSumario()}
@@ -967,7 +1066,7 @@ addEventListener('pagehide',salvarJa);document.addEventListener('visibilitychang
 function aviso(txt){let a=$('#avisoSalvar');if(!txt){if(a)a.remove();return}
   if(!a){a=document.createElement('div');a.id='avisoSalvar';a.style.cssText='position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:200;background:#b42318;color:#fff;font-weight:bold;padding:10px 16px;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.3);max-width:92vw';document.body.appendChild(a)}
   a.textContent=txt}
-function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,.inc-badge').forEach(b=>b.remove());c.querySelectorAll('[data-fo]').forEach(b=>b.removeAttribute('data-fo'));c.querySelectorAll('[data-tit]').forEach(b=>b.removeAttribute('data-tit'));return c.innerHTML}
+function htmlLimpo(){const c=folha.cloneNode(true);c.querySelectorAll('.inc-anc,.inc-badge').forEach(b=>b.remove());c.querySelectorAll('[data-fo]').forEach(b=>b.removeAttribute('data-fo'));c.querySelectorAll('[data-tit]').forEach(b=>b.removeAttribute('data-tit'));c.querySelectorAll('nav.tud-sum').forEach(b=>b.remove());c.querySelectorAll('[data-tn],[data-num],[data-incv],[data-incf]').forEach(b=>{['data-tn','data-num','data-incv','data-incf'].forEach(a=>b.removeAttribute(a))});if(ehTudao())aparaFimTudao(c);return c.innerHTML}
 async function salvar(){
   if(!pronto)return;
   const k='doc:'+slug,h=htmlLimpo();
@@ -991,12 +1090,12 @@ $('#mMais').querySelector('[data-a=baixar]').onclick=()=>{fechaMenus();const a=d
   a.download=slug+'.html';a.click()};
 
 // ---- sumário do capítulo: só aparece se houver títulos ----
-function titulos(){return [...folha.querySelectorAll('h2,h3')]}
+function titulos(){return [...folha.querySelectorAll('h2,h3,h4')].filter(h=>!h.closest('nav.tud-sum'))}
 function montarSumario(){
   const hs=titulos();
   $('#btnSum').hidden=!hs.length;
   if(!hs.length){$('#sumario').classList.remove('on');$('#sumLista').innerHTML='';return}
-  $('#sumLista').innerHTML=hs.map((h,i)=>`<a class="${h.tagName.toLowerCase()}" data-i="${i}">${esc(Array.from(h.childNodes).map(n=>n.nodeName==='BR'?' – ':n.textContent).join('').replace(/\s+/g,' ').trim())}</a>`).join('');
+  $('#sumLista').innerHTML=hs.map((h,i)=>`<a class="${h.tagName.toLowerCase()}" data-i="${i}">${h.dataset.num?esc(h.dataset.num)+' ':''}${esc(Array.from(h.childNodes).map(n=>n.nodeName==='BR'?' – ':n.textContent).join('').replace(/\s+/g,' ').trim())}</a>`).join('');
   $('#sumLista').querySelectorAll('a').forEach(a=>a.onclick=()=>irPara(titulos()[+a.dataset.i]));
   if(LS.get('sumOn')&&!montarSumario.ini){montarSumario.ini=1;$('#sumario').classList.add('on')}
 }
@@ -1327,6 +1426,7 @@ async function atualizarIncidencia(){
     }
     // o selo mostra só a incidência da citação principal do bloco (a primeira); as demais citadas no texto são acessórias
     for(let i=ins.length-1;i>=0;i--)if(ins[i].mi!==primeiro){ins.splice(i,1);total--}
+    if(ehTudao()){if(/^H[2-4]$/.test(bloco.tagName)){total-=ins.length;ins.length=0}else ins.forEach(x=>{x.pos=Math.max(0,ini0)})}
     ins.sort((a,b)=>b.pos-a.pos).forEach(x=>inserirNaPosicao(mapa,x.pos,x.el));
   }
   const leiBase=(LEISECA&&usaComp)?leiPadrao(inc):null;
@@ -1531,6 +1631,7 @@ async function editor(){
   try{ // texto salvo vazio/corrompido: volta ao original em vez de mostrar folha em branco
     if(pronto&&folha.innerText.trim().length<30){const o=await original();if(o&&o.length>100){folha.innerHTML=semMarcas(o);try{await Cofre.apagar('doc:'+slug)}catch(e){}}}
   }catch(e){}
+  if(ehTudao())aparaFimTudao(folha);
   marcarTitulos();montarSumario();marcarLeiSeca();mostrarAtu();{const bu=$('#btnUlt');document.body.classList.remove('ver-ult');bu.classList.remove('on');
   if((ATU[slug]&&ATU[slug].length)||folha.querySelector('.upd')){bu.hidden=false;bu.onmousedown=e=>e.preventDefault();bu.onclick=()=>{
     const on=!document.body.classList.contains('ver-ult');document.body.classList.toggle('ver-ult',on);bu.classList.toggle('on',on);
