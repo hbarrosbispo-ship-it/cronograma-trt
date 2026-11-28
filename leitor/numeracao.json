@@ -153,7 +153,8 @@
   "tudao-leg": ["Tudões", "09", "Tudão de Legislação"],
   "tudao-pcd": ["Tudões", "10", "Tudão de Pessoas com Deficiência (PCD)"],
   "tudao-inf": ["Tudões", "11", "Tudão de Informática"],
-  "tudao-rlm": ["Tudões", "12", "Tudão de Raciocínio Lógico-Matemático (RLM)"]
+  "tudao-rlm": ["Tudões", "12", "Tudão de Raciocínio Lógico-Matemático (RLM)"],
+  "tudao-dct": ["Tudões", "13", "Tudão de Direito Coletivo do Trabalho"]
  },
  "compilados": {
     "3A": ["02", "Direitos sociais + nacionalidade + direitos políticos + partidos políticos"], 

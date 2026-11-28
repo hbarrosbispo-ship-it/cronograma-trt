@@ -172,8 +172,8 @@
   .badge-type.leitura{background:#FDEBD0;color:#B9770E;}
   .badge-type.questoes{background:#D6EAF8;color:#1F618D;}
   .badge-type.flashcards{background:#E8DAEF;color:#6C3483;}
-  .badge-type.estudocaso{background:#D4E6F1;color:#21618C;}
-  .badge-type.simulado{background:#FAD7A0;color:#A04000;}
+  .badge-type.estudocaso{background:#D5F0E0;color:#1E7A45;}
+  .badge-type.simulado{background:#E9ECF2;color:#3E4C63;}
   .desc-cell{max-width:340px;}
   .qc-link{font-size:10.5px;color:var(--blue-dark);text-decoration:none;font-weight:bold;white-space:nowrap;margin-left:4px;}
   .qc-link:hover{text-decoration:underline;}
@@ -318,9 +318,9 @@
   .cal-num span{font-weight:400;color:var(--gray,#6b7280);font-size:10.5px}
   .cal-t{font-size:11px;line-height:1.25;border-radius:4px;padding:2px 4px;border-left:3px solid #305496;background:#f1f5fb;color:#1f2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .cal-t.feito{opacity:.45;text-decoration:line-through}
-  .cal-t.simulado{background:#fdf2e3;border-left-color:#E67E22}
-  .cal-t.estudocaso{background:#f3eefc;border-left-color:#8e44ad}
-  .cal-t.leitura{background:#eaf6ef;border-left-color:#2E9E5B}
+  .cal-t.simulado{background:#eef0f4;border-left-color:#6b7a90}
+  .cal-t.estudocaso{background:#e8f6ee;border-left-color:#27AE60}
+  .cal-t.leitura{background:#fdf3e4;border-left-color:#D68910}
   .cal-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--gray,#6b7280);margin-top:8px}
   @media (max-width:700px){ .cal-dia{min-height:60px} .cal-t{font-size:9.5px;padding:1px 2px} }
   table.ed-tab th{text-align:left;font-size:11px;color:var(--gray);text-transform:uppercase;padding:6px 8px;border-bottom:2px solid var(--border);}
@@ -371,7 +371,7 @@
   details.hist-det[open] .hs-n::before{content:"▾ ";}
   .hs-m{display:flex;gap:6px;flex-wrap:wrap;}
   .hs-m .chip{font-size:11.5px;font-weight:bold;background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:12px;padding:2px 10px;}
-  .hs-m .chip.alto{background:#e3f6ea;}.hs-m .chip.medio{background:#fff3cc;}.hs-m .chip.baixo{background:#fde8e6;}
+  .hs-m .chip.alto{background:#e3f6ea;color:#1E7A45;}.hs-m .chip.medio{background:#fff3cc;color:#8A6508;}.hs-m .chip.baixo{background:#fde8e6;color:#A93226;}
   .hr{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--border);}
   .hr:hover{background:#f7f9fc;}
   .hr-t{flex:1 1 230px;min-width:200px;}
@@ -525,7 +525,6 @@ body > .wrap > .tab-bar{display:none}
             <select id="tfType">
               <option value="Leitura">Leitura</option>
               <option value="Questões">Questões</option>
-              <option value="Simulado">Simulado</option>
               <option value="Estudo de Caso">Estudo de Caso</option>
               <option value="Flashcards">Flashcards</option>
             </select>
@@ -1311,7 +1310,7 @@ const PLANO_REVISAO = [
 {"rid":"u008","de":"t499","date":"21/12/2026","mins":55,"amount":29},
 {"rid":"u009","de":"t511","date":"09/12/2026","mins":33,"amount":21},
 {"rid":"u010","de":"t515","date":"17/12/2026","mins":27,"amount":13},
-{"rid":"u011","de":"t438","date":"02/12/2026","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
+{"rid":"u011","de":"t438","date":"02/12/2026","mins":50,"desc":"Estudo de Caso da prova TRT-7 (2024) (escrever e corrigir pelo padrão da FCC)"},
 {"rid":"u012","de":"t485","date":"04/12/2026","mins":141,"amount":52},
 {"rid":"u013","de":"t593","date":"23/12/2026","mins":5,"amount":3},
 {"rid":"u014","de":"t617","date":"23/12/2026","mins":30,"amount":18},
@@ -1328,7 +1327,7 @@ const PLANO_REVISAO = [
 {"rid":"u025","de":"t510","date":"10/12/2026","mins":38,"amount":25},
 {"rid":"u026","de":"t517","date":"08/12/2026","mins":25,"amount":11},
 {"rid":"u027","de":"t605","date":"28/12/2026","mins":10,"amount":6},
-{"rid":"u028","de":"t438","date":"09/12/2026","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
+{"rid":"u028","de":"t438","date":"09/12/2026","mins":50,"desc":"Estudo de Caso da prova TRT-11 (2024) (escrever e corrigir pelo padrão da FCC)"},
 {"rid":"u029","de":"t450","date":"31/12/2026","mins":113,"amount":40},
 {"rid":"u030","de":"t460","date":"11/12/2026","mins":68,"amount":39},
 {"rid":"u031","de":"t448","date":"14/12/2026","mins":23,"amount":12},
@@ -1342,7 +1341,7 @@ const PLANO_REVISAO = [
 {"rid":"u039","de":"t609","date":"31/12/2026","mins":52,"amount":30},
 {"rid":"u040","de":"t500","date":"08/12/2026","mins":43,"amount":23},
 {"rid":"u041","de":"t502","date":"16/12/2026","mins":25,"amount":12},
-{"rid":"u042","de":"t438","date":"16/12/2026","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
+{"rid":"u042","de":"t438","date":"16/12/2026","mins":50,"desc":"Estudo de Caso da prova TRT-1 (2025) (escrever e corrigir pelo padrão da FCC)"},
 {"rid":"u043","de":"t447","date":"30/11/2026","mins":77,"amount":25},
 {"rid":"u044","de":"t452","date":"23/12/2026","mins":68,"amount":19},
 {"rid":"u045","de":"t464","date":"09/12/2026","mins":32,"amount":16},
@@ -1361,7 +1360,7 @@ const PLANO_REVISAO = [
 {"rid":"u058","de":"t635","date":"22/12/2026","mins":39,"amount":15},
 {"rid":"u059","de":"t636","date":"01/01/2027","mins":15,"amount":9},
 {"rid":"u060","de":"t637","date":"01/01/2027","mins":13,"amount":5},
-{"rid":"u061","de":"t438","date":"23/12/2026","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
+{"rid":"u061","de":"t438","date":"23/12/2026","mins":50,"desc":"Estudo de Caso da prova TRT-6 (2025) (escrever e corrigir pelo padrão da FCC)"},
 {"rid":"u062","de":"t589","date":"09/12/2026","mins":25,"amount":10},
 {"rid":"u063","de":"t498","date":"03/12/2026","mins":83,"amount":39},
 {"rid":"u064","de":"t501","date":"02/12/2026","mins":32,"amount":19},
@@ -1380,7 +1379,7 @@ const PLANO_REVISAO = [
 {"rid":"u077","de":"t469","date":"01/12/2026","mins":27,"amount":9},
 {"rid":"u078","de":"t597","date":"22/12/2026","mins":9,"amount":5},
 {"rid":"u079","de":"t603","date":"30/12/2026","mins":40,"amount":28},
-{"rid":"u080","de":"t438","date":"30/12/2026","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
+{"rid":"u080","de":"t438","date":"30/12/2026","mins":50,"desc":"Estudo de Caso da prova TRT-2 (2025) (escrever e corrigir pelo padrão da FCC)"},
 {"rid":"u081","de":"t481","date":"08/12/2026","mins":55,"amount":33},
 {"rid":"u082","de":"t491","date":"16/12/2026","mins":27,"amount":16},
 {"rid":"u083","de":"t594","date":"21/12/2026","mins":2,"amount":1},
@@ -1406,7 +1405,6 @@ const PLANO_REVISAO = [
 {"rid":"u103","de":"t613","date":"16/12/2026","mins":7,"amount":3},
 {"rid":"u104","de":"t622","date":"31/12/2026","mins":20,"amount":11},
 {"rid":"u105","de":"t623","date":"01/01/2027","mins":10,"amount":6},
-{"rid":"u106","de":"t438","date":"06/01/2027","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
 {"rid":"u107","de":"t454","date":"17/12/2026","mins":18,"amount":7},
 {"rid":"u108","de":"t588","date":"08/12/2026","mins":84,"amount":33,"desc":"Fazer Caderno - Administração Pública (sem PDF)"},
 {"rid":"u109","de":"t592","date":"28/12/2026","mins":38,"amount":15},
@@ -1416,18 +1414,18 @@ const PLANO_REVISAO = [
 {"rid":"u113","de":"t641","date":"29/12/2026","mins":177,"amount":55},
 {"rid":"u114","de":"t438","date":"28/11/2026","mins":50,"desc":"Estudo de Caso: refazer um que você já fez"},
 {"rid":"u115","de":"t472","date":"05/12/2026","mins":50},
-{"rid":"u116","de":"t438","date":"12/12/2026","mins":50,"desc":"Estudo de Caso: refazer um que você já fez"},
+{"rid":"u116","de":"t438","date":"12/12/2026","mins":50,"desc":"Estudo de Caso da prova TRT-20 (2024) (escrever e corrigir pelo padrão da FCC)"},
 {"rid":"u117","de":"t527","date":"19/12/2026","mins":50},
-{"rid":"u118","de":"t438","date":"25/12/2026","mins":50,"desc":"Estudo de Caso: refazer um que você já fez"},
+{"rid":"u118","de":"t438","date":"25/12/2026","mins":50,"desc":"Estudo de Caso da prova TRT-15 (2025) (escrever e corrigir pelo padrão da FCC)"},
 {"rid":"u119","de":"t553","date":"02/01/2027","mins":50},
-{"rid":"u120","de":"t438","date":"09/01/2027","mins":50,"desc":"Estudo de Caso: refazer um que você já fez"},
-{"rid":"u121","de":null,"date":"28/11/2026","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-11 (2024)","amount":60,"unit":"questões"},
-{"rid":"u122","de":null,"date":"05/12/2026","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-7 (2024)","amount":60,"unit":"questões"},
-{"rid":"u123","de":null,"date":"12/12/2026","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-20 (2024)","amount":60,"unit":"questões"},
-{"rid":"u124","de":null,"date":"19/12/2026","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-1 (2025)","amount":60,"unit":"questões"},
-{"rid":"u125","de":null,"date":"27/12/2026","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-6 (2025)","amount":60,"unit":"questões"},
-{"rid":"u126","de":null,"date":"02/01/2027","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-15 (2025)","amount":60,"unit":"questões"},
-{"rid":"u127","de":null,"date":"09/01/2027","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-2 (2025)","amount":60,"unit":"questões"},
+{"rid":"u120","de":"t438","date":"09/01/2027","mins":50,"desc":"Estudo de Caso da prova TRT-8 (2022) AJAJ (escrever e corrigir pelo padrão da FCC)"},
+{"rid":"u121","de":null,"date":"28/11/2026","mins":120,"subj":"-","type":"Questões","desc":"Simulado: TRT-11 (2024)","amount":60,"unit":"questões"},
+{"rid":"u122","de":null,"date":"05/12/2026","mins":120,"subj":"-","type":"Questões","desc":"Simulado: TRT-7 (2024)","amount":60,"unit":"questões"},
+{"rid":"u123","de":null,"date":"12/12/2026","mins":120,"subj":"-","type":"Questões","desc":"Simulado: TRT-20 (2024)","amount":60,"unit":"questões"},
+{"rid":"u124","de":null,"date":"19/12/2026","mins":120,"subj":"-","type":"Questões","desc":"Simulado: TRT-1 (2025)","amount":60,"unit":"questões"},
+{"rid":"u125","de":null,"date":"27/12/2026","mins":120,"subj":"-","type":"Questões","desc":"Simulado: TRT-6 (2025)","amount":60,"unit":"questões"},
+{"rid":"u126","de":null,"date":"02/01/2027","mins":120,"subj":"-","type":"Questões","desc":"Simulado: TRT-15 (2025)","amount":60,"unit":"questões"},
+{"rid":"u127","de":null,"date":"09/01/2027","mins":120,"subj":"-","type":"Questões","desc":"Simulado: TRT-2 (2025)","amount":60,"unit":"questões"},
 {"rid":"u133","de":"t438","date":"13/01/2027","mins":45,"desc":"Revisão dos Estudos de Caso"},
 {"rid":"v001","de":null,"date":"04/01/2027","mins":74,"subj":"DPT","type":"Questões","desc":"Caderno geral por incidência: Processo do Trabalho (montar em janeiro)","amount":35,"unit":"questões"},
 {"rid":"v002","de":null,"date":"04/01/2027","mins":21,"subj":"PCD","type":"Questões","desc":"Caderno geral por incidência: PCD (montar em janeiro)","amount":10,"unit":"questões"},
@@ -1441,19 +1439,8 @@ const PLANO_REVISAO = [
 {"rid":"v010","de":null,"date":"05/01/2027","mins":52,"subj":"DCO","type":"Questões","desc":"Caderno geral por incidência: Constitucional (montar em janeiro)","amount":25,"unit":"questões"},
 {"rid":"v011","de":null,"date":"06/01/2027","mins":74,"subj":"DT","type":"Questões","desc":"Caderno geral por incidência: Direito do Trabalho (montar em janeiro)","amount":35,"unit":"questões"},
 {"rid":"v012","de":null,"date":"06/01/2027","mins":21,"subj":"DCT","type":"Questões","desc":"Caderno geral por incidência: Direito Coletivo (montar em janeiro)","amount":10,"unit":"questões"},
-{"rid":"v013","de":null,"date":"06/01/2027","mins":10,"subj":"RLM","type":"Questões","desc":"Caderno geral por incidência: RLM (montar em janeiro)","amount":5,"unit":"questões"},
-{"rid":"w001","de":null,"date":"06/01/2027","mins":60,"subj":"-","type":"Leitura","desc":"Leitura do tudão: RLM + Informática","amount":null,"unit":"","bib":"tudao-rlm,tudao-inf"},
-{"rid":"w002","de":null,"date":"07/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DPT","amount":null,"unit":"","bib":"tudao-dpt"},
-{"rid":"w003","de":null,"date":"07/01/2027","mins":90,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DPC","amount":null,"unit":"","bib":"tudao-dpc"},
-{"rid":"w004","de":null,"date":"08/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DT (com Coletivo)","amount":null,"unit":"","bib":"tudao-dt"},
-{"rid":"w005","de":null,"date":"08/01/2027","mins":100,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DA","amount":null,"unit":"","bib":"tudao-da"},
-{"rid":"w006","de":null,"date":"11/01/2027","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-8 (2022) AJAJ, última prova do TRT-8","amount":60,"unit":"questões"},
-{"rid":"w007","de":null,"date":"11/01/2027","mins":90,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DCO","amount":null,"unit":"","bib":"tudao-dco"},
-{"rid":"w008","de":null,"date":"12/01/2027","mins":80,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DCI","amount":null,"unit":"","bib":"tudao-dci"},
-{"rid":"w009","de":null,"date":"12/01/2027","mins":140,"subj":"-","type":"Leitura","desc":"Leitura do tudão: Português + Legislação + DH","amount":null,"unit":"","bib":"tudao-port,tudao-leg,tudao-dh"},
-{"rid":"w010","de":null,"date":"13/01/2027","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-8 (2022) TJAA, última prova do TRT-8","amount":60,"unit":"questões"},
-{"rid":"w011","de":null,"date":"13/01/2027","mins":30,"subj":"-","type":"Leitura","desc":"Leitura do tudão: PCD","amount":null,"unit":"","bib":"tudao-pcd"},
-{"rid":"w030","de":null,"date":"16/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Revisão leve de todos os tudões","amount":null,"unit":"","bib":"tudao-dpt,tudao-dt,tudao-da,tudao-dco,tudao-dpc,tudao-dci,tudao-port,tudao-leg,tudao-dh,tudao-pcd,tudao-inf,tudao-rlm"},
+{"rid":"w006","de":null,"date":"12/01/2027","mins":120,"subj":"-","type":"Questões","desc":"Simulado: TRT-8 (2022) AJAJ, última prova do TRT-8","amount":60,"unit":"questões"},
+{"rid":"w010","de":null,"date":"11/01/2027","mins":120,"subj":"-","type":"Questões","desc":"Simulado: TRT-8 (2022) TJAA, última prova do TRT-8","amount":60,"unit":"questões"},
 {"rid":"w012","de":null,"date":"14/01/2027","mins":63,"subj":"DPT","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Processo do Trabalho (montar em janeiro)","amount":30,"unit":"questões"},
 {"rid":"w013","de":null,"date":"14/01/2027","mins":52,"subj":"DPC","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Processo Civil (montar em janeiro)","amount":25,"unit":"questões"},
 {"rid":"w014","de":null,"date":"14/01/2027","mins":42,"subj":"DCI","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Direito Civil (montar em janeiro)","amount":20,"unit":"questões"},
@@ -1466,7 +1453,33 @@ const PLANO_REVISAO = [
 {"rid":"w021","de":null,"date":"15/01/2027","mins":25,"subj":"LEG","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Legislação (montar em janeiro)","amount":12,"unit":"questões"},
 {"rid":"w022","de":null,"date":"15/01/2027","mins":17,"subj":"DH","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Direitos Humanos (montar em janeiro)","amount":8,"unit":"questões"},
 {"rid":"w023","de":null,"date":"15/01/2027","mins":17,"subj":"DCT","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Direito Coletivo (montar em janeiro)","amount":8,"unit":"questões"},
-{"rid":"w024","de":null,"date":"15/01/2027","mins":10,"subj":"RLM","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: RLM (montar em janeiro)","amount":5,"unit":"questões"},
+{"rid":"w101","de":null,"date":"06/01/2027","mins":80,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DCI","amount":null,"unit":"","bib":"tudao-dci"},
+{"rid":"w102","de":null,"date":"06/01/2027","mins":15,"subj":"-","type":"Leitura","desc":"Leitura do tudão: RLM","amount":null,"unit":"","bib":"tudao-rlm"},
+{"rid":"w103","de":null,"date":"07/01/2027","mins":90,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DCO","amount":null,"unit":"","bib":"tudao-dco"},
+{"rid":"w104","de":null,"date":"07/01/2027","mins":50,"subj":"-","type":"Leitura","desc":"Leitura do tudão: Português","amount":null,"unit":"","bib":"tudao-port"},
+{"rid":"w105","de":null,"date":"07/01/2027","mins":50,"subj":"-","type":"Leitura","desc":"Leitura do tudão: Legislação","amount":null,"unit":"","bib":"tudao-leg"},
+{"rid":"w106","de":null,"date":"08/01/2027","mins":90,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DPC","amount":null,"unit":"","bib":"tudao-dpc"},
+{"rid":"w107","de":null,"date":"08/01/2027","mins":40,"subj":"-","type":"Leitura","desc":"Leitura do tudão: Direitos Humanos","amount":null,"unit":"","bib":"tudao-dh"},
+{"rid":"w108","de":null,"date":"08/01/2027","mins":40,"subj":"-","type":"Leitura","desc":"Leitura do tudão: Informática","amount":null,"unit":"","bib":"tudao-inf"},
+{"rid":"w109","de":null,"date":"08/01/2027","mins":30,"subj":"-","type":"Leitura","desc":"Leitura do tudão: PCD","amount":null,"unit":"","bib":"tudao-pcd"},
+{"rid":"w110","de":null,"date":"11/01/2027","mins":100,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DA","amount":null,"unit":"","bib":"tudao-da"},
+{"rid":"w111","de":null,"date":"12/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DPT","amount":null,"unit":"","bib":"tudao-dpt"},
+{"rid":"w112","de":null,"date":"13/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DT","amount":null,"unit":"","bib":"tudao-dt"},
+{"rid":"w113","de":null,"date":"13/01/2027","mins":30,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DCT","amount":null,"unit":"","bib":"tudao-dct"},
+{"rid":"w114","de":null,"date":"13/01/2027","mins":45,"subj":"RLM","type":"Questões","desc":"Refazer só as erradas: RLM (matemática)","amount":11,"unit":"questões"},
+{"rid":"w120","de":null,"date":"16/01/2027","mins":6,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: PCD","amount":null,"unit":"","bib":"tudao-pcd"},
+{"rid":"w121","de":null,"date":"16/01/2027","mins":6,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: Informática","amount":null,"unit":"","bib":"tudao-inf"},
+{"rid":"w122","de":null,"date":"16/01/2027","mins":6,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: Direitos Humanos","amount":null,"unit":"","bib":"tudao-dh"},
+{"rid":"w123","de":null,"date":"16/01/2027","mins":8,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: Legislação","amount":null,"unit":"","bib":"tudao-leg"},
+{"rid":"w124","de":null,"date":"16/01/2027","mins":8,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: Português","amount":null,"unit":"","bib":"tudao-port"},
+{"rid":"w125","de":null,"date":"16/01/2027","mins":4,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: RLM","amount":null,"unit":"","bib":"tudao-rlm"},
+{"rid":"w126","de":null,"date":"16/01/2027","mins":10,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: DCI","amount":null,"unit":"","bib":"tudao-dci"},
+{"rid":"w127","de":null,"date":"16/01/2027","mins":12,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: DPC","amount":null,"unit":"","bib":"tudao-dpc"},
+{"rid":"w128","de":null,"date":"16/01/2027","mins":12,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: DCO","amount":null,"unit":"","bib":"tudao-dco"},
+{"rid":"w129","de":null,"date":"16/01/2027","mins":12,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: DA","amount":null,"unit":"","bib":"tudao-da"},
+{"rid":"w130","de":null,"date":"16/01/2027","mins":6,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: DCT","amount":null,"unit":"","bib":"tudao-dct"},
+{"rid":"w131","de":null,"date":"16/01/2027","mins":15,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: DT","amount":null,"unit":"","bib":"tudao-dt"},
+{"rid":"w132","de":null,"date":"16/01/2027","mins":15,"subj":"-","type":"Leitura","desc":"Revisão leve do tudão: DPT","amount":null,"unit":"","bib":"tudao-dpt"},
 ];
 PLANO_REVISAO.forEach(n=>{
   const molde = n.de ? BUILTIN_TASKS.find(t=>t.id===n.de) : null;
@@ -2161,7 +2174,7 @@ function ritmoHtml(t){
   if(real>0) h += `<div class="ritmo ritmo-real" title="Tempo registrado dividido pela quantidade">real: ${fmtRitmo(real/a)} min/${un}</div>`;
   return h;
 }
-const TYPE_RANK = {Leitura:0, 'Questões':1, Simulado:1.2, 'Estudo de Caso':1.5, Flashcards:2};
+const TYPE_RANK = {Leitura:0, 'Questões':1, Simulado:1, 'Estudo de Caso':1.5, Flashcards:2};
 // Posição manual dentro do dia: só existe depois que o usuário arrasta uma tarefa pra um
 // lugar específico (entre duas outras). Enquanto isso não acontece, cai no padrão por tipo.
 function manualOrder(t){
@@ -2552,7 +2565,7 @@ function rowHtml(t, firstCol, draggableRow){
   const isQ = t.type==='Questões' || t.type==='Simulado';
   const isFlash = t.type==='Flashcards';
   const acertos = isQ ? acertosTotalStr(t) : '';
-  const typeClass = t.type==='Leitura' ? 'leitura' : (t.type==='Questões' ? 'questoes' : (t.type==='Simulado' ? 'simulado' : (t.type==='Estudo de Caso' ? 'estudocaso' : 'flashcards')));
+  const typeClass = t.type==='Leitura' ? 'leitura' : (isSimulado(t) ? 'simulado' : t.type==='Questões' ? 'questoes' : (t.type==='Simulado' ? 'simulado' : (t.type==='Estudo de Caso' ? 'estudocaso' : 'flashcards')));
   const rowClass = (timerTaskId===t.id) ? 'timing' : '';
   const linkHtml = t.link ? ` <a href="${t.link}" target="_blank" rel="noopener" class="qc-link" title="Abrir o caderno no QConcursos">QConcursos ↗</a>` : '';
   const offHtml = t.off ? ` <a href="${t.off}" target="_blank" rel="noopener" class="qc-link" title="Abrir o simulado offline (com gabarito comentado)">Offline ↗</a>` : '';
@@ -2586,7 +2599,7 @@ function rowHtml(t, firstCol, draggableRow){
   return `
     <tr data-id="${t.id}" data-date="${effectiveDate(t)}" class="${rowClass}" ${draggableRow ? 'draggable="true"' : ''}>
       ${firstCell}
-      <td data-label="Atividade"><span class="badge-type ${typeClass}">${t.type}</span></td>
+      <td data-label="Atividade"><span class="badge-type ${typeClass}">${isSimulado(t) ? 'Simulado' : t.type}</span></td>
       <td data-label="Descrição" class="desc-cell">${descHtml}</td>
       <td data-label="Qtd">${qtdHtml}</td>
       <td data-label="Status">
@@ -3295,7 +3308,7 @@ function planoFases(){
   const f = [
     { n:'Fase 1 · Conteúdo novo', a:ini, b:parseBR('26/11/2026'), d:'Leituras e questões de cada PDF' },
     { n:'Fase 2 · Refazer os cadernos anotando o essencial', a:parseBR('27/11/2026'), b:parseBR('03/01/2027'), d:'Cadernos inteiros (os feitos nos últimos 2 meses ficam para o fim), Estudo de Caso às quartas, simulado e Estudo de Caso aos sábados' },
-    { n:'Fase 3 · Cadernos gerais e leitura dos tudões', a:parseBR('04/01/2027'), b:parseBR('13/01/2027'), d:'Cadernos gerais por incidência (04 a 06/01), leitura dos tudões e as duas últimas provas do TRT-8 (AJAJ e TJAA)' },
+    { n:'Fase 3 · Cadernos gerais e leitura dos tudões', a:parseBR('04/01/2027'), b:parseBR('13/01/2027'), d:'Cadernos gerais por incidência (04 a 06/01), um tudão por matéria (DPT e DT por último) e as duas últimas provas do TRT-8 (TJAA na segunda, AJAJ na terça)' },
     { n:'Fase 4 · Reta final', a:parseBR('14/01/2027'), b:prova, d:'Cadernos gerais (2ª rodada) na quinta e na sexta; revisão leve de todos os tudões no sábado' }
   ];
   return f;
@@ -3339,7 +3352,7 @@ function renderGeral(){
   });
   const proxRez = rezRows.find(x=>!x.feito && x.env>=h0);
   const rezHtml = rezRows.map(x=>`<tr class="${x===proxRez?'rez-prox':''}"><td><b>Simulado nº ${x.r.n}</b></td><td>${x.r.lib}</td><td>${x.r.escrever}</td><td>${x.r.enviar}</td><td>${x.r.corr}</td><td>${x.sit}</td></tr>`).join('');
-  const sims = tasks.filter(t=>t.type==='Simulado').sort((a,b)=>parseBR(effectiveDate(a))-parseBR(effectiveDate(b)));
+  const sims = tasks.filter(isSimulado).sort((a,b)=>parseBR(effectiveDate(a))-parseBR(effectiveDate(b)));
   const proxSim = sims.find(t=>lsGet('status_'+t.id,'Pendente')!=='Concluído');
   const simRows = sims.map(t=>{
     const d = effectiveDate(t), feito = lsGet('status_'+t.id,'Pendente')==='Concluído';
@@ -3351,7 +3364,7 @@ function renderGeral(){
   }).join('');
   const simHtml = sims.length ? `<div class="geral-sec"><h3>Simulados de questões (provas FCC de TRT)</h3>
       <table class="ed-tab"><thead><tr><th>Prova</th><th>Data</th><th>Tamanho</th><th>Acerto</th><th>Situação</th></tr></thead><tbody>${simRows}</tbody></table>
-      <div style="font-size:12px;color:var(--gray);margin-top:8px">Os simulados não entram nas estatísticas de questões dos cadernos; o acerto aparece só aqui.</div></div>` : '';
+      <div style="font-size:12px;color:var(--gray);margin-top:8px">Os simulados contam nas estatísticas de questões como as demais tarefas.</div></div>` : '';
   const refaz = tasks.filter(t=>/^Estudo de Caso: refazer/.test(t.desc||''));
   const refazFeitos = refaz.filter(t=>lsGet('status_'+t.id,'Pendente')==='Concluído').length;
   box.innerHTML = top + `
@@ -3361,6 +3374,7 @@ function renderGeral(){
       <table class="ed-tab"><thead><tr><th>Simulado</th><th>Liberado em</th><th>Escrever (sábado)</th><th>Enviar até</th><th>Correção (prevista)</th><th>Situação</th></tr></thead><tbody>${rezHtml}</tbody></table>
       <div style="font-size:12px;color:var(--gray);margin-top:8px">Nos demais sábados e às quartas o Estudo de Caso é refazer um que você já fez: ${refazFeitos} de ${refaz.length} concluídos.</div></div>`;
 }
+function isSimulado(t){ return t.type==='Simulado' || (t.type==='Questões' && /^Simulado/.test(t.desc||'')); }
 // ---------- Calendário (Edital > Calendário): todas as tarefas por dia, mês a mês ----------
 function renderCalendario(){
   const box = document.getElementById('calBox'); if(!box) return;
@@ -3384,7 +3398,7 @@ function renderCalendario(){
     const tot = lst.reduce((s,t)=>s+effectiveEffort(t),0) + (temFlash[d]||0);
     const cls = ['cal-dia', dt.getMonth()!==M-1?'fora':'', +dt===+h0?'hoje':'', +dt===+prova?'prova':''].join(' ');
     const itens = lst.map(t=>{
-      const tc = t.type==='Leitura' ? 'leitura' : (t.type==='Simulado' ? 'simulado' : (t.type==='Estudo de Caso' ? 'estudocaso' : ''));
+      const tc = t.type==='Leitura' ? 'leitura' : (isSimulado(t) ? 'simulado' : (t.type==='Estudo de Caso' ? 'estudocaso' : ''));
       const feito = lsGet('status_'+t.id,'Pendente')==='Concluído';
       const cor = (t.subj && t.subj!=='-' && SUBJ_COLORS[t.subj]) ? `border-left-color:${SUBJ_COLORS[t.subj]}` : '';
       const nome = effectiveDesc(t);
@@ -3395,7 +3409,7 @@ function renderCalendario(){
   }
   box.innerHTML = `<div class="cal-nav"><button type="button" onclick="calMudar(-1)">◀</button><span class="cal-mes">${nomes[M-1]} ${Y}</span><button type="button" onclick="calMudar(1)">▶</button><button type="button" onclick="calMudar(0)">Hoje</button></div>
     <div class="cal-grid">${cells}</div>
-    <div class="cal-leg"><span>Borda colorida = matéria</span><span style="color:#2E9E5B">■ leitura</span><span style="color:#E67E22">■ simulado</span><span style="color:#8e44ad">■ estudo de caso</span><span>Riscado = concluído · o tempo do dia inclui os flashcards</span></div>`;
+    <div class="cal-leg"><span>Borda colorida = matéria</span><span style="color:#D68910">■ leitura</span><span style="color:#6b7a90">■ simulado</span><span style="color:#27AE60">■ estudo de caso</span><span>Riscado = concluído · o tempo do dia inclui os flashcards</span></div>`;
 }
 function calMudar(n){
   if(n===0){ lsSet('calMes',''); renderCalendario(); return; }
@@ -4049,8 +4063,8 @@ function compiladoDaTarefa(t){
       renderAll();
     });
     if(t.type==='Questões' && t.subj && t.subj!=='-'){
-      const sl = 'tudao-'+(t.subj==='DCT'?'dt':t.subj.toLowerCase());
-      item('Abrir Tudão de '+(t.subj==='DCT'?'DT':t.subj)+' ↗', ()=>{ window.open(new URL('leitor.html?doc='+sl, location.href).href,'_blank','noopener'); });
+      const sl = 'tudao-'+t.subj.toLowerCase();
+      item('Abrir Tudão de '+t.subj+' ↗', ()=>{ window.open(new URL('leitor.html?doc='+sl, location.href).href,'_blank','noopener'); });
     }
     const comp = compiladoDaTarefa(t);
     if(comp) item('Abrir compilado ↗', ()=>{ window.open(new URL('compilado/'+comp.href, location.href).href,'_blank','noopener'); });

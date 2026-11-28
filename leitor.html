@@ -210,10 +210,10 @@ body:not(.ver-ult) .upd[data-visto]::after{display:none}
 body.tud-h #folha p[data-tit="linha"][data-tn="9"]{border-top:0;padding-top:0}
 /* Tudões com títulos de verdade (Título / Subtítulo / Subtítulo 2): numeração 1, 1.1, 1.1.1 automática */
 body.tud #folha h2[data-num],body.tud #folha h3[data-num],body.tud #folha h4[data-num]{position:relative;text-align:left}
-body.tud #folha h2[data-num]{font-size:13pt;color:#1F3864;border-top:2.5px solid #305496;padding-top:.55em;margin:1.8em 0 .7em}
-body.tud #folha h3[data-num]{font-size:12pt;color:#1F4E78;border-top:1px solid #b9c7e0;padding-top:.5em;margin:1.4em 0 .55em}
-body.tud #folha h4[data-num]{font-size:11pt;color:#1f2937;margin:1.1em 0 .4em}
-body.tud #folha [data-num]::before{content:attr(data-num) "\00a0\00a0";color:#305496}
+body.tud #folha h2[data-num]{font-size:13pt;color:#111;border-top:2.5px solid #305496;padding-top:.55em;margin:1.8em 0 .7em}
+body.tud #folha h3[data-num]{font-size:12pt;color:#111;border-top:1px solid #b9c7e0;padding-top:.5em;margin:1.4em 0 .55em}
+body.tud #folha h4[data-num]{font-size:11pt;color:#111;margin:1.1em 0 .4em}
+body.tud #folha [data-num]::before{content:attr(data-num) "\00a0\00a0";color:#111}
 body.tud #folha [data-incv]::after{content:attr(data-incv) "×";position:absolute;left:-64px;top:var(--inc-top,.62em);font:700 8.5pt Arial,sans-serif;line-height:1.25;padding:0 5px;border-radius:9px;border:1px solid transparent;user-select:none;pointer-events:none}
 body.tud #folha h4[data-incv]::after{--inc-top:.1em;top:.1em}
 body.tud #folha [data-incf="1"]::after{background:#E3F6DA;color:#2a6b12;border-color:#7ED957}
@@ -222,16 +222,16 @@ body.tud #folha [data-incf="3"]::after{background:#FFF3CC;color:#7a5b00;border-c
 body.tud #folha [data-incf="4"]::after{background:#FFE6CC;color:#9a4a00;border-color:#FF9F43}
 body.tud #folha [data-incf="5"]::after{background:#FFD9D9;color:#a30f0f;border-color:#FF3131}
 @media(max-width:700px){body.tud #folha [data-incv]::after{left:-42px;font-size:7.5pt;padding:0 3px}}
-#folha nav.tud-sum{display:block;border:1px solid #c9d5ea;border-radius:6px;background:#f7f9fd;padding:10px 14px;margin:0 0 1.6em;text-align:left;user-select:none;font-size:10.5pt}
-#folha nav.tud-sum .ts-t{font-weight:bold;color:#1F3864;margin-bottom:6px;font-size:11pt}
-#folha nav.tud-sum a{display:flex;gap:6px;align-items:baseline;color:#1f2937;text-decoration:none;cursor:pointer;padding:1px 0}
+#folha nav.tud-sum{display:block;border:1px solid #8a9ab5;border-radius:6px;background:#fff;color:#111;padding:10px 14px;margin:0 0 1.6em;text-align:left;user-select:none;font-size:10.5pt}
+#folha nav.tud-sum .ts-t{font-weight:bold;color:#111;margin-bottom:6px;font-size:11pt}
+#folha nav.tud-sum a{display:flex;gap:6px;align-items:baseline;color:#111;text-decoration:none;cursor:pointer;padding:1px 0}
 #folha nav.tud-sum a:hover .x{text-decoration:underline}
-#folha nav.tud-sum a.l1{font-weight:bold;color:#1F3864;margin-top:4px}
+#folha nav.tud-sum a.l1{font-weight:bold;color:#111;margin-top:4px}
 #folha nav.tud-sum a.l2{padding-left:18px}
-#folha nav.tud-sum a.l3{padding-left:36px;color:#4b5563;font-size:10pt}
-#folha nav.tud-sum .n{flex:none;color:#305496}
-#folha nav.tud-sum .d{flex:1 1 auto;border-bottom:1px dotted #9aa6b8;min-width:14px;transform:translateY(-3px)}
-#folha nav.tud-sum .p{flex:none;color:#4b5563;font-weight:normal}
+#folha nav.tud-sum a.l3{padding-left:36px;color:#222;font-size:10pt}
+#folha nav.tud-sum .n{flex:none;color:#111}
+#folha nav.tud-sum .d{flex:1 1 auto;border-bottom:1px dotted #555;min-width:14px;transform:translateY(-3px)}
+#folha nav.tud-sum .p{flex:none;color:#111;font-weight:normal}
 #folha nav.tud-sum .vazio{color:#6b7280;font-style:italic}
 /* faixa de ferramentas compacta */
 .rib{padding:2px 6px 0}
