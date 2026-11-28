@@ -173,6 +173,7 @@
   .badge-type.questoes{background:#D6EAF8;color:#1F618D;}
   .badge-type.flashcards{background:#E8DAEF;color:#6C3483;}
   .badge-type.estudocaso{background:#D4E6F1;color:#21618C;}
+  .badge-type.simulado{background:#FAD7A0;color:#A04000;}
   .desc-cell{max-width:340px;}
   .qc-link{font-size:10.5px;color:var(--blue-dark);text-decoration:none;font-weight:bold;white-space:nowrap;margin-left:4px;}
   .qc-link:hover{text-decoration:underline;}
@@ -304,6 +305,24 @@
   .ed-tools button{background:#fff;border:1px solid var(--border);padding:5px 11px;border-radius:7px;font-size:12px;font-weight:bold;cursor:pointer;color:var(--gray);}
   .ed-tools button.on{background:var(--blue);color:#fff;border-color:var(--blue);}
   table.ed-tab{width:100%;border-collapse:collapse;font-size:13px;}
+  .cal-nav{display:flex;align-items:center;gap:10px;margin:6px 0 10px;flex-wrap:wrap}
+  .cal-nav button{border:1px solid var(--border,#d0d7e2);background:#fff;border-radius:6px;padding:5px 12px;cursor:pointer;font:inherit;color:#1F4E78}
+  .cal-nav .cal-mes{font-size:17px;font-weight:700;color:#1F4E78;min-width:170px;text-align:center}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+  .cal-hd{font-size:11px;font-weight:700;color:var(--gray,#6b7280);text-align:center;padding:2px 0;text-transform:uppercase}
+  .cal-dia{border:1px solid #dde3ec;border-radius:7px;background:#fff;min-height:92px;padding:4px 5px;display:flex;flex-direction:column;gap:3px;min-width:0}
+  .cal-dia.fora{background:#f6f8fb;opacity:.55}
+  .cal-dia.hoje{border:2px solid #305496}
+  .cal-dia.prova{background:#fdecec;border-color:#D64545}
+  .cal-num{font-size:12px;font-weight:700;color:#1F4E78;display:flex;justify-content:space-between;gap:4px}
+  .cal-num span{font-weight:400;color:var(--gray,#6b7280);font-size:10.5px}
+  .cal-t{font-size:11px;line-height:1.25;border-radius:4px;padding:2px 4px;border-left:3px solid #305496;background:#f1f5fb;color:#1f2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cal-t.feito{opacity:.45;text-decoration:line-through}
+  .cal-t.simulado{background:#fdf2e3;border-left-color:#E67E22}
+  .cal-t.estudocaso{background:#f3eefc;border-left-color:#8e44ad}
+  .cal-t.leitura{background:#eaf6ef;border-left-color:#2E9E5B}
+  .cal-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--gray,#6b7280);margin-top:8px}
+  @media (max-width:700px){ .cal-dia{min-height:60px} .cal-t{font-size:9.5px;padding:1px 2px} }
   table.ed-tab th{text-align:left;font-size:11px;color:var(--gray);text-transform:uppercase;padding:6px 8px;border-bottom:2px solid var(--border);}
   table.ed-tab td{padding:7px 8px;border-bottom:1px solid #EDF0F4;vertical-align:top;}
   .ed-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:bold;white-space:nowrap;}
@@ -453,8 +472,7 @@ body > .wrap > .tab-bar{display:none}
 
   <div id="view-cronograma">
 
-    <button type="button" id="weekSummaryToggle" onclick="toggleWeekSummary()" style="margin:10px 0 0;padding:6px 12px;border:1px solid var(--border,#d0d7e2);border-radius:6px;background:transparent;color:inherit;font-weight:bold;cursor:pointer;"></button>
-    <div class="week-summary" id="weekSummary"></div>
+    
 
     <div class="subtab-bar">
       <button class="subtab-btn" id="subtabDiaria">Visão diária</button>
@@ -507,6 +525,7 @@ body > .wrap > .tab-bar{display:none}
             <select id="tfType">
               <option value="Leitura">Leitura</option>
               <option value="Questões">Questões</option>
+              <option value="Simulado">Simulado</option>
               <option value="Estudo de Caso">Estudo de Caso</option>
               <option value="Flashcards">Flashcards</option>
             </select>
@@ -567,8 +586,10 @@ body > .wrap > .tab-bar{display:none}
     <div class="subtab-bar">
       <button class="subtab-btn" id="edSubGeral">Visão geral</button>
       <button class="subtab-btn" id="edSubItens">Itens do edital</button>
+      <button class="subtab-btn" id="edSubCal">Calendário</button>
     </div>
     <div id="edital-geral-content" style="display:none;"><div id="geralBox"></div></div>
+    <div id="edital-cal-content" style="display:none;"><div id="calBox"></div></div>
     <div id="edital-itens-content" style="display:none;">
       <p class="note">Conteúdo programático do edital (cargo 01, Analista Judiciário, Área Judiciária) item por item. Os itens se atualizam sozinhos: cada um é casado com as leituras do cronograma e com os títulos e sumários dos capítulos da biblioteca (📖 abre o trecho). Conta como estudado quando todas as leituras que o cobrem estão concluídas ou quando você já fez questões sobre o tema (filtro ou caderno concluído); só o que foi feito de fato entra na conta. Clique em um item ou em uma matéria para guardar anotações.</p>
     <div id="editalResumo"></div>
@@ -1278,155 +1299,174 @@ BUILTIN_TASKS.forEach((t,i)=>{ t.id='t'+i; t.effort = t.mins!=null ? t.mins : t.
 // ---- Revisão da reta final (26/11/2026): substitui as tarefas pendentes de 27/11 a 16/01 ----
 // As tarefas antigas continuam no array (o progresso é guardado pela posição) e só são escondidas.
 // As novas têm id próprio (rNNN); 'de' é a tarefa antiga que serve de molde (link, assuntos).
-const PLANO_REVISAO_ESCONDE = new Set(["t377","t433","t438","t440","t441","t443","t444","t446","t447","t448","t450","t451","t452","t453","t454","t456","t457","t458","t459","t460","t462","t463","t464","t465","t466","t467","t468","t469","t471","t472","t474","t476","t477","t478","t480","t481","t482","t483","t485","t486","t487","t488","t490","t491","t492","t493","t494","t495","t496","t498","t499","t500","t501","t502","t503","t504","t506","t507","t509","t510","t511","t513","t514","t515","t516","t517","t519","t521","t523","t525","t527","t530","t534","t536","t541","t543","t545","t547","t549","t550","t551","t553","t556","t557","t559","t565","t567","t570","t572","t574","t576","t579","t581","t588","t589","t590","t591","t592","t593","t594","t595","t596","t597","t598","t599","t600","t601","t602","t603","t604","t605","t606","t607","t608","t609","t610","t611","t612","t613","t614","t615","t616","t617","t618","t619","t620","t621","t622","t623","t624","t625","t626","t627","t628","t629","t630","t631","t632","t633","t634","t635","t636","t637","t638","t639","t640","t641","t642","t643"]);
+const PLANO_REVISAO_ESCONDE = new Set(["t532","t377","t433","t438","t440","t441","t443","t444","t446","t447","t448","t450","t451","t452","t453","t454","t456","t457","t458","t459","t460","t462","t463","t464","t465","t466","t467","t468","t469","t471","t472","t474","t476","t477","t478","t480","t481","t482","t483","t485","t486","t487","t488","t490","t491","t492","t493","t494","t495","t496","t498","t499","t500","t501","t502","t503","t504","t506","t507","t509","t510","t511","t513","t514","t515","t516","t517","t519","t521","t523","t525","t527","t530","t534","t536","t541","t543","t545","t547","t549","t550","t551","t553","t556","t557","t559","t565","t567","t570","t572","t574","t576","t579","t581","t588","t589","t590","t591","t592","t593","t594","t595","t596","t597","t598","t599","t600","t601","t602","t603","t604","t605","t606","t607","t608","t609","t610","t611","t612","t613","t614","t615","t616","t617","t618","t619","t620","t621","t622","t623","t624","t625","t626","t627","t628","t629","t630","t631","t632","t633","t634","t635","t636","t637","t638","t639","t640","t641","t642","t643"]);
 const PLANO_REVISAO = [
 {"rid":"u001","de":"t459","date":"27/11/2026","mins":106,"amount":55},
 {"rid":"u002","de":"t639","date":"27/11/2026","mins":92,"amount":49},
-{"rid":"u003","de":"t443","date":"30/11/2026","mins":131,"amount":69},
-{"rid":"u004","de":"t513","date":"30/11/2026","mins":47,"amount":22},
-{"rid":"u005","de":"t495","date":"01/12/2026","mins":81,"amount":45},
-{"rid":"u006","de":"t496","date":"03/12/2026","mins":63,"amount":25},
-{"rid":"u007","de":"t595","date":"01/12/2026","mins":33,"amount":21},
-{"rid":"u008","de":"t499","date":"04/12/2026","mins":55,"amount":29},
-{"rid":"u009","de":"t511","date":"02/12/2026","mins":33,"amount":21},
-{"rid":"u010","de":"t515","date":"02/12/2026","mins":27,"amount":13},
+{"rid":"u003","de":"t443","date":"07/12/2026","mins":131,"amount":69},
+{"rid":"u004","de":"t513","date":"03/12/2026","mins":47,"amount":22},
+{"rid":"u005","de":"t495","date":"11/12/2026","mins":81,"amount":45},
+{"rid":"u006","de":"t496","date":"30/12/2026","mins":63,"amount":25},
+{"rid":"u007","de":"t595","date":"21/12/2026","mins":33,"amount":21},
+{"rid":"u008","de":"t499","date":"21/12/2026","mins":55,"amount":29},
+{"rid":"u009","de":"t511","date":"09/12/2026","mins":33,"amount":21},
+{"rid":"u010","de":"t515","date":"17/12/2026","mins":27,"amount":13},
 {"rid":"u011","de":"t438","date":"02/12/2026","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
-{"rid":"u012","de":"t485","date":"03/12/2026","mins":141,"amount":52},
-{"rid":"u013","de":"t593","date":"03/12/2026","mins":5,"amount":3},
-{"rid":"u014","de":"t617","date":"03/12/2026","mins":30,"amount":18},
+{"rid":"u012","de":"t485","date":"04/12/2026","mins":141,"amount":52},
+{"rid":"u013","de":"t593","date":"23/12/2026","mins":5,"amount":3},
+{"rid":"u014","de":"t617","date":"23/12/2026","mins":30,"amount":18},
 {"rid":"u015","de":"t483","date":"01/12/2026","mins":133,"amount":68},
-{"rid":"u016","de":"t634","date":"04/12/2026","mins":48,"amount":14},
-{"rid":"u017","de":"t441","date":"07/12/2026","mins":73,"amount":23},
-{"rid":"u018","de":"t444","date":"07/12/2026","mins":60,"amount":29},
-{"rid":"u019","de":"t462","date":"09/12/2026","mins":45,"amount":27},
-{"rid":"u020","de":"t471","date":"08/12/2026","mins":33,"amount":19},
-{"rid":"u021","de":"t474","date":"07/12/2026","mins":75,"amount":31},
-{"rid":"u022","de":"t514","date":"10/12/2026","mins":42,"amount":19},
-{"rid":"u023","de":"t516","date":"11/12/2026","mins":28,"amount":11},
-{"rid":"u024","de":"t509","date":"09/12/2026","mins":43,"amount":32},
-{"rid":"u025","de":"t510","date":"09/12/2026","mins":38,"amount":25},
-{"rid":"u026","de":"t517","date":"09/12/2026","mins":25,"amount":11},
-{"rid":"u027","de":"t605","date":"09/12/2026","mins":10,"amount":6},
+{"rid":"u016","de":"t634","date":"21/12/2026","mins":48,"amount":14},
+{"rid":"u017","de":"t441","date":"02/12/2026","mins":73,"amount":23},
+{"rid":"u018","de":"t444","date":"17/12/2026","mins":60,"amount":29},
+{"rid":"u019","de":"t462","date":"01/12/2026","mins":45,"amount":27},
+{"rid":"u020","de":"t471","date":"14/12/2026","mins":33,"amount":19},
+{"rid":"u021","de":"t474","date":"10/12/2026","mins":75,"amount":31},
+{"rid":"u022","de":"t514","date":"15/12/2026","mins":42,"amount":19},
+{"rid":"u023","de":"t516","date":"02/12/2026","mins":28,"amount":11},
+{"rid":"u024","de":"t509","date":"03/12/2026","mins":43,"amount":32},
+{"rid":"u025","de":"t510","date":"10/12/2026","mins":38,"amount":25},
+{"rid":"u026","de":"t517","date":"08/12/2026","mins":25,"amount":11},
+{"rid":"u027","de":"t605","date":"28/12/2026","mins":10,"amount":6},
 {"rid":"u028","de":"t438","date":"09/12/2026","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
-{"rid":"u029","de":"t450","date":"10/12/2026","mins":113,"amount":40},
-{"rid":"u030","de":"t460","date":"10/12/2026","mins":68,"amount":39},
-{"rid":"u031","de":"t448","date":"11/12/2026","mins":23,"amount":12},
-{"rid":"u032","de":"t476","date":"11/12/2026","mins":160,"amount":55},
-{"rid":"u033","de":"t463","date":"14/12/2026","mins":57,"amount":22},
-{"rid":"u034","de":"t487","date":"14/12/2026","mins":55,"amount":22},
-{"rid":"u035","de":"t488","date":"14/12/2026","mins":29,"amount":15},
-{"rid":"u036","de":"t490","date":"18/12/2026","mins":42,"amount":18},
-{"rid":"u037","de":"t456","date":"15/12/2026","mins":33,"amount":15},
-{"rid":"u038","de":"t608","date":"17/12/2026","mins":142,"amount":73},
-{"rid":"u039","de":"t609","date":"16/12/2026","mins":52,"amount":30},
-{"rid":"u040","de":"t500","date":"16/12/2026","mins":43,"amount":23},
+{"rid":"u029","de":"t450","date":"31/12/2026","mins":113,"amount":40},
+{"rid":"u030","de":"t460","date":"11/12/2026","mins":68,"amount":39},
+{"rid":"u031","de":"t448","date":"14/12/2026","mins":23,"amount":12},
+{"rid":"u032","de":"t476","date":"28/12/2026","mins":160,"amount":55},
+{"rid":"u033","de":"t463","date":"07/12/2026","mins":57,"amount":22},
+{"rid":"u034","de":"t487","date":"11/12/2026","mins":55,"amount":22},
+{"rid":"u035","de":"t488","date":"30/11/2026","mins":29,"amount":15},
+{"rid":"u036","de":"t490","date":"09/12/2026","mins":42,"amount":18},
+{"rid":"u037","de":"t456","date":"03/12/2026","mins":33,"amount":15},
+{"rid":"u038","de":"t608","date":"22/12/2026","mins":142,"amount":73},
+{"rid":"u039","de":"t609","date":"31/12/2026","mins":52,"amount":30},
+{"rid":"u040","de":"t500","date":"08/12/2026","mins":43,"amount":23},
 {"rid":"u041","de":"t502","date":"16/12/2026","mins":25,"amount":12},
 {"rid":"u042","de":"t438","date":"16/12/2026","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
-{"rid":"u043","de":"t447","date":"14/12/2026","mins":77,"amount":25},
-{"rid":"u044","de":"t452","date":"17/12/2026","mins":68,"amount":19},
-{"rid":"u045","de":"t464","date":"16/12/2026","mins":32,"amount":16},
-{"rid":"u046","de":"t453","date":"18/12/2026","mins":65,"amount":16},
-{"rid":"u047","de":"t457","date":"18/12/2026","mins":27,"amount":10},
-{"rid":"u048","de":"t440","date":"18/12/2026","mins":87,"amount":11},
-{"rid":"u049","de":"t486","date":"21/12/2026","mins":70,"amount":34},
-{"rid":"u050","de":"t494","date":"21/12/2026","mins":11,"amount":5},
-{"rid":"u051","de":"t591","date":"21/12/2026","mins":97,"amount":32},
-{"rid":"u052","de":"t446","date":"22/12/2026","mins":143,"amount":66},
-{"rid":"u053","de":"t600","date":"22/12/2026","mins":32,"amount":16},
-{"rid":"u054","de":"t619","date":"22/12/2026","mins":8,"amount":5},
-{"rid":"u055","de":"t492","date":"23/12/2026","mins":28,"amount":13},
-{"rid":"u056","de":"t493","date":"23/12/2026","mins":11,"amount":5},
-{"rid":"u057","de":"t614","date":"23/12/2026","mins":13,"amount":10},
-{"rid":"u058","de":"t635","date":"24/12/2026","mins":39,"amount":15},
-{"rid":"u059","de":"t636","date":"23/12/2026","mins":15,"amount":9},
-{"rid":"u060","de":"t637","date":"23/12/2026","mins":13,"amount":5},
+{"rid":"u043","de":"t447","date":"30/11/2026","mins":77,"amount":25},
+{"rid":"u044","de":"t452","date":"23/12/2026","mins":68,"amount":19},
+{"rid":"u045","de":"t464","date":"09/12/2026","mins":32,"amount":16},
+{"rid":"u046","de":"t453","date":"16/12/2026","mins":65,"amount":16},
+{"rid":"u047","de":"t457","date":"30/11/2026","mins":27,"amount":10},
+{"rid":"u048","de":"t440","date":"24/12/2026","mins":87,"amount":11},
+{"rid":"u049","de":"t486","date":"15/12/2026","mins":70,"amount":34},
+{"rid":"u050","de":"t494","date":"17/12/2026","mins":11,"amount":5},
+{"rid":"u051","de":"t591","date":"24/12/2026","mins":97,"amount":32},
+{"rid":"u052","de":"t446","date":"14/12/2026","mins":143,"amount":66},
+{"rid":"u053","de":"t600","date":"21/12/2026","mins":32,"amount":16},
+{"rid":"u054","de":"t619","date":"24/12/2026","mins":8,"amount":5},
+{"rid":"u055","de":"t492","date":"17/12/2026","mins":28,"amount":13},
+{"rid":"u056","de":"t493","date":"14/12/2026","mins":11,"amount":5},
+{"rid":"u057","de":"t614","date":"18/12/2026","mins":13,"amount":10},
+{"rid":"u058","de":"t635","date":"22/12/2026","mins":39,"amount":15},
+{"rid":"u059","de":"t636","date":"01/01/2027","mins":15,"amount":9},
+{"rid":"u060","de":"t637","date":"01/01/2027","mins":13,"amount":5},
 {"rid":"u061","de":"t438","date":"23/12/2026","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
-{"rid":"u062","de":"t589","date":"24/12/2026","mins":25,"amount":10},
-{"rid":"u063","de":"t498","date":"24/12/2026","mins":83,"amount":39},
-{"rid":"u064","de":"t501","date":"24/12/2026","mins":32,"amount":19},
-{"rid":"u065","de":"t504","date":"24/12/2026","mins":4,"amount":2},
-{"rid":"u066","de":"t506","date":"24/12/2026","mins":25,"amount":10},
-{"rid":"u067","de":"t590","date":"24/12/2026","mins":14,"amount":7},
-{"rid":"u068","de":"t477","date":"01/01/2027","mins":68,"amount":29},
-{"rid":"u069","de":"t480","date":"28/12/2026","mins":40,"amount":23},
-{"rid":"u070","de":"t599","date":"28/12/2026","mins":38,"amount":17},
-{"rid":"u071","de":"t618","date":"28/12/2026","mins":32,"amount":15},
-{"rid":"u072","de":"t465","date":"29/12/2026","mins":23,"amount":14},
-{"rid":"u073","de":"t467","date":"29/12/2026","mins":27,"amount":10},
-{"rid":"u074","de":"t642","date":"29/12/2026","mins":128,"amount":42,"desc":"Refazer Caderno - Pt.4 Reescritura de texto"},
-{"rid":"u075","de":"t466","date":"30/12/2026","mins":25,"amount":14},
-{"rid":"u076","de":"t468","date":"30/12/2026","mins":17,"amount":10},
-{"rid":"u077","de":"t469","date":"30/12/2026","mins":27,"amount":9},
-{"rid":"u078","de":"t597","date":"30/12/2026","mins":9,"amount":5},
+{"rid":"u062","de":"t589","date":"09/12/2026","mins":25,"amount":10},
+{"rid":"u063","de":"t498","date":"03/12/2026","mins":83,"amount":39},
+{"rid":"u064","de":"t501","date":"02/12/2026","mins":32,"amount":19},
+{"rid":"u065","de":"t504","date":"30/11/2026","mins":4,"amount":2},
+{"rid":"u066","de":"t506","date":"15/12/2026","mins":25,"amount":10},
+{"rid":"u067","de":"t590","date":"17/12/2026","mins":14,"amount":7},
+{"rid":"u068","de":"t477","date":"15/12/2026","mins":68,"amount":29},
+{"rid":"u069","de":"t480","date":"04/12/2026","mins":40,"amount":23},
+{"rid":"u070","de":"t599","date":"30/12/2026","mins":38,"amount":17},
+{"rid":"u071","de":"t618","date":"23/12/2026","mins":32,"amount":15},
+{"rid":"u072","de":"t465","date":"16/12/2026","mins":23,"amount":14},
+{"rid":"u073","de":"t467","date":"17/12/2026","mins":27,"amount":10},
+{"rid":"u074","de":"t642","date":"01/01/2027","mins":128,"amount":42,"desc":"Refazer Caderno - Pt.4 Reescritura de texto"},
+{"rid":"u075","de":"t466","date":"04/12/2026","mins":25,"amount":14},
+{"rid":"u076","de":"t468","date":"09/12/2026","mins":17,"amount":10},
+{"rid":"u077","de":"t469","date":"01/12/2026","mins":27,"amount":9},
+{"rid":"u078","de":"t597","date":"22/12/2026","mins":9,"amount":5},
 {"rid":"u079","de":"t603","date":"30/12/2026","mins":40,"amount":28},
 {"rid":"u080","de":"t438","date":"30/12/2026","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
-{"rid":"u081","de":"t481","date":"31/12/2026","mins":55,"amount":33},
-{"rid":"u082","de":"t491","date":"31/12/2026","mins":27,"amount":16},
-{"rid":"u083","de":"t594","date":"31/12/2026","mins":2,"amount":1},
-{"rid":"u084","de":"t598","date":"31/12/2026","mins":7,"amount":3},
-{"rid":"u085","de":"t601","date":"31/12/2026","mins":9,"amount":4},
-{"rid":"u086","de":"t606","date":"31/12/2026","mins":2,"amount":1},
-{"rid":"u087","de":"t610","date":"31/12/2026","mins":16,"amount":7},
-{"rid":"u088","de":"t624","date":"31/12/2026","mins":7,"amount":3},
-{"rid":"u089","de":"t503","date":"31/12/2026","mins":20,"amount":11},
+{"rid":"u081","de":"t481","date":"08/12/2026","mins":55,"amount":33},
+{"rid":"u082","de":"t491","date":"16/12/2026","mins":27,"amount":16},
+{"rid":"u083","de":"t594","date":"21/12/2026","mins":2,"amount":1},
+{"rid":"u084","de":"t598","date":"22/12/2026","mins":7,"amount":3},
+{"rid":"u085","de":"t601","date":"23/12/2026","mins":9,"amount":4},
+{"rid":"u086","de":"t606","date":"22/12/2026","mins":2,"amount":1},
+{"rid":"u087","de":"t610","date":"24/12/2026","mins":16,"amount":7},
+{"rid":"u088","de":"t624","date":"22/12/2026","mins":7,"amount":3},
+{"rid":"u089","de":"t503","date":"07/12/2026","mins":20,"amount":11},
 {"rid":"u090","de":"t604","date":"31/12/2026","mins":20,"amount":11},
-{"rid":"u091","de":"t611","date":"31/12/2026","mins":8,"amount":4},
-{"rid":"u092","de":"t620","date":"31/12/2026","mins":6,"amount":3},
-{"rid":"u093","de":"t612","date":"21/12/2026","mins":2,"amount":1},
-{"rid":"u094","de":"t640","date":"08/12/2026","mins":182,"amount":44},
-{"rid":"u095","de":"t451","date":"02/12/2026","mins":95,"amount":22},
-{"rid":"u096","de":"t458","date":"21/12/2026","mins":10,"amount":4},
-{"rid":"u097","de":"t615","date":"30/11/2026","mins":15,"amount":6},
-{"rid":"u098","de":"t621","date":"22/12/2026","mins":33,"amount":18},
-{"rid":"u099","de":"t638","date":"02/12/2026","mins":25,"amount":10},
-{"rid":"u100","de":"t478","date":"01/01/2027","mins":70,"amount":24},
-{"rid":"u101","de":"t482","date":"28/12/2026","mins":13,"amount":11},
-{"rid":"u102","de":"t607","date":"03/12/2026","mins":2,"amount":1},
-{"rid":"u103","de":"t613","date":"15/12/2026","mins":7,"amount":3},
-{"rid":"u104","de":"t622","date":"01/01/2027","mins":20,"amount":11},
-{"rid":"u105","de":"t623","date":"30/11/2026","mins":10,"amount":6},
+{"rid":"u091","de":"t611","date":"30/12/2026","mins":8,"amount":4},
+{"rid":"u092","de":"t620","date":"01/01/2027","mins":6,"amount":3},
+{"rid":"u093","de":"t612","date":"23/12/2026","mins":2,"amount":1},
+{"rid":"u094","de":"t640","date":"18/12/2026","mins":182,"amount":44},
+{"rid":"u095","de":"t451","date":"10/12/2026","mins":95,"amount":22},
+{"rid":"u096","de":"t458","date":"18/12/2026","mins":10,"amount":4},
+{"rid":"u097","de":"t615","date":"17/12/2026","mins":15,"amount":6},
+{"rid":"u098","de":"t621","date":"01/01/2027","mins":33,"amount":18},
+{"rid":"u099","de":"t638","date":"29/12/2026","mins":25,"amount":10},
+{"rid":"u100","de":"t478","date":"30/11/2026","mins":70,"amount":24},
+{"rid":"u101","de":"t482","date":"02/12/2026","mins":13,"amount":11},
+{"rid":"u102","de":"t607","date":"18/12/2026","mins":2,"amount":1},
+{"rid":"u103","de":"t613","date":"16/12/2026","mins":7,"amount":3},
+{"rid":"u104","de":"t622","date":"31/12/2026","mins":20,"amount":11},
+{"rid":"u105","de":"t623","date":"01/01/2027","mins":10,"amount":6},
 {"rid":"u106","de":"t438","date":"06/01/2027","mins":60,"desc":"Estudo de Caso: refazer um antigo (50 min escrevendo e 10 corrigindo)"},
-{"rid":"u107","de":"t454","date":"21/12/2026","mins":18,"amount":7},
-{"rid":"u108","de":"t588","date":"23/12/2026","mins":84,"amount":33,"desc":"Fazer Caderno - Administração Pública (sem PDF)"},
+{"rid":"u107","de":"t454","date":"17/12/2026","mins":18,"amount":7},
+{"rid":"u108","de":"t588","date":"08/12/2026","mins":84,"amount":33,"desc":"Fazer Caderno - Administração Pública (sem PDF)"},
 {"rid":"u109","de":"t592","date":"28/12/2026","mins":38,"amount":15},
-{"rid":"u110","de":"t596","date":"30/11/2026","mins":37,"amount":16},
-{"rid":"u111","de":"t616","date":"07/12/2026","mins":4,"amount":2},
-{"rid":"u112","de":"t602","date":"01/01/2027","mins":7,"amount":3},
-{"rid":"u113","de":"t641","date":"15/12/2026","mins":177,"amount":55},
-{"rid":"u114","de":"t438","date":"28/11/2026","mins":60,"desc":"Estudo de Caso: refazer um que você já fez"},
-{"rid":"u115","de":"t472","date":"05/12/2026","mins":60},
-{"rid":"u116","de":"t438","date":"12/12/2026","mins":60,"desc":"Estudo de Caso: refazer um que você já fez"},
-{"rid":"u117","de":"t527","date":"19/12/2026","mins":60},
-{"rid":"u118","de":"t438","date":"25/12/2026","mins":60,"desc":"Estudo de Caso: refazer um que você já fez"},
-{"rid":"u119","de":"t553","date":"02/01/2027","mins":60},
-{"rid":"u120","de":"t438","date":"09/01/2027","mins":60,"desc":"Estudo de Caso: refazer um que você já fez"},
-{"rid":"u121","de":null,"date":"28/11/2026","mins":150,"subj":"-","type":"Questões","desc":"Simulado: TRT-11 (2024)","amount":60,"unit":"questões"},
-{"rid":"u122","de":null,"date":"05/12/2026","mins":150,"subj":"-","type":"Questões","desc":"Simulado: TRT-7 (2024)","amount":60,"unit":"questões"},
-{"rid":"u123","de":null,"date":"12/12/2026","mins":150,"subj":"-","type":"Questões","desc":"Simulado: TRT-20 (2024)","amount":60,"unit":"questões"},
-{"rid":"u124","de":null,"date":"19/12/2026","mins":150,"subj":"-","type":"Questões","desc":"Simulado: TRT-1 (2025)","amount":60,"unit":"questões"},
-{"rid":"u125","de":null,"date":"27/12/2026","mins":150,"subj":"-","type":"Questões","desc":"Simulado: TRT-6 (2025)","amount":60,"unit":"questões"},
-{"rid":"u126","de":null,"date":"02/01/2027","mins":150,"subj":"-","type":"Questões","desc":"Simulado: TRT-15 (2025)","amount":60,"unit":"questões"},
-{"rid":"u127","de":null,"date":"09/01/2027","mins":150,"subj":"-","type":"Questões","desc":"Simulado: TRT-2 (2025)","amount":60,"unit":"questões"},
-{"rid":"u128","de":null,"date":"11/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Revisão do tudão: DPT (foco) + RLM","amount":null,"unit":"","bib":"tudao-dpt,tudao-rlm"},
-{"rid":"u129","de":null,"date":"12/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Revisão do tudão: DPC (foco) + Informática","amount":null,"unit":"","bib":"tudao-dpc,tudao-inf"},
-{"rid":"u130","de":null,"date":"13/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Revisão do tudão: DCI (foco) + Português","amount":null,"unit":"","bib":"tudao-dci,tudao-port"},
-{"rid":"u131","de":null,"date":"14/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Revisão do tudão: DCO (foco) + Legislação","amount":null,"unit":"","bib":"tudao-dco,tudao-leg"},
-{"rid":"u132","de":null,"date":"15/01/2027","mins":90,"subj":"-","type":"Leitura","desc":"Revisão do tudão: DT (foco) + DH","amount":null,"unit":"","bib":"tudao-dt,tudao-dh"},
-{"rid":"u133","de":"t438","date":"15/01/2027","mins":45,"desc":"Revisão dos Estudos de Caso"},
-{"rid":"u134","de":null,"date":"16/01/2027","mins":75,"subj":"-","type":"Leitura","desc":"Revisão do tudão: DA (foco) + PCD","amount":null,"unit":"","bib":"tudao-da,tudao-pcd"},
+{"rid":"u110","de":"t596","date":"21/12/2026","mins":37,"amount":16},
+{"rid":"u111","de":"t616","date":"01/01/2027","mins":4,"amount":2},
+{"rid":"u112","de":"t602","date":"17/12/2026","mins":7,"amount":3},
+{"rid":"u113","de":"t641","date":"29/12/2026","mins":177,"amount":55},
+{"rid":"u114","de":"t438","date":"28/11/2026","mins":50,"desc":"Estudo de Caso: refazer um que você já fez"},
+{"rid":"u115","de":"t472","date":"05/12/2026","mins":50},
+{"rid":"u116","de":"t438","date":"12/12/2026","mins":50,"desc":"Estudo de Caso: refazer um que você já fez"},
+{"rid":"u117","de":"t527","date":"19/12/2026","mins":50},
+{"rid":"u118","de":"t438","date":"25/12/2026","mins":50,"desc":"Estudo de Caso: refazer um que você já fez"},
+{"rid":"u119","de":"t553","date":"02/01/2027","mins":50},
+{"rid":"u120","de":"t438","date":"09/01/2027","mins":50,"desc":"Estudo de Caso: refazer um que você já fez"},
+{"rid":"u121","de":null,"date":"28/11/2026","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-11 (2024)","amount":60,"unit":"questões"},
+{"rid":"u122","de":null,"date":"05/12/2026","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-7 (2024)","amount":60,"unit":"questões"},
+{"rid":"u123","de":null,"date":"12/12/2026","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-20 (2024)","amount":60,"unit":"questões"},
+{"rid":"u124","de":null,"date":"19/12/2026","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-1 (2025)","amount":60,"unit":"questões"},
+{"rid":"u125","de":null,"date":"27/12/2026","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-6 (2025)","amount":60,"unit":"questões"},
+{"rid":"u126","de":null,"date":"02/01/2027","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-15 (2025)","amount":60,"unit":"questões"},
+{"rid":"u127","de":null,"date":"09/01/2027","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-2 (2025)","amount":60,"unit":"questões"},
+{"rid":"u133","de":"t438","date":"13/01/2027","mins":45,"desc":"Revisão dos Estudos de Caso"},
 {"rid":"v001","de":null,"date":"04/01/2027","mins":74,"subj":"DPT","type":"Questões","desc":"Caderno geral por incidência: Processo do Trabalho (montar em janeiro)","amount":35,"unit":"questões"},
 {"rid":"v002","de":null,"date":"04/01/2027","mins":21,"subj":"PCD","type":"Questões","desc":"Caderno geral por incidência: PCD (montar em janeiro)","amount":10,"unit":"questões"},
 {"rid":"v003","de":null,"date":"04/01/2027","mins":21,"subj":"INF","type":"Questões","desc":"Caderno geral por incidência: Informática (montar em janeiro)","amount":10,"unit":"questões"},
-{"rid":"v004","de":null,"date":"05/01/2027","mins":63,"subj":"DPC","type":"Questões","desc":"Caderno geral por incidência: Processo Civil (montar em janeiro)","amount":30,"unit":"questões"},
-{"rid":"v005","de":null,"date":"05/01/2027","mins":32,"subj":"LEG","type":"Questões","desc":"Caderno geral por incidência: Legislação (montar em janeiro)","amount":15,"unit":"questões"},
-{"rid":"v006","de":null,"date":"05/01/2027","mins":21,"subj":"DH","type":"Questões","desc":"Caderno geral por incidência: Direitos Humanos (montar em janeiro)","amount":10,"unit":"questões"},
-{"rid":"v007","de":null,"date":"06/01/2027","mins":52,"subj":"DCI","type":"Questões","desc":"Caderno geral por incidência: Direito Civil (montar em janeiro)","amount":25,"unit":"questões"},
-{"rid":"v008","de":null,"date":"06/01/2027","mins":63,"subj":"PORT","type":"Questões","desc":"Caderno geral por incidência: Português (montar em janeiro)","amount":30,"unit":"questões"},
-{"rid":"v009","de":null,"date":"07/01/2027","mins":63,"subj":"DA","type":"Questões","desc":"Caderno geral por incidência: Administrativo (montar em janeiro)","amount":30,"unit":"questões"},
-{"rid":"v010","de":null,"date":"07/01/2027","mins":52,"subj":"DCO","type":"Questões","desc":"Caderno geral por incidência: Constitucional (montar em janeiro)","amount":25,"unit":"questões"},
-{"rid":"v011","de":null,"date":"08/01/2027","mins":74,"subj":"DT","type":"Questões","desc":"Caderno geral por incidência: Direito do Trabalho (montar em janeiro)","amount":35,"unit":"questões"},
-{"rid":"v012","de":null,"date":"08/01/2027","mins":21,"subj":"DCT","type":"Questões","desc":"Caderno geral por incidência: Direito Coletivo (montar em janeiro)","amount":10,"unit":"questões"},
-{"rid":"v013","de":null,"date":"08/01/2027","mins":10,"subj":"RLM","type":"Questões","desc":"Caderno geral por incidência: RLM (montar em janeiro)","amount":5,"unit":"questões"},
+{"rid":"v004","de":null,"date":"04/01/2027","mins":63,"subj":"DPC","type":"Questões","desc":"Caderno geral por incidência: Processo Civil (montar em janeiro)","amount":30,"unit":"questões"},
+{"rid":"v005","de":null,"date":"04/01/2027","mins":32,"subj":"LEG","type":"Questões","desc":"Caderno geral por incidência: Legislação (montar em janeiro)","amount":15,"unit":"questões"},
+{"rid":"v006","de":null,"date":"04/01/2027","mins":21,"subj":"DH","type":"Questões","desc":"Caderno geral por incidência: Direitos Humanos (montar em janeiro)","amount":10,"unit":"questões"},
+{"rid":"v007","de":null,"date":"05/01/2027","mins":52,"subj":"DCI","type":"Questões","desc":"Caderno geral por incidência: Direito Civil (montar em janeiro)","amount":25,"unit":"questões"},
+{"rid":"v008","de":null,"date":"05/01/2027","mins":63,"subj":"PORT","type":"Questões","desc":"Caderno geral por incidência: Português (montar em janeiro)","amount":30,"unit":"questões"},
+{"rid":"v009","de":null,"date":"05/01/2027","mins":63,"subj":"DA","type":"Questões","desc":"Caderno geral por incidência: Administrativo (montar em janeiro)","amount":30,"unit":"questões"},
+{"rid":"v010","de":null,"date":"05/01/2027","mins":52,"subj":"DCO","type":"Questões","desc":"Caderno geral por incidência: Constitucional (montar em janeiro)","amount":25,"unit":"questões"},
+{"rid":"v011","de":null,"date":"06/01/2027","mins":74,"subj":"DT","type":"Questões","desc":"Caderno geral por incidência: Direito do Trabalho (montar em janeiro)","amount":35,"unit":"questões"},
+{"rid":"v012","de":null,"date":"06/01/2027","mins":21,"subj":"DCT","type":"Questões","desc":"Caderno geral por incidência: Direito Coletivo (montar em janeiro)","amount":10,"unit":"questões"},
+{"rid":"v013","de":null,"date":"06/01/2027","mins":10,"subj":"RLM","type":"Questões","desc":"Caderno geral por incidência: RLM (montar em janeiro)","amount":5,"unit":"questões"},
+{"rid":"w001","de":null,"date":"06/01/2027","mins":60,"subj":"-","type":"Leitura","desc":"Leitura do tudão: RLM + Informática","amount":null,"unit":"","bib":"tudao-rlm,tudao-inf"},
+{"rid":"w002","de":null,"date":"07/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DPT","amount":null,"unit":"","bib":"tudao-dpt"},
+{"rid":"w003","de":null,"date":"07/01/2027","mins":90,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DPC","amount":null,"unit":"","bib":"tudao-dpc"},
+{"rid":"w004","de":null,"date":"08/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DT (com Coletivo)","amount":null,"unit":"","bib":"tudao-dt"},
+{"rid":"w005","de":null,"date":"08/01/2027","mins":100,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DA","amount":null,"unit":"","bib":"tudao-da"},
+{"rid":"w006","de":null,"date":"11/01/2027","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-8 (2022) AJAJ, última prova do TRT-8","amount":60,"unit":"questões"},
+{"rid":"w007","de":null,"date":"11/01/2027","mins":90,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DCO","amount":null,"unit":"","bib":"tudao-dco"},
+{"rid":"w008","de":null,"date":"12/01/2027","mins":80,"subj":"-","type":"Leitura","desc":"Leitura do tudão: DCI","amount":null,"unit":"","bib":"tudao-dci"},
+{"rid":"w009","de":null,"date":"12/01/2027","mins":140,"subj":"-","type":"Leitura","desc":"Leitura do tudão: Português + Legislação + DH","amount":null,"unit":"","bib":"tudao-port,tudao-leg,tudao-dh"},
+{"rid":"w010","de":null,"date":"13/01/2027","mins":120,"subj":"-","type":"Simulado","desc":"Simulado: TRT-8 (2022) TJAA, última prova do TRT-8","amount":60,"unit":"questões"},
+{"rid":"w011","de":null,"date":"13/01/2027","mins":30,"subj":"-","type":"Leitura","desc":"Leitura do tudão: PCD","amount":null,"unit":"","bib":"tudao-pcd"},
+{"rid":"w030","de":null,"date":"16/01/2027","mins":120,"subj":"-","type":"Leitura","desc":"Revisão leve de todos os tudões","amount":null,"unit":"","bib":"tudao-dpt,tudao-dt,tudao-da,tudao-dco,tudao-dpc,tudao-dci,tudao-port,tudao-leg,tudao-dh,tudao-pcd,tudao-inf,tudao-rlm"},
+{"rid":"w012","de":null,"date":"14/01/2027","mins":63,"subj":"DPT","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Processo do Trabalho (montar em janeiro)","amount":30,"unit":"questões"},
+{"rid":"w013","de":null,"date":"14/01/2027","mins":52,"subj":"DPC","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Processo Civil (montar em janeiro)","amount":25,"unit":"questões"},
+{"rid":"w014","de":null,"date":"14/01/2027","mins":42,"subj":"DCI","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Direito Civil (montar em janeiro)","amount":20,"unit":"questões"},
+{"rid":"w015","de":null,"date":"14/01/2027","mins":52,"subj":"PORT","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Português (montar em janeiro)","amount":25,"unit":"questões"},
+{"rid":"w016","de":null,"date":"14/01/2027","mins":17,"subj":"PCD","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: PCD (montar em janeiro)","amount":8,"unit":"questões"},
+{"rid":"w017","de":null,"date":"14/01/2027","mins":17,"subj":"INF","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Informática (montar em janeiro)","amount":8,"unit":"questões"},
+{"rid":"w018","de":null,"date":"15/01/2027","mins":63,"subj":"DT","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Direito do Trabalho (montar em janeiro)","amount":30,"unit":"questões"},
+{"rid":"w019","de":null,"date":"15/01/2027","mins":52,"subj":"DA","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Administrativo (montar em janeiro)","amount":25,"unit":"questões"},
+{"rid":"w020","de":null,"date":"15/01/2027","mins":42,"subj":"DCO","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Constitucional (montar em janeiro)","amount":20,"unit":"questões"},
+{"rid":"w021","de":null,"date":"15/01/2027","mins":25,"subj":"LEG","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Legislação (montar em janeiro)","amount":12,"unit":"questões"},
+{"rid":"w022","de":null,"date":"15/01/2027","mins":17,"subj":"DH","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Direitos Humanos (montar em janeiro)","amount":8,"unit":"questões"},
+{"rid":"w023","de":null,"date":"15/01/2027","mins":17,"subj":"DCT","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: Direito Coletivo (montar em janeiro)","amount":8,"unit":"questões"},
+{"rid":"w024","de":null,"date":"15/01/2027","mins":10,"subj":"RLM","type":"Questões","desc":"Caderno geral por incidência, 2ª rodada: RLM (montar em janeiro)","amount":5,"unit":"questões"},
 ];
 PLANO_REVISAO.forEach(n=>{
   const molde = n.de ? BUILTIN_TASKS.find(t=>t.id===n.de) : null;
@@ -2121,7 +2161,7 @@ function ritmoHtml(t){
   if(real>0) h += `<div class="ritmo ritmo-real" title="Tempo registrado dividido pela quantidade">real: ${fmtRitmo(real/a)} min/${un}</div>`;
   return h;
 }
-const TYPE_RANK = {Leitura:0, 'Questões':1, 'Estudo de Caso':1.5, Flashcards:2};
+const TYPE_RANK = {Leitura:0, 'Questões':1, Simulado:1.2, 'Estudo de Caso':1.5, Flashcards:2};
 // Posição manual dentro do dia: só existe depois que o usuário arrasta uma tarefa pra um
 // lugar específico (entre duas outras). Enquanto isso não acontece, cai no padrão por tipo.
 function manualOrder(t){
@@ -2372,7 +2412,7 @@ function filtroKeyFromDesc(desc){
 // (1, 2, 3...); o resto (leituras sem capítulo no nome, flashcards, estudo de caso) vem por
 // último, na ordem de tipo/data de sempre.
 function sortByCapitulo(items){
-  const RANK = {Leitura:0, 'Questões':1, 'Estudo de Caso':1.5, Flashcards:2};
+  const RANK = {Leitura:0, 'Questões':1, Simulado:1.2, 'Estudo de Caso':1.5, Flashcards:2};
   return items.slice().sort((a,b)=>{
     const ca = a.type==='Leitura' ? chapterNumFromFile(a.file) : null;
     const cb = b.type==='Leitura' ? chapterNumFromFile(b.file) : null;
@@ -2509,10 +2549,10 @@ function leisDaTarefa(t){
 
 function rowHtml(t, firstCol, draggableRow){
   const status = lsGet('status_'+t.id, 'Pendente');
-  const isQ = t.type==='Questões';
+  const isQ = t.type==='Questões' || t.type==='Simulado';
   const isFlash = t.type==='Flashcards';
   const acertos = isQ ? acertosTotalStr(t) : '';
-  const typeClass = t.type==='Leitura' ? 'leitura' : (t.type==='Questões' ? 'questoes' : (t.type==='Estudo de Caso' ? 'estudocaso' : 'flashcards'));
+  const typeClass = t.type==='Leitura' ? 'leitura' : (t.type==='Questões' ? 'questoes' : (t.type==='Simulado' ? 'simulado' : (t.type==='Estudo de Caso' ? 'estudocaso' : 'flashcards')));
   const rowClass = (timerTaskId===t.id) ? 'timing' : '';
   const linkHtml = t.link ? ` <a href="${t.link}" target="_blank" rel="noopener" class="qc-link" title="Abrir o caderno no QConcursos">QConcursos ↗</a>` : '';
   const offHtml = t.off ? ` <a href="${t.off}" target="_blank" rel="noopener" class="qc-link" title="Abrir o simulado offline (com gabarito comentado)">Offline ↗</a>` : '';
@@ -2522,7 +2562,7 @@ function rowHtml(t, firstCol, draggableRow){
   const leiP = (LEI_POR_MATERIA[t.subj]||[]).filter(()=>t.type!=='Flashcards').map(k=>LEI_URL[k]);
   const leiHtml = leiP.map(([nome,url])=>` <a href="${url}" target="_blank" rel="noopener" class="lei-link" title="Abrir ${nome} (legislação principal da matéria)">${nome} ↗</a>`).join('');
   const fileHtml = fileHtml0;
-  const topicsHtml = isQ && !(descCaderno(t) && !lsGet('desc_'+t.id,'')) ? `<textarea class="topicsedit" data-id="${t.id}" rows="1" placeholder="Assuntos abordados pelo filtro">${escapeHtml(effectiveTopics(t))}</textarea>` : '';
+  const topicsHtml = t.type==='Questões' && !(descCaderno(t) && !lsGet('desc_'+t.id,'')) ? `<textarea class="topicsedit" data-id="${t.id}" rows="1" placeholder="Assuntos abordados pelo filtro">${escapeHtml(effectiveTopics(t))}</textarea>` : '';
   const descHtml = `<span class="descedit" data-id="${t.id}" title="Clique duas vezes para editar o nome (botão direito: mais opções)">${escapeHtml(effectiveDesc(t))}</span>${linkHtml}${offHtml}${fileHtml}${topicsHtml}`;
   const amt = effectiveAmount(t);
   const qtdHtml = isQ
@@ -3254,8 +3294,9 @@ function planoFases(){
   const menos = n=>new Date(n.getFullYear(), n.getMonth(), n.getDate()-1);
   const f = [
     { n:'Fase 1 · Conteúdo novo', a:ini, b:parseBR('26/11/2026'), d:'Leituras e questões de cada PDF' },
-    { n:'Fase 2 · Refazer os cadernos anotando o essencial', a:parseBR('27/11/2026'), b:parseBR('10/01/2027'), d:'Cadernos inteiros, Estudo de Caso às quartas e simulado aos sábados' },
-    { n:'Fase 3 · Reta final', a:parseBR('11/01/2027'), b:prova, d:'Um tudão principal e um secundário por dia, em ritmo leve' }
+    { n:'Fase 2 · Refazer os cadernos anotando o essencial', a:parseBR('27/11/2026'), b:parseBR('03/01/2027'), d:'Cadernos inteiros (os feitos nos últimos 2 meses ficam para o fim), Estudo de Caso às quartas, simulado e Estudo de Caso aos sábados' },
+    { n:'Fase 3 · Cadernos gerais e leitura dos tudões', a:parseBR('04/01/2027'), b:parseBR('13/01/2027'), d:'Cadernos gerais por incidência (04 a 06/01), leitura dos tudões e as duas últimas provas do TRT-8 (AJAJ e TJAA)' },
+    { n:'Fase 4 · Reta final', a:parseBR('14/01/2027'), b:prova, d:'Cadernos gerais (2ª rodada) na quinta e na sexta; revisão leve de todos os tudões no sábado' }
   ];
   return f;
 }
@@ -3298,13 +3339,75 @@ function renderGeral(){
   });
   const proxRez = rezRows.find(x=>!x.feito && x.env>=h0);
   const rezHtml = rezRows.map(x=>`<tr class="${x===proxRez?'rez-prox':''}"><td><b>Simulado nº ${x.r.n}</b></td><td>${x.r.lib}</td><td>${x.r.escrever}</td><td>${x.r.enviar}</td><td>${x.r.corr}</td><td>${x.sit}</td></tr>`).join('');
+  const sims = tasks.filter(t=>t.type==='Simulado').sort((a,b)=>parseBR(effectiveDate(a))-parseBR(effectiveDate(b)));
+  const proxSim = sims.find(t=>lsGet('status_'+t.id,'Pendente')!=='Concluído');
+  const simRows = sims.map(t=>{
+    const d = effectiveDate(t), feito = lsGet('status_'+t.id,'Pendente')==='Concluído';
+    const ac = acertosTotalStr(t), amt = effectiveAmount(t) || t.amount;
+    const pct = ac!=='' && amt ? Math.round(Number(ac)/amt*100)+'% ('+ac+'/'+amt+')' : '<span style="color:#A0AEC0">-</span>';
+    const sit = feito ? '<span class="ed-badge ed-estudado">Feito</span>' : (parseBR(d)<h0 ? '<span class="ed-badge ed-sem">Atrasado</span>' : '<span class="ed-badge ed-pendente">A fazer</span>');
+    const dw = ['dom','seg','ter','qua','qui','sex','sáb'][parseBR(d).getDay()];
+    return `<tr class="${t===proxSim?'rez-prox':''}"><td><b>${escapeHtml(effectiveDesc(t).replace(/^Simulado:\s*/,''))}</b></td><td>${d.slice(0,5)} · ${dw}</td><td>${amt||'-'} questões · ${fmtMin(effectiveEffort(t))}</td><td>${pct}</td><td>${sit}</td></tr>`;
+  }).join('');
+  const simHtml = sims.length ? `<div class="geral-sec"><h3>Simulados de questões (provas FCC de TRT)</h3>
+      <table class="ed-tab"><thead><tr><th>Prova</th><th>Data</th><th>Tamanho</th><th>Acerto</th><th>Situação</th></tr></thead><tbody>${simRows}</tbody></table>
+      <div style="font-size:12px;color:var(--gray);margin-top:8px">Os simulados não entram nas estatísticas de questões dos cadernos; o acerto aparece só aqui.</div></div>` : '';
   const refaz = tasks.filter(t=>/^Estudo de Caso: refazer/.test(t.desc||''));
   const refazFeitos = refaz.filter(t=>lsGet('status_'+t.id,'Pendente')==='Concluído').length;
   box.innerHTML = top + `
     <div class="geral-sec"><h3>Fases do cronograma</h3>${faseRows}</div>
+    ${simHtml}
     <div class="geral-sec"><h3>Estudo de Caso: curso de dissertativas Rezende</h3>
       <table class="ed-tab"><thead><tr><th>Simulado</th><th>Liberado em</th><th>Escrever (sábado)</th><th>Enviar até</th><th>Correção (prevista)</th><th>Situação</th></tr></thead><tbody>${rezHtml}</tbody></table>
-      <div style="font-size:12px;color:var(--gray);margin-top:8px">Nos demais sábados o Estudo de Caso é refazer um que você já fez: ${refazFeitos} de ${refaz.length} concluídos.</div></div>`;
+      <div style="font-size:12px;color:var(--gray);margin-top:8px">Nos demais sábados e às quartas o Estudo de Caso é refazer um que você já fez: ${refazFeitos} de ${refaz.length} concluídos.</div></div>`;
+}
+// ---------- Calendário (Edital > Calendário): todas as tarefas por dia, mês a mês ----------
+function renderCalendario(){
+  const box = document.getElementById('calBox'); if(!box) return;
+  const hoje = new Date(); const h0 = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  let ym = lsGet('calMes','');
+  if(!/^\d{4}-\d{2}$/.test(ym)) ym = h0.getFullYear()+'-'+String(h0.getMonth()+1).padStart(2,'0');
+  const [Y,M] = ym.split('-').map(Number);
+  const porDia = {}, temFlash = {};
+  tasks.forEach(t=>{ const d = effectiveDate(t); if(t.type==='Flashcards'){ temFlash[d]=effectiveEffort(t); return; } (porDia[d]=porDia[d]||[]).push(t); });
+  const RK = {Leitura:0, 'Questões':1, Simulado:1.2, 'Estudo de Caso':1.5};
+  const ini = new Date(Y, M-1, 1); const off = (ini.getDay()+6)%7; // segunda primeiro
+  const start = new Date(Y, M-1, 1-off);
+  const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  let cells = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].map(d=>`<div class="cal-hd">${d}</div>`).join('');
+  const prova = parseBR(DATA_PROVA);
+  for(let i=0;i<42;i++){
+    const dt = new Date(start.getFullYear(), start.getMonth(), start.getDate()+i);
+    if(i>=35 && dt.getMonth()!==M-1) break;
+    const d = fmtBR(dt);
+    const lst = (porDia[d]||[]).slice().sort((a,b)=>(RK[a.type]??3)-(RK[b.type]??3) || String(a.subj).localeCompare(String(b.subj)));
+    const tot = lst.reduce((s,t)=>s+effectiveEffort(t),0) + (temFlash[d]||0);
+    const cls = ['cal-dia', dt.getMonth()!==M-1?'fora':'', +dt===+h0?'hoje':'', +dt===+prova?'prova':''].join(' ');
+    const itens = lst.map(t=>{
+      const tc = t.type==='Leitura' ? 'leitura' : (t.type==='Simulado' ? 'simulado' : (t.type==='Estudo de Caso' ? 'estudocaso' : ''));
+      const feito = lsGet('status_'+t.id,'Pendente')==='Concluído';
+      const cor = (t.subj && t.subj!=='-' && SUBJ_COLORS[t.subj]) ? `border-left-color:${SUBJ_COLORS[t.subj]}` : '';
+      const nome = effectiveDesc(t);
+      const rot = (t.subj && t.subj!=='-' ? '<b>'+t.subj+'</b> ' : '') + escapeHtml(String(nome).replace(/^Refazer (Filtro |Caderno - )/,'').replace(/^Estudo de Caso: /,'EC: '));
+      return `<div class="cal-t ${tc} ${feito?'feito':''}" style="${cor}" title="${escapeHtml((t.subj&&t.subj!=='-'?t.subj+' · ':'')+nome+' · ~'+fmtMin(effectiveEffort(t)))}">${rot}</div>`;
+    }).join('');
+    cells += `<div class="${cls}"><div class="cal-num">${dt.getDate()}${+dt===+prova?' · PROVA':''}${lst.length?`<span>~${fmtMin(tot)}</span>`:''}</div>${itens}</div>`;
+  }
+  box.innerHTML = `<div class="cal-nav"><button type="button" onclick="calMudar(-1)">◀</button><span class="cal-mes">${nomes[M-1]} ${Y}</span><button type="button" onclick="calMudar(1)">▶</button><button type="button" onclick="calMudar(0)">Hoje</button></div>
+    <div class="cal-grid">${cells}</div>
+    <div class="cal-leg"><span>Borda colorida = matéria</span><span style="color:#2E9E5B">■ leitura</span><span style="color:#E67E22">■ simulado</span><span style="color:#8e44ad">■ estudo de caso</span><span>Riscado = concluído · o tempo do dia inclui os flashcards</span></div>`;
+}
+function calMudar(n){
+  if(n===0){ lsSet('calMes',''); renderCalendario(); return; }
+  const hoje = new Date(); let ym = lsGet('calMes','') || (hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0'));
+  let [Y,M] = ym.split('-').map(Number); M += n; if(M<1){M=12;Y--;} if(M>12){M=1;Y++;}
+  lsSet('calMes', Y+'-'+String(M).padStart(2,'0')); renderCalendario();
+}
+function ritmoOrdenar(tp){
+  const ord = (lsGet('ritmoOrdem','')||'').split('|');
+  const novo = !tp ? '' : (ord[0]===tp ? tp+'|'+(ord[1]==='desc'?'asc':'desc') : tp+'|asc');
+  lsSet('ritmoOrdem', novo);
+  try{ const rb = document.getElementById('ritmoBox'); if(rb) rb.innerHTML = ritmosHtml(); }catch(e){}
 }
 // Ritmo real por matéria: medido nas tarefas concluídas com tempo registrado (fica em Desempenho > Estatísticas).
 function ritmosHtml(){
@@ -3320,9 +3423,16 @@ function ritmosHtml(){
   const cel = (sj, tp)=>{ const r = real[sj+'|'+tp]; return `<td>${r ? `<b>${fmtRitmo(r.min/r.amt)}</b> <span style="color:var(--gray)">(${r.n} tarefa${r.n>1?'s':''})</span>` : '<span style="color:#A0AEC0">-</span>'}</td>`; };
   const subs = SUBJECTS.filter(sj=>real[sj+'|Leitura'] || real[sj+'|Questões']);
   if(!subs.length) return '<div class="geral-sec"><h3>Ritmo real de estudo por matéria</h3><div class="chart-empty">Ainda não há tarefas concluídas com tempo registrado.</div></div>';
+  const ord = (lsGet('ritmoOrdem','')||'').split('|'); // [tipo, 'asc'|'desc']
+  if(ord[0]==='Leitura' || ord[0]==='Questões'){
+    const v = sj=>{ const r = real[sj+'|'+ord[0]]; return r ? r.min/r.amt : null; };
+    subs.sort((x,y)=>{ const a=v(x), b=v(y); if(a==null && b==null) return 0; if(a==null) return 1; if(b==null) return -1; return ord[1]==='desc' ? b-a : a-b; });
+  }
+  const seta = tp => ord[0]===tp ? (ord[1]==='desc' ? ' ▼ mais lento primeiro' : ' ▲ mais rápido primeiro') : ' ⇅';
+  const th = (tp, rot) => `<th style="cursor:pointer;user-select:none" title="Clique para ordenar (mais rápido / mais lento)" onclick="ritmoOrdenar('${tp}')">${rot}<span style="font-weight:400;font-size:11px;color:var(--gray)">${seta(tp)}</span></th>`;
   const rows = subs.map(sj=>`<tr><td><b>${sj}</b> · ${SUBJECT_NAMES[sj]}</td>${cel(sj,'Leitura')}${cel(sj,'Questões')}</tr>`).join('');
   return `<div class="geral-sec"><h3>Ritmo real de estudo por matéria</h3>
-    <table class="ed-tab"><thead><tr><th>Matéria</th><th>Leitura (min/pág)</th><th>Questões (min/questão)</th></tr></thead><tbody>${rows}</tbody></table>
+    <table class="ed-tab"><thead><tr><th style="cursor:pointer" title="Ordem padrão" onclick="ritmoOrdenar('')">Matéria</th>${th('Leitura','Leitura (min/pág)')}${th('Questões','Questões (min/questão)')}</tr></thead><tbody>${rows}</tbody></table>
     <div style="font-size:12px;color:var(--gray);margin-top:8px">Média das tarefas concluídas com tempo registrado, só o que você realmente fez.</div></div>`;
 }
 
@@ -3771,13 +3881,15 @@ function activateDesempenhoSub(sub){
   if(sub==='acertos') renderAcertos();
 }
 function activateEditalSub(sub){
-  if(['geral','itens'].indexOf(sub)<0) sub = 'geral';
+  if(['geral','itens','cal'].indexOf(sub)<0) sub = 'geral';
   lsSet('editalSub', sub);
   document.getElementById('edital-geral-content').style.display = sub==='geral' ? '' : 'none';
   document.getElementById('edital-itens-content').style.display = sub==='itens' ? '' : 'none';
+  document.getElementById('edital-cal-content').style.display = sub==='cal' ? '' : 'none';
   document.getElementById('edSubGeral').classList.toggle('active', sub==='geral');
   document.getElementById('edSubItens').classList.toggle('active', sub==='itens');
-  if(sub==='geral') renderGeral(); else renderEdital();
+  document.getElementById('edSubCal').classList.toggle('active', sub==='cal');
+  if(sub==='geral') renderGeral(); else if(sub==='cal') renderCalendario(); else renderEdital();
 }
 function activateTab(name){
   let sub = null, edSub = null;
@@ -3806,6 +3918,7 @@ document.getElementById('tabBtnDesempenho').addEventListener('click', ()=>activa
 document.getElementById('tabBtnEdital').addEventListener('click', ()=>activateTab('edital'));
 document.getElementById('edSubGeral').addEventListener('click', ()=>activateEditalSub('geral'));
 document.getElementById('edSubItens').addEventListener('click', ()=>activateEditalSub('itens'));
+document.getElementById('edSubCal').addEventListener('click', ()=>activateEditalSub('cal'));
 document.getElementById('desSubDesempenho').addEventListener('click', ()=>activateDesempenhoSub('desempenho'));
 document.getElementById('desSubHistorico').addEventListener('click', ()=>activateDesempenhoSub('historico'));
 document.getElementById('desSubEstatisticas').addEventListener('click', ()=>activateDesempenhoSub('estatisticas'));
@@ -3935,6 +4048,10 @@ function compiladoDaTarefa(t){
       updateSwDisplay();
       renderAll();
     });
+    if(t.type==='Questões' && t.subj && t.subj!=='-'){
+      const sl = 'tudao-'+(t.subj==='DCT'?'dt':t.subj.toLowerCase());
+      item('Abrir Tudão de '+(t.subj==='DCT'?'DT':t.subj)+' ↗', ()=>{ window.open(new URL('leitor.html?doc='+sl, location.href).href,'_blank','noopener'); });
+    }
     const comp = compiladoDaTarefa(t);
     if(comp) item('Abrir compilado ↗', ()=>{ window.open(new URL('compilado/'+comp.href, location.href).href,'_blank','noopener'); });
     leisDaTarefa(t).forEach(([nome,url])=>item('Abrir '+nome+' ↗', ()=>{ window.open(url,'_blank','noopener'); }));
